@@ -46,6 +46,22 @@ export function App({ appConfig }: AppProps) {
   useEffect(() => {
     let aborted = false;
     if (sessionStarted && room.state === 'disconnected') {
+      // Clear any saved "camera disabled" preference so camera always starts enabled
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const savedSettings = window.localStorage.getItem('livekit-settings');
+        if (savedSettings) {
+          try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.inputs?.video?.enabled === false) {
+              settings.inputs.video.enabled = true;
+              window.localStorage.setItem('livekit-settings', JSON.stringify(settings));
+            }
+          } catch (e) {
+            // Ignore parsing errors
+          }
+        }
+      }
+
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
@@ -53,21 +69,28 @@ export function App({ appConfig }: AppProps) {
         existingOrRefreshConnectionDetails().then((connectionDetails) =>
           room.connect(connectionDetails.serverUrl, connectionDetails.participantToken)
         ),
-      ]).catch((error) => {
-        if (aborted) {
-          // Once the effect has cleaned up after itself, drop any errors
-          //
-          // These errors are likely caused by this effect rerunning rapidly,
-          // resulting in a previous run `disconnect` running in parallel with
-          // a current run `connect`
-          return;
-        }
+      ])
+        .then(async () => {
+          // Enable camera after connection is established
+          if (!aborted) {
+            await room.localParticipant.setCameraEnabled(true);
+          }
+        })
+        .catch((error) => {
+          if (aborted) {
+            // Once the effect has cleaned up after itself, drop any errors
+            //
+            // These errors are likely caused by this effect rerunning rapidly,
+            // resulting in a previous run `disconnect` running in parallel with
+            // a current run `connect`
+            return;
+          }
 
-        toastAlert({
-          title: 'There was an error connecting to the agent',
-          description: `${error.name}: ${error.message}`,
+          toastAlert({
+            title: 'There was an error connecting to the agent',
+            description: `${error.name}: ${error.message}`,
+          });
         });
-      });
     }
     return () => {
       aborted = true;

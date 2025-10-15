@@ -40,3 +40,98 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large files and media
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.m4v
+*.3gp
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+*.m4a
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+*.xz
+*.dmg
+*.iso
+*.img
+*.bin
+*.exe
+*.msi
+*.deb
+*.rpm
+*.pkg
+*.dmg
+*.app
+*.apk
+*.ipa
+
+# Large images (keep common web formats but exclude high-res originals)
+*.psd
+*.ai
+*.sketch
+*.fig
+*.xd
+*.indd
+*.raw
+*.cr2
+*.nef
+*.arw
+*.dng
+*.tiff
+*.tif
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+
+# Log files
+*.log
+logs/
+log/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
