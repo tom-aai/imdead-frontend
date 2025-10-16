@@ -158,7 +158,7 @@ export const SessionView = ({
                 )}
               >
                 <p className="animate-text-shimmer inline-block !bg-clip-text text-sm font-semibold text-transparent">
-                  Agent is listening, ask it a question
+                  Hold on while we summon Tom.
                 </p>
               </motion.div>
             )}
