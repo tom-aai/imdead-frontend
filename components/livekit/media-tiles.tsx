@@ -99,6 +99,23 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
   const [screenShareTrack] = useTracks([Track.Source.ScreenShare]);
   const cameraTrack: TrackReference | undefined = useLocalTrackRef(Track.Source.Camera);
 
+  // Debug logging for avatar detection
+  React.useEffect(() => {
+    console.log('MediaTiles Debug:', {
+      agentState,
+      agentAudioTrack: agentAudioTrack ? 'present' : 'missing',
+      agentVideoTrack: agentVideoTrack ? 'present' : 'missing',
+      videoTrackDetails: agentVideoTrack ? {
+        source: agentVideoTrack.source,
+        publication: {
+          isMuted: agentVideoTrack.publication.isMuted,
+          isSubscribed: agentVideoTrack.publication.isSubscribed,
+          dimensions: agentVideoTrack.publication.dimensions,
+        }
+      } : null,
+    });
+  }, [agentState, agentAudioTrack, agentVideoTrack]);
+
   const isCameraEnabled = cameraTrack && !cameraTrack.publication.isMuted;
   const isScreenShareEnabled = screenShareTrack && !screenShareTrack.publication.isMuted;
   const hasSecondTile = isCameraEnabled || isScreenShareEnabled;
@@ -119,7 +136,8 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
   const agentLayoutTransition = transition;
   const avatarLayoutTransition = transition;
 
-  const isAvatar = agentVideoTrack !== undefined;
+  // Force avatar display when agent is available (regardless of video track detection)
+  const isAvatar = agentState === 'listening' || agentState === 'thinking' || agentState === 'speaking';
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-8 bottom-32 z-50 md:top-12 md:bottom-40">

@@ -2,7 +2,7 @@ import { type TrackReference, VideoTrack } from '@livekit/components-react';
 import { cn } from '@/lib/utils';
 
 interface AgentAudioTileProps {
-  videoTrack: TrackReference;
+  videoTrack?: TrackReference;
   className?: string;
 }
 
@@ -11,6 +11,11 @@ export const AvatarTile = ({
   className,
   ref,
 }: React.ComponentProps<'div'> & AgentAudioTileProps) => {
+  // Only render when video track is available to avoid flashing
+  if (!videoTrack) {
+    return null;
+  }
+
   return (
     <div ref={ref} className={cn(className)}>
       <VideoTrack
