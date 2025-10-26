@@ -118,7 +118,7 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
 
   const isCameraEnabled = cameraTrack && !cameraTrack.publication.isMuted;
   const isScreenShareEnabled = screenShareTrack && !screenShareTrack.publication.isMuted;
-  const hasSecondTile = isCameraEnabled || isScreenShareEnabled;
+  const hasSecondTile = isScreenShareEnabled; // Only screen share, camera tile removed
 
   const transition = {
     ...animationProps.transition,
@@ -191,22 +191,8 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
               !chatOpen && classNames.secondTileChatClosed,
             ])}
           >
-            {/* camera */}
+            {/* screen share only - camera tile removed */}
             <AnimatePresence>
-              {cameraTrack && isCameraEnabled && (
-                <MotionVideoTile
-                  key="camera"
-                  layout="position"
-                  layoutId="camera"
-                  {...animationProps}
-                  trackRef={cameraTrack}
-                  transition={{
-                    ...animationProps.transition,
-                    delay: chatOpen ? 0 : 0.15,
-                  }}
-                  className="h-[90px]"
-                />
-              )}
               {/* screen */}
               {isScreenShareEnabled && (
                 <MotionVideoTile
