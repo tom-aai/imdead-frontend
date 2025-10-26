@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +14,129 @@ export const Welcome = ({
   onStartCall,
   ref,
 }: React.ComponentProps<'div'> & WelcomeProps) => {
+  const [hasTakenPicture, setHasTakenPicture] = useState(false);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    const enableCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+          },
+          audio: false
+        });
+        
+        streamRef.current = stream;
+        
+        const waitForVideoElement = () => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            
+            videoRef.current.onloadedmetadata = () => {
+              setCameraEnabled(true);
+              setCameraError(null);
+            };
+            
+            videoRef.current.oncanplay = () => {
+              // Video ready
+            };
+            
+            videoRef.current.onerror = (error) => {
+              console.error('Video error:', error);
+              setCameraError('Video failed to load');
+              setCameraEnabled(false);
+            };
+          } else {
+            setTimeout(waitForVideoElement, 50);
+          }
+        };
+        
+        waitForVideoElement();
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        
+        if (error instanceof Error) {
+          if (error.name === 'NotAllowedError') {
+            setCameraError('Camera access denied. Please allow camera permission and refresh.');
+          } else if (error.name === 'NotFoundError') {
+            setCameraError('No camera found. Please connect a camera.');
+          } else if (error.name === 'NotReadableError') {
+            setCameraError('Camera is already in use by another application.');
+          } else {
+            setCameraError(`Camera error: ${error.message}`);
+          }
+        } else {
+          setCameraError('Camera access denied or not available');
+        }
+        setCameraEnabled(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      enableCamera();
+    }, 200);
+    
+    return () => {
+      clearTimeout(timer);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+        });
+        streamRef.current = null;
+      }
+    };
+  }, []);
+
+  const takePicture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      if (context && video.videoWidth > 0 && video.videoHeight > 0) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'avatar-picture.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            setHasTakenPicture(true);
+          }
+        }, 'image/png');
+      }
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (!hasTakenPicture) {
+      takePicture();
+    } else {
+      onStartCall();
+    }
+  };
+
+  const buttonText = hasTakenPicture ? 'Start Call' : 'Take Picture';
+  const welcomeText = hasTakenPicture 
+    ? 'Great! Your avatar picture has been saved. Ready to start your call?'
+    : 'Welcome to Expert Avatar. Let\'s start by creating your avatar. Look at your camera, smile softly, pretend like you\'re about to join a video conference with an old friend, and click \'Take Picture\'.';
+
   return (
     <section
       ref={ref}
@@ -22,25 +146,52 @@ export const Welcome = ({
         disabled ? 'z-10' : 'z-20'
       )}
     >
-      <svg
-        width="64"
-        height="64"
-        viewBox="0 0 64 64"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="text-fg0 mb-4 size-16"
-      >
-        <path
-          d="M15 24V40C15 40.7957 14.6839 41.5587 14.1213 42.1213C13.5587 42.6839 12.7956 43 12 43C11.2044 43 10.4413 42.6839 9.87868 42.1213C9.31607 41.5587 9 40.7957 9 40V24C9 23.2044 9.31607 22.4413 9.87868 21.8787C10.4413 21.3161 11.2044 21 12 21C12.7956 21 13.5587 21.3161 14.1213 21.8787C14.6839 22.4413 15 23.2044 15 24ZM22 5C21.2044 5 20.4413 5.31607 19.8787 5.87868C19.3161 6.44129 19 7.20435 19 8V56C19 56.7957 19.3161 57.5587 19.8787 58.1213C20.4413 58.6839 21.2044 59 22 59C22.7956 59 23.5587 58.6839 24.1213 58.1213C24.6839 57.5587 25 56.7957 25 56V8C25 7.20435 24.6839 6.44129 24.1213 5.87868C23.5587 5.31607 22.7956 5 22 5ZM32 13C31.2044 13 30.4413 13.3161 29.8787 13.8787C29.3161 14.4413 29 15.2044 29 16V48C29 48.7957 29.3161 49.5587 29.8787 50.1213C30.4413 50.6839 31.2044 51 32 51C32.7956 51 33.5587 50.6839 34.1213 50.1213C34.6839 49.5587 35 48.7957 35 48V16C35 15.2044 34.6839 14.4413 34.1213 13.8787C33.5587 13.3161 32.7956 13 32 13ZM42 21C41.2043 21 40.4413 21.3161 39.8787 21.8787C39.3161 22.4413 39 23.2044 39 24V40C39 40.7957 39.3161 41.5587 39.8787 42.1213C40.4413 42.6839 41.2043 43 42 43C42.7957 43 43.5587 42.6839 44.1213 42.1213C44.6839 41.5587 45 40.7957 45 40V24C45 23.2044 44.6839 22.4413 44.1213 21.8787C43.5587 21.3161 42.7957 21 42 21ZM52 17C51.2043 17 50.4413 17.3161 49.8787 17.8787C49.3161 18.4413 49 19.2044 49 20V44C49 44.7957 49.3161 45.5587 49.8787 46.1213C50.4413 46.6839 51.2043 47 52 47C52.7957 47 53.5587 46.6839 54.1213 46.1213C54.6839 45.5587 55 44.7957 55 44V20C55 19.2044 54.6839 18.4413 54.1213 17.8787C53.5587 17.3161 52.7957 17 52 17Z"
-          fill="currentColor"
-        />
-      </svg>
+      {/* Video preview */}
+      <div className="mb-6 relative">
+        <div className="relative">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-96 h-72 bg-gray-200 rounded-lg object-cover"
+            style={{ display: cameraEnabled ? 'block' : 'none' }}
+          />
+          <canvas
+            ref={canvasRef}
+            className="hidden"
+          />
+          {!cameraEnabled && (
+            <div className="w-96 h-72 bg-gray-200 rounded-lg flex items-center justify-center absolute inset-0">
+              <div className="text-center">
+                <p className="text-gray-500 mb-2">
+                  {cameraError || 'Loading camera...'}
+                </p>
+                {cameraError && (
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="text-blue-500 hover:text-blue-700 underline text-sm"
+                  >
+                    Retry
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       <p className="text-fg1 max-w-prose pt-1 leading-6 font-medium">
-        Chat live with your voice AI agent
+        {welcomeText}
       </p>
-      <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
-        {startButtonText}
+      <Button 
+        variant="primary" 
+        size="lg" 
+        onClick={handleButtonClick} 
+        className="mt-6 w-64 font-mono"
+        disabled={!cameraEnabled}
+      >
+        {buttonText}
       </Button>
     </section>
   );

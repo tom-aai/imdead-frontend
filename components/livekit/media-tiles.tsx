@@ -38,41 +38,15 @@ const animationProps = {
 };
 
 const classNames = {
-  // GRID
-  // 2 Columns x 3 Rows
   grid: [
     'h-full w-full',
     'grid gap-x-2 place-content-center',
     'grid-cols-[1fr_1fr] grid-rows-[90px_1fr_90px]',
   ],
-  // Agent
-  // chatOpen: true,
-  // hasSecondTile: true
-  // layout: Column 1 / Row 1
-  // align: x-end y-center
   agentChatOpenWithSecondTile: ['col-start-1 row-start-1', 'self-center justify-self-end'],
-  // Agent
-  // chatOpen: true,
-  // hasSecondTile: false
-  // layout: Column 1 / Row 1 / Column-Span 2
-  // align: x-center y-center
   agentChatOpenWithoutSecondTile: ['col-start-1 row-start-1', 'col-span-2', 'place-content-center'],
-  // Agent
-  // chatOpen: false
-  // layout: Column 1 / Row 1 / Column-Span 2 / Row-Span 3
-  // align: x-center y-center
   agentChatClosed: ['col-start-1 row-start-1', 'col-span-2 row-span-3', 'place-content-center'],
-  // Second tile
-  // chatOpen: true,
-  // hasSecondTile: true
-  // layout: Column 2 / Row 1
-  // align: x-start y-center
   secondTileChatOpen: ['col-start-2 row-start-1', 'self-center justify-self-start'],
-  // Second tile
-  // chatOpen: false,
-  // hasSecondTile: false
-  // layout: Column 2 / Row 2
-  // align: x-end y-end
   secondTileChatClosed: ['col-start-2 row-start-3', 'place-content-end'],
 };
 
@@ -99,30 +73,13 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
   const [screenShareTrack] = useTracks([Track.Source.ScreenShare]);
   const cameraTrack: TrackReference | undefined = useLocalTrackRef(Track.Source.Camera);
 
-  // Debug logging for avatar detection
-  React.useEffect(() => {
-    console.log('MediaTiles Debug:', {
-      agentState,
-      agentAudioTrack: agentAudioTrack ? 'present' : 'missing',
-      agentVideoTrack: agentVideoTrack ? 'present' : 'missing',
-      videoTrackDetails: agentVideoTrack ? {
-        source: agentVideoTrack.source,
-        publication: {
-          isMuted: agentVideoTrack.publication.isMuted,
-          isSubscribed: agentVideoTrack.publication.isSubscribed,
-          dimensions: agentVideoTrack.publication.dimensions,
-        }
-      } : null,
-    });
-  }, [agentState, agentAudioTrack, agentVideoTrack]);
-
   const isCameraEnabled = cameraTrack && !cameraTrack.publication.isMuted;
   const isScreenShareEnabled = screenShareTrack && !screenShareTrack.publication.isMuted;
-  const hasSecondTile = isScreenShareEnabled; // Only screen share, camera tile removed
+  const hasSecondTile = isScreenShareEnabled;
 
   const transition = {
     ...animationProps.transition,
-    delay: chatOpen ? 0 : 0.15, // delay on close
+    delay: chatOpen ? 0 : 0.15,
   };
   const agentAnimate = {
     ...animationProps.animate,
@@ -135,8 +92,6 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
   };
   const agentLayoutTransition = transition;
   const avatarLayoutTransition = transition;
-
-  // Force avatar display when agent is available (regardless of video track detection)
   const isAvatar = agentState === 'listening' || agentState === 'thinking' || agentState === 'speaking';
 
   return (
@@ -147,7 +102,6 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
           <div
             className={cn([
               'grid',
-              // 'bg-[hotpink]', // for debugging
               !chatOpen && classNames.agentChatClosed,
               chatOpen && hasSecondTile && classNames.agentChatOpenWithSecondTile,
               chatOpen && !hasSecondTile && classNames.agentChatOpenWithoutSecondTile,
@@ -155,7 +109,6 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
           >
             <AnimatePresence mode="popLayout">
               {!isAvatar && (
-                // audio-only agent
                 <MotionAgentTile
                   key="agent"
                   layoutId="agent"
@@ -168,7 +121,6 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
                 />
               )}
               {isAvatar && (
-                // avatar agent
                 <MotionAvatarTile
                   key="avatar"
                   layoutId="avatar"
@@ -191,9 +143,7 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
               !chatOpen && classNames.secondTileChatClosed,
             ])}
           >
-            {/* screen share only - camera tile removed */}
             <AnimatePresence>
-              {/* screen */}
               {isScreenShareEnabled && (
                 <MotionVideoTile
                   key="screen"

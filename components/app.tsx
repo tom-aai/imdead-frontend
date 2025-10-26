@@ -43,25 +43,49 @@ export function App({ appConfig }: AppProps) {
     };
   }, [room, refreshConnectionDetails]);
 
+  // Enable camera early for avatar creation (before session starts)
+  useEffect(() => {
+    const enableCameraForAvatar = async () => {
+      try {
+        // Clear any saved "camera disabled" preference so camera always starts enabled
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const savedSettings = window.localStorage.getItem('livekit-settings');
+          if (savedSettings) {
+            try {
+              const settings = JSON.parse(savedSettings);
+              if (settings.inputs?.video?.enabled === false) {
+                settings.inputs.video.enabled = true;
+                window.localStorage.setItem('livekit-settings', JSON.stringify(settings));
+              }
+            } catch (e) {
+              // Error parsing saved settings
+            }
+          }
+        }
+
+        // Request camera permission early for avatar creation
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+          },
+          audio: false
+        });
+        
+        // Stop the stream immediately since we just needed permission
+        stream.getTracks().forEach(track => track.stop());
+      } catch (error) {
+        console.error('Error requesting camera for avatar creation:', error);
+      }
+    };
+
+    enableCameraForAvatar();
+  }, []);
+
   useEffect(() => {
     let aborted = false;
     if (sessionStarted && room.state === 'disconnected') {
-      // Clear any saved "camera disabled" preference so camera always starts enabled
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const savedSettings = window.localStorage.getItem('livekit-settings');
-        if (savedSettings) {
-          try {
-            const settings = JSON.parse(savedSettings);
-            if (settings.inputs?.video?.enabled === false) {
-              settings.inputs.video.enabled = true;
-              window.localStorage.setItem('livekit-settings', JSON.stringify(settings));
-            }
-          } catch (e) {
-            // Ignore parsing errors
-          }
-        }
-      }
-
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,

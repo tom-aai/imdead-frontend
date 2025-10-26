@@ -14,9 +14,7 @@ export const VideoTile = ({
     <div ref={ref} className={cn('bg-muted overflow-hidden rounded-md', className)}>
       <MotionVideoTrack
         trackRef={trackRef}
-        width={trackRef?.publication.dimensions?.width ?? 0}
-        height={trackRef?.publication.dimensions?.height ?? 0}
-        className={cn('h-full w-auto')}
+        className={cn('h-full w-full object-cover')}
       />
     </div>
   );
