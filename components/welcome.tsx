@@ -162,7 +162,7 @@ export const Welcome = ({
             className="hidden"
           />
           {!cameraEnabled && (
-            <div className="w-96 h-72 bg-gray-200 rounded-lg flex items-center justify-center absolute inset-0">
+            <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
               <div className="text-center">
                 <p className="text-gray-500 mb-2">
                   {cameraError || 'Loading camera...'}
