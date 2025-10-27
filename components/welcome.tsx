@@ -118,6 +118,8 @@ export const Welcome = ({
             URL.revokeObjectURL(url);
             
             setHasTakenPicture(true);
+            // Automatically start the call after taking the picture
+            onStartCall();
           }
         }, 'image/png');
       }
