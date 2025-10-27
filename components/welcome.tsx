@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 interface WelcomeProps {
   disabled: boolean;
   startButtonText: string;
-  onStartCall: () => void;
+  onStartCall: (pictureId: string) => void;
 }
 
 export const Welcome = ({
@@ -17,6 +17,7 @@ export const Welcome = ({
   const [hasTakenPicture, setHasTakenPicture] = useState(false);
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [pictureId, setPictureId] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -102,6 +103,11 @@ export const Welcome = ({
       const context = canvas.getContext('2d');
       
       if (context && video.videoWidth > 0 && video.videoHeight > 0) {
+        // Generate a unique ID for this picture
+        const newPictureId = crypto.randomUUID();
+        console.log(`📸 Picture taken with ID: ${newPictureId}`);
+        setPictureId(newPictureId);
+        
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0);
@@ -111,15 +117,16 @@ export const Welcome = ({
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'avatar-picture.png';
+            link.download = `avatar-picture-${newPictureId}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
             
+            console.log(`✅ Picture saved, calling onStartCall with ID: ${newPictureId}`);
             setHasTakenPicture(true);
             // Automatically start the call after taking the picture
-            onStartCall();
+            onStartCall(newPictureId);
           }
         }, 'image/png');
       }
@@ -129,8 +136,8 @@ export const Welcome = ({
   const handleButtonClick = () => {
     if (!hasTakenPicture) {
       takePicture();
-    } else {
-      onStartCall();
+    } else if (pictureId) {
+      onStartCall(pictureId);
     }
   };
 

@@ -21,13 +21,14 @@ interface AppProps {
 export function App({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [pictureId, setPictureId] = useState<string | null>(null);
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
-    useConnectionDetails(appConfig);
+    useConnectionDetails(appConfig, pictureId);
 
   useEffect(() => {
     const onDisconnected = () => {
       setSessionStarted(false);
-      refreshConnectionDetails();
+      // Don't fetch new connection details here - wait until user starts a new session
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
@@ -41,7 +42,7 @@ export function App({ appConfig }: AppProps) {
       room.off(RoomEvent.Disconnected, onDisconnected);
       room.off(RoomEvent.MediaDevicesError, onMediaDevicesError);
     };
-  }, [room, refreshConnectionDetails]);
+  }, [room]);
 
   // Enable camera early for avatar creation (before session starts)
   useEffect(() => {
@@ -86,6 +87,8 @@ export function App({ appConfig }: AppProps) {
   useEffect(() => {
     let aborted = false;
     if (sessionStarted && room.state === 'disconnected') {
+      console.log(`🔌 Starting connection with picture ID: ${pictureId}`);
+      
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
@@ -95,9 +98,20 @@ export function App({ appConfig }: AppProps) {
         ),
       ])
         .then(async () => {
-          // Enable camera after connection is established
-          if (!aborted) {
+          if (aborted) {
+            console.log('⚠️ Connection aborted');
+            return;
+          }
+
+          console.log('✅ Connected to room');
+          console.log(`🖼️  Picture ID embedded in token attributes: ${pictureId}`);
+          
+          // Enable camera (pictureId is already in token attributes, no need to send data packet)
+          try {
             await room.localParticipant.setCameraEnabled(true);
+            console.log('✅ Camera enabled');
+          } catch (error) {
+            console.error('❌ Error enabling camera:', error);
           }
         })
         .catch((error) => {
@@ -110,6 +124,7 @@ export function App({ appConfig }: AppProps) {
             return;
           }
 
+          console.error('❌ Connection error:', error);
           toastAlert({
             title: 'There was an error connecting to the agent',
             description: `${error.name}: ${error.message}`,
@@ -120,7 +135,7 @@ export function App({ appConfig }: AppProps) {
       aborted = true;
       room.disconnect();
     };
-  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled]);
+  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled, pictureId]);
 
   const { startButtonText } = appConfig;
 
@@ -129,7 +144,12 @@ export function App({ appConfig }: AppProps) {
       <MotionWelcome
         key="welcome"
         startButtonText={startButtonText}
-        onStartCall={() => setSessionStarted(true)}
+        onStartCall={(pictureId: string) => {
+          console.log(`🎬 onStartCall invoked with picture ID: ${pictureId}`);
+          setPictureId(pictureId);
+          setSessionStarted(true);
+          console.log(`🎬 Session started, picture ID state will update to: ${pictureId}`);
+        }}
         disabled={sessionStarted}
         initial={{ opacity: 1 }}
         animate={{ opacity: sessionStarted ? 0 : 1 }}

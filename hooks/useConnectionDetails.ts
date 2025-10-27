@@ -5,7 +5,7 @@ import { AppConfig } from '@/lib/types';
 
 const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
-export default function useConnectionDetails(appConfig: AppConfig) {
+export default function useConnectionDetails(appConfig: AppConfig, pictureId: string | null) {
   // Generate room connection details, including:
   //   - A random Room name
   //   - A random Participant name
@@ -24,23 +24,31 @@ export default function useConnectionDetails(appConfig: AppConfig) {
       window.location.origin
     );
 
+    console.log('🔄 Fetching connection details with pictureId:', pictureId);
+
     let data: ConnectionDetails;
     try {
+      const requestBody = {
+        room_config: appConfig.agentName
+          ? {
+              agents: [{ agent_name: appConfig.agentName }],
+            }
+          : undefined,
+        pictureId: pictureId,
+      };
+      
+      console.log('📤 Sending request body:', requestBody);
+      
       const res = await fetch(url.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Sandbox-Id': appConfig.sandboxId ?? '',
         },
-        body: JSON.stringify({
-          room_config: appConfig.agentName
-            ? {
-                agents: [{ agent_name: appConfig.agentName }],
-              }
-            : undefined,
-        }),
+        body: JSON.stringify(requestBody),
       });
       data = await res.json();
+      console.log('✅ Connection details received:', data);
     } catch (error) {
       console.error('Error fetching connection details:', error);
       throw new Error('Error fetching connection details!');
@@ -48,11 +56,10 @@ export default function useConnectionDetails(appConfig: AppConfig) {
 
     setConnectionDetails(data);
     return data;
-  }, []);
+  }, [pictureId, appConfig.agentName, appConfig.sandboxId]);
 
-  useEffect(() => {
-    fetchConnectionDetails();
-  }, [fetchConnectionDetails]);
+  // Don't fetch automatically on mount - let the app fetch when it's ready to connect
+  // (after the user has taken a picture and clicked start)
 
   const isConnectionDetailsExpired = useCallback(() => {
     const token = connectionDetails?.participantToken;

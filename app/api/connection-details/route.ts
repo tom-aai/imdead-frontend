@@ -32,6 +32,13 @@ export async function POST(req: Request) {
     // Parse agent configuration from request body
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
+    const pictureId: string | undefined = body?.pictureId;
+    
+    console.log('📥 Connection details request received:', { 
+      agentName, 
+      pictureId,
+      fullBody: body 
+    });
 
     // Generate participant token
     const participantName = 'user';
@@ -41,8 +48,20 @@ export async function POST(req: Request) {
     const participantToken = await createParticipantToken(
       { identity: participantIdentity, name: participantName },
       roomName,
-      agentName
+      agentName,
+      pictureId
     );
+    
+    console.log('✅ Participant token created with pictureId:', pictureId);
+    
+    // Debug: decode the token to verify attributes are included
+    try {
+      const tokenPayload = JSON.parse(Buffer.from(participantToken.split('.')[1], 'base64').toString());
+      console.log('🔍 Token payload:', JSON.stringify(tokenPayload, null, 2));
+      console.log('🔍 Attributes in token:', tokenPayload.attributes);
+    } catch (e) {
+      console.error('Error decoding token for debug:', e);
+    }
 
     // Return connection details
     const data: ConnectionDetails = {
@@ -66,12 +85,28 @@ export async function POST(req: Request) {
 function createParticipantToken(
   userInfo: AccessTokenOptions,
   roomName: string,
-  agentName?: string
+  agentName?: string,
+  pictureId?: string
 ): Promise<string> {
-  const at = new AccessToken(API_KEY, API_SECRET, {
+  // Build token options with metadata included
+  const tokenOptions: AccessTokenOptions = {
     ...userInfo,
     ttl: '15m',
-  });
+  };
+  
+  // Add pictureId as participant metadata (JSON string)
+  // This is more reliable than attributes for passing data to agents
+  if (pictureId) {
+    tokenOptions.metadata = JSON.stringify({
+      pictureId: pictureId,
+    });
+    console.log('🏷️  Adding pictureId to token metadata:', pictureId);
+  } else {
+    console.warn('⚠️  No pictureId provided, skipping metadata');
+  }
+  
+  const at = new AccessToken(API_KEY, API_SECRET, tokenOptions);
+  
   const grant: VideoGrant = {
     room: roomName,
     roomJoin: true,
