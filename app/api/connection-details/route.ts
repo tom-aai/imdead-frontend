@@ -33,12 +33,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
     const pictureId: string | undefined = body?.pictureId;
-    
-    console.log('📥 Connection details request received:', { 
-      agentName, 
-      pictureId,
-      fullBody: body 
-    });
 
     // Generate participant token
     const participantName = 'user';
@@ -51,17 +45,6 @@ export async function POST(req: Request) {
       agentName,
       pictureId
     );
-    
-    console.log('✅ Participant token created with pictureId:', pictureId);
-    
-    // Debug: decode the token to verify attributes are included
-    try {
-      const tokenPayload = JSON.parse(Buffer.from(participantToken.split('.')[1], 'base64').toString());
-      console.log('🔍 Token payload:', JSON.stringify(tokenPayload, null, 2));
-      console.log('🔍 Attributes in token:', tokenPayload.attributes);
-    } catch (e) {
-      console.error('Error decoding token for debug:', e);
-    }
 
     // Return connection details
     const data: ConnectionDetails = {
@@ -95,14 +78,10 @@ function createParticipantToken(
   };
   
   // Add pictureId as participant metadata (JSON string)
-  // This is more reliable than attributes for passing data to agents
   if (pictureId) {
     tokenOptions.metadata = JSON.stringify({
       pictureId: pictureId,
     });
-    console.log('🏷️  Adding pictureId to token metadata:', pictureId);
-  } else {
-    console.warn('⚠️  No pictureId provided, skipping metadata');
   }
   
   const at = new AccessToken(API_KEY, API_SECRET, tokenOptions);

@@ -24,8 +24,6 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
       window.location.origin
     );
 
-    console.log('🔄 Fetching connection details with pictureId:', pictureId);
-
     let data: ConnectionDetails;
     try {
       const requestBody = {
@@ -37,8 +35,6 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
         pictureId: pictureId,
       };
       
-      console.log('📤 Sending request body:', requestBody);
-      
       const res = await fetch(url.toString(), {
         method: 'POST',
         headers: {
@@ -48,7 +44,6 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
         body: JSON.stringify(requestBody),
       });
       data = await res.json();
-      console.log('✅ Connection details received:', data);
     } catch (error) {
       console.error('Error fetching connection details:', error);
       throw new Error('Error fetching connection details!');

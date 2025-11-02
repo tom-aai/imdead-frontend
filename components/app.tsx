@@ -87,8 +87,6 @@ export function App({ appConfig }: AppProps) {
   useEffect(() => {
     let aborted = false;
     if (sessionStarted && room.state === 'disconnected') {
-      console.log(`🔌 Starting connection with picture ID: ${pictureId}`);
-      
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
@@ -99,19 +97,14 @@ export function App({ appConfig }: AppProps) {
       ])
         .then(async () => {
           if (aborted) {
-            console.log('⚠️ Connection aborted');
             return;
           }
 
-          console.log('✅ Connected to room');
-          console.log(`🖼️  Picture ID embedded in token attributes: ${pictureId}`);
-          
-          // Enable camera (pictureId is already in token attributes, no need to send data packet)
+          // Enable camera (pictureId is already in token metadata)
           try {
             await room.localParticipant.setCameraEnabled(true);
-            console.log('✅ Camera enabled');
           } catch (error) {
-            console.error('❌ Error enabling camera:', error);
+            console.error('Error enabling camera:', error);
           }
         })
         .catch((error) => {
@@ -124,7 +117,7 @@ export function App({ appConfig }: AppProps) {
             return;
           }
 
-          console.error('❌ Connection error:', error);
+          console.error('Connection error:', error);
           toastAlert({
             title: 'There was an error connecting to the agent',
             description: `${error.name}: ${error.message}`,
@@ -145,10 +138,8 @@ export function App({ appConfig }: AppProps) {
         key="welcome"
         startButtonText={startButtonText}
         onStartCall={(pictureId: string) => {
-          console.log(`🎬 onStartCall invoked with picture ID: ${pictureId}`);
           setPictureId(pictureId);
           setSessionStarted(true);
-          console.log(`🎬 Session started, picture ID state will update to: ${pictureId}`);
         }}
         disabled={sessionStarted}
         initial={{ opacity: 1 }}
