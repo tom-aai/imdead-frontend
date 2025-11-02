@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
 import { SessionView } from '@/components/session-view';
+import { Dashboard } from '@/components/dashboard';
 import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
 import useConnectionDetails from '@/hooks/useConnectionDetails';
@@ -13,6 +14,7 @@ import type { AppConfig } from '@/lib/types';
 
 const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
+const MotionDashboard = motion.create(Dashboard);
 
 interface AppProps {
   appConfig: AppConfig;
@@ -21,6 +23,7 @@ interface AppProps {
 export function App({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [pictureId, setPictureId] = useState<string | null>(null);
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig, pictureId);
@@ -28,6 +31,7 @@ export function App({ appConfig }: AppProps) {
   useEffect(() => {
     const onDisconnected = () => {
       setSessionStarted(false);
+      setShowDashboard(true);
       // Don't fetch new connection details here - wait until user starts a new session
     };
     const onMediaDevicesError = (error: Error) => {
@@ -132,6 +136,11 @@ export function App({ appConfig }: AppProps) {
 
   const { startButtonText } = appConfig;
 
+  const handleCreateNew = () => {
+    setShowDashboard(false);
+    setPictureId(null);
+  };
+
   return (
     <main>
       <MotionWelcome
@@ -141,10 +150,19 @@ export function App({ appConfig }: AppProps) {
           setPictureId(pictureId);
           setSessionStarted(true);
         }}
-        disabled={sessionStarted}
+        disabled={sessionStarted || showDashboard}
         initial={{ opacity: 1 }}
-        animate={{ opacity: sessionStarted ? 0 : 1 }}
+        animate={{ opacity: sessionStarted || showDashboard ? 0 : 1 }}
         transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
+      />
+
+      <MotionDashboard
+        key="dashboard"
+        onCreateNew={handleCreateNew}
+        disabled={!showDashboard}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showDashboard ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: 'linear', delay: showDashboard ? 0.5 : 0 }}
       />
 
       <RoomContext.Provider value={room}>
