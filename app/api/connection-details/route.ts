@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { AccessToken, type AccessTokenOptions, type VideoGrant } from 'livekit-server-sdk';
 import { RoomConfiguration } from '@livekit/protocol';
+import { createClient } from '@supabase/supabase-js';
 
 // NOTE: you are expected to define the following environment variables in `.env.local`:
 const API_KEY = process.env.LIVEKIT_API_KEY;
@@ -15,6 +16,14 @@ export type ConnectionDetails = {
   roomName: string;
   participantName: string;
   participantToken: string;
+};
+
+export type UserData = {
+  userId: string;
+  email: string | undefined;
+  name: string | undefined;
+  firstName: string | undefined;
+  lastName: string | undefined;
 };
 
 export async function POST(req: Request) {
@@ -34,8 +43,39 @@ export async function POST(req: Request) {
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
     const pictureId: string | undefined = body?.pictureId;
 
+    // Get user data from Supabase session
+    let userData: UserData | null = null;
+    const authHeader = req.headers.get('authorization');
+    
+    if (authHeader) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        
+        const { data: { user }, error } = await supabase.auth.getUser(
+          authHeader.replace('Bearer ', '')
+        );
+        
+        if (!error && user) {
+          userData = {
+            userId: user.id,
+            email: user.email,
+            name: user.user_metadata?.name,
+            firstName: user.user_metadata?.given_name,
+            lastName: user.user_metadata?.family_name,
+          };
+        } else if (error) {
+          console.error('Authentication error:', error.message);
+        }
+      } catch (error) {
+        console.error('Error validating user session:', error);
+      }
+    }
+
     // Generate participant token
-    const participantName = 'user';
+    const participantName = userData?.firstName || userData?.name || 'user';
     const participantIdentity = `voice_assistant_user_${Math.floor(Math.random() * 10_000)}`;
     const roomName = `voice_assistant_room_${Math.floor(Math.random() * 10_000)}`;
 
@@ -43,7 +83,8 @@ export async function POST(req: Request) {
       { identity: participantIdentity, name: participantName },
       roomName,
       agentName,
-      pictureId
+      pictureId,
+      userData
     );
 
     // Return connection details
@@ -69,7 +110,8 @@ function createParticipantToken(
   userInfo: AccessTokenOptions,
   roomName: string,
   agentName?: string,
-  pictureId?: string
+  pictureId?: string,
+  userData?: UserData | null
 ): Promise<string> {
   // Build token options with metadata included
   const tokenOptions: AccessTokenOptions = {
@@ -77,11 +119,26 @@ function createParticipantToken(
     ttl: '15m',
   };
   
-  // Add pictureId as participant metadata (JSON string)
+  // Build metadata object with all user info
+  const metadata: any = {};
+  
   if (pictureId) {
-    tokenOptions.metadata = JSON.stringify({
-      pictureId: pictureId,
-    });
+    metadata.pictureId = pictureId;
+  }
+  
+  if (userData) {
+    metadata.user = {
+      userId: userData.userId,
+      email: userData.email,
+      name: userData.name,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+    };
+  }
+  
+  // Add metadata to token if we have any
+  if (Object.keys(metadata).length > 0) {
+    tokenOptions.metadata = JSON.stringify(metadata);
   }
   
   const at = new AccessToken(API_KEY, API_SECRET, tokenOptions);

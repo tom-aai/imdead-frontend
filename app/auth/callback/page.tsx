@@ -38,6 +38,7 @@ export default function AuthCallback() {
             id: session.user.id,
             email: session.user.email,
             provider: session.user.app_metadata?.provider,
+            user_metadata: session.user.user_metadata,
           }));
           
           router.push('/');

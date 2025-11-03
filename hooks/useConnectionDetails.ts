@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { decodeJwt } from 'jose';
 import { ConnectionDetails } from '@/app/api/connection-details/route';
 import { AppConfig } from '@/lib/types';
+import { getSupabaseClient } from '@/lib/supabase';
 
 const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
@@ -26,6 +27,10 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
 
     let data: ConnectionDetails;
     try {
+      // Get Supabase session for authentication
+      const supabase = getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const requestBody = {
         room_config: appConfig.agentName
           ? {
@@ -35,12 +40,19 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
         pictureId: pictureId,
       };
       
+      // Include authorization header with session token
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'X-Sandbox-Id': appConfig.sandboxId ?? '',
+      };
+      
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
       const res = await fetch(url.toString(), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Sandbox-Id': appConfig.sandboxId ?? '',
-        },
+        headers,
         body: JSON.stringify(requestBody),
       });
       data = await res.json();
