@@ -51,3 +51,42 @@ export async function signOut() {
   return error;
 }
 
+// Helper to upload avatar image to Supabase Storage
+export async function uploadAvatarImage(imageId: string, blob: Blob) {
+  const supabase = getSupabaseClient();
+  
+  // Verify we have an active session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session) {
+    console.error('Failed to upload avatar: No active session');
+    throw new Error('You must be logged in to upload an avatar image');
+  }
+  
+  const filePath = `${imageId}.png`;
+  
+  const { data, error } = await supabase
+    .storage
+    .from('avatar-images')
+    .upload(filePath, blob, {
+      contentType: 'image/png',
+      upsert: true,
+    });
+    
+  if (error) {
+    console.error('Failed to upload avatar image:', error.message);
+    throw error;
+  }
+  
+  // Get the public URL
+  const { data: publicURLData } = supabase
+    .storage
+    .from('avatar-images')
+    .getPublicUrl(filePath);
+  
+  return {
+    path: data.path,
+    publicUrl: publicURLData.publicUrl,
+  };
+}
+

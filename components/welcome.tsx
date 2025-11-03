@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { uploadAvatarImage } from '@/lib/supabase';
 
 interface WelcomeProps {
   disabled: boolean;
@@ -96,7 +97,7 @@ export const Welcome = ({
     };
   }, []);
 
-  const takePicture = () => {
+  const takePicture = async () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -105,28 +106,25 @@ export const Welcome = ({
       if (context && video.videoWidth > 0 && video.videoHeight > 0) {
         // Generate a unique ID for this picture
         const newPictureId = crypto.randomUUID();
-        console.log(`📸 Picture taken with ID: ${newPictureId}`);
         setPictureId(newPictureId);
         
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0);
         
-        canvas.toBlob((blob) => {
+        canvas.toBlob(async (blob) => {
           if (blob) {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `avatar-picture-${newPictureId}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            console.log(`✅ Picture saved, calling onStartCall with ID: ${newPictureId}`);
-            setHasTakenPicture(true);
-            // Automatically start the call after taking the picture
-            onStartCall(newPictureId);
+            try {
+              // Upload to Supabase Storage
+              await uploadAvatarImage(newPictureId, blob);
+              
+              setHasTakenPicture(true);
+              // Automatically start the call after uploading the picture
+              onStartCall(newPictureId);
+            } catch (error) {
+              console.error('Failed to upload avatar image:', error);
+              // You might want to show an error message to the user here
+            }
           }
         }, 'image/png');
       }
