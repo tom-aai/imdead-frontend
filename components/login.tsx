@@ -1,11 +1,27 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Check if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        router.push('/');
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
 
   const handleLogin = async () => {
     setIsLoading(true);
