@@ -67,7 +67,7 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
   
   const { data, error } = await supabase
     .storage
-    .from('avatar-images')
+    .from('avatar-images-bucket')
     .upload(filePath, blob, {
       contentType: 'image/png',
       upsert: true,
@@ -81,7 +81,7 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
   // Get the public URL
   const { data: publicURLData } = supabase
     .storage
-    .from('avatar-images')
+    .from('avatar-images-bucket')
     .getPublicUrl(filePath);
   
   return {
