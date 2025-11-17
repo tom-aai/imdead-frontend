@@ -59,7 +59,7 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
   if (sessionError || !session) {
-    console.error('Failed to upload avatar: No active session');
+    console.error('Failed to upload avatar: No active session', sessionError);
     throw new Error('You must be logged in to upload an avatar image');
   }
   
@@ -74,7 +74,7 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
     });
     
   if (error) {
-    console.error('Failed to upload avatar image:', error.message);
+    console.error(`Failed to upload avatar image "${filePath}":`, error);
     throw error;
   }
   

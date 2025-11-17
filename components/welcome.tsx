@@ -23,6 +23,29 @@ export const Welcome = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const prevDisabledRef = useRef(disabled);
+
+  // Log when component mounts
+  useEffect(() => {
+    console.log('Welcome component mounted/remounted');
+    return () => {
+      console.log('Welcome component unmounting');
+    };
+  }, []);
+
+  // Reset picture state when component becomes enabled (visible) again after being disabled
+  useEffect(() => {
+    const wasDisabled = prevDisabledRef.current;
+    const isNowEnabled = !disabled;
+    
+    if (wasDisabled && isNowEnabled) {
+      console.log('Welcome component transitioned from disabled to enabled - resetting picture state');
+      setHasTakenPicture(false);
+      setPictureId(null);
+    }
+    
+    prevDisabledRef.current = disabled;
+  }, [disabled]);
 
   useEffect(() => {
     const enableCamera = async () => {
@@ -106,6 +129,7 @@ export const Welcome = ({
       if (context && video.videoWidth > 0 && video.videoHeight > 0) {
         // Generate a unique ID for this picture
         const newPictureId = crypto.randomUUID();
+        console.log('Generated new picture ID:', newPictureId);
         setPictureId(newPictureId);
         
         canvas.width = video.videoWidth;
@@ -116,10 +140,12 @@ export const Welcome = ({
           if (blob) {
             try {
               // Upload to Supabase Storage
+              console.log('Uploading picture:', newPictureId);
               await uploadAvatarImage(newPictureId, blob);
               
               setHasTakenPicture(true);
               // Automatically start the call after uploading the picture
+              console.log('Calling onStartCall with picture ID:', newPictureId);
               onStartCall(newPictureId);
             } catch (error) {
               console.error('Failed to upload avatar image:', error);
@@ -132,9 +158,12 @@ export const Welcome = ({
   };
 
   const handleButtonClick = () => {
+    console.log('Button clicked. hasTakenPicture:', hasTakenPicture, 'pictureId:', pictureId);
     if (!hasTakenPicture) {
+      console.log('Taking new picture...');
       takePicture();
     } else if (pictureId) {
+      console.log('Starting call with existing picture ID:', pictureId);
       onStartCall(pictureId);
     }
   };

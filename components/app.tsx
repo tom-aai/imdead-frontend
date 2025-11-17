@@ -25,6 +25,7 @@ export function App({ appConfig }: AppProps) {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [pictureId, setPictureId] = useState<string | null>(null);
+  const [welcomeKey, setWelcomeKey] = useState(0); // Track welcome component resets
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig, pictureId);
 
@@ -139,12 +140,13 @@ export function App({ appConfig }: AppProps) {
   const handleCreateNew = () => {
     setShowDashboard(false);
     setPictureId(null);
+    setWelcomeKey(prev => prev + 1); // Force Welcome component to remount with fresh state
   };
 
   return (
     <main>
       <MotionWelcome
-        key="welcome"
+        key={`welcome-${welcomeKey}`}
         startButtonText={startButtonText}
         onStartCall={(pictureId: string) => {
           setPictureId(pictureId);

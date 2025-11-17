@@ -17,6 +17,7 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
   // own participant name, and possibly to choose from existing rooms to join.
 
   const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | null>(null);
+  const [connectionDetailsPictureId, setConnectionDetailsPictureId] = useState<string | null>(null);
 
   const fetchConnectionDetails = useCallback(async () => {
     setConnectionDetails(null);
@@ -62,6 +63,7 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
     }
 
     setConnectionDetails(data);
+    setConnectionDetailsPictureId(pictureId);
     return data;
   }, [pictureId, appConfig.agentName, appConfig.sandboxId]);
 
@@ -85,12 +87,24 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
   }, [connectionDetails?.participantToken]);
 
   const existingOrRefreshConnectionDetails = useCallback(async () => {
-    if (isConnectionDetailsExpired() || !connectionDetails) {
+    // Force refresh if:
+    // 1. Connection details don't exist
+    // 2. Token is expired
+    // 3. Picture ID has changed (important for multi-session use!)
+    const pictureIdChanged = connectionDetailsPictureId !== pictureId;
+    
+    if (isConnectionDetailsExpired() || !connectionDetails || pictureIdChanged) {
+      if (pictureIdChanged) {
+        console.log('Picture ID changed, fetching new connection details', {
+          old: connectionDetailsPictureId,
+          new: pictureId
+        });
+      }
       return fetchConnectionDetails();
     } else {
       return connectionDetails;
     }
-  }, [connectionDetails, fetchConnectionDetails, isConnectionDetailsExpired]);
+  }, [connectionDetails, connectionDetailsPictureId, pictureId, fetchConnectionDetails, isConnectionDetailsExpired]);
 
   return {
     connectionDetails,
