@@ -143,7 +143,18 @@ export const Welcome = ({
               console.log('Uploading picture:', newPictureId);
               await uploadAvatarImage(newPictureId, blob);
               
+              // Stop camera stream after taking picture - we don't need it during the call
+              if (streamRef.current) {
+                console.log('Stopping camera stream after picture taken');
+                streamRef.current.getTracks().forEach(track => {
+                  track.stop();
+                });
+                streamRef.current = null;
+              }
+              
               setHasTakenPicture(true);
+              setCameraEnabled(false);
+              
               // Automatically start the call after uploading the picture
               console.log('Calling onStartCall with picture ID:', newPictureId);
               onStartCall(newPictureId);

@@ -105,12 +105,9 @@ export function App({ appConfig }: AppProps) {
             return;
           }
 
-          // Enable camera (pictureId is already in token metadata)
-          try {
-            await room.localParticipant.setCameraEnabled(true);
-          } catch (error) {
-            console.error('Error enabling camera:', error);
-          }
+          // Camera is NOT enabled during the call - only used for taking the initial picture
+          // This ensures only audio is recorded, not video
+          console.log('Call started - microphone enabled, camera disabled');
         })
         .catch((error) => {
           if (aborted) {
