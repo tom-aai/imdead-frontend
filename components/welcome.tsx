@@ -180,9 +180,6 @@ export const Welcome = ({
   };
 
   const buttonText = hasTakenPicture ? 'Start Call' : 'Take Picture';
-  const welcomeText = hasTakenPicture 
-    ? 'Great! Your avatar picture has been saved. Ready to start your call?'
-    : 'Welcome to Expert Avatar. Let\'s start by creating your avatar. Look at your camera, smile softly, pretend like you\'re about to join a video conference with an old friend, and click \'Take Picture\'.';
 
   return (
     <section
@@ -228,9 +225,13 @@ export const Welcome = ({
         </div>
       </div>
 
-      <p className="text-fg1 max-w-prose pt-1 leading-6 font-medium">
-        {welcomeText}
-      </p>
+      {!hasTakenPicture && (
+        <p className="text-fg1 max-w-prose pt-1 leading-6 font-medium">
+          We'll use your picture to create your avatar.
+          <br />
+          Make sure your camera is enabled, then click 'Take Picture'.
+        </p>
+      )}
       <Button 
         variant="primary" 
         size="lg" 

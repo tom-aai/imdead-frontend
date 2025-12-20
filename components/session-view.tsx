@@ -158,7 +158,7 @@ export const SessionView = ({
                 )}
               >
                 <p className="animate-text-shimmer inline-block !bg-clip-text text-sm font-semibold text-transparent">
-                  Hold on while we summon Tom.
+                  We're starting your session. Please hold on...
                 </p>
               </motion.div>
             )}
