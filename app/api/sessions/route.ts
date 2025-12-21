@@ -76,33 +76,52 @@ export async function GET(req: Request) {
         
         if (avatarData?.cartoon_id) {
           console.log(`[Sessions API] Found cartoon_id for session ${session.session_id}: ${avatarData.cartoon_id}`);
-          // Get the public URL for the cartoon image
-          const { data: urlData } = supabase.storage
+          // Generate a signed URL (valid for 1 hour) since the bucket has RLS policies
+          // Note: cartoon_id should already include the file extension (e.g., "uuid_cartoon.png")
+          const { data: urlData, error: urlError } = await supabase.storage
             .from('avatar-images-bucket')
-            .getPublicUrl(avatarData.cartoon_id);
+            .createSignedUrl(avatarData.cartoon_id, 3600); // 3600 seconds = 1 hour
           
-          avatar_image_url = urlData?.publicUrl || null;
-          console.log(`[Sessions API] Avatar URL: ${avatar_image_url}`);
+          if (urlError) {
+            console.error(`[Sessions API] Error creating signed URL for avatar:`, urlError);
+          } else {
+            avatar_image_url = urlData?.signedUrl || null;
+            console.log(`[Sessions API] Avatar signed URL created`);
+          }
         } else {
           console.log(`[Sessions API] No cartoon_id found for session ${session.session_id}`);
         }
 
-        // Get public URLs for hot take videos if they exist
+        // Generate signed URLs for hot take videos if they exist (valid for 1 hour)
         let hot_take_video_1_url = null;
         let hot_take_video_2_url = null;
 
         if (session.hot_take_video_1) {
-          const { data: video1Data } = supabase.storage
-            .from('hot-take-videos')
-            .getPublicUrl(session.hot_take_video_1);
-          hot_take_video_1_url = video1Data?.publicUrl || null;
+          console.log(`[Sessions API] Found hot_take_video_1 for session ${session.session_id}: ${session.hot_take_video_1}`);
+          const { data: video1Data, error: video1Error } = await supabase.storage
+            .from('interview-hot-take-videos')
+            .createSignedUrl(session.hot_take_video_1, 3600); // 3600 seconds = 1 hour
+          
+          if (video1Error) {
+            console.error(`[Sessions API] Error creating signed URL for video 1:`, video1Error);
+          } else {
+            hot_take_video_1_url = video1Data?.signedUrl || null;
+            console.log(`[Sessions API] Hot take video 1 signed URL created`);
+          }
         }
 
         if (session.hot_take_video_2) {
-          const { data: video2Data } = supabase.storage
-            .from('hot-take-videos')
-            .getPublicUrl(session.hot_take_video_2);
-          hot_take_video_2_url = video2Data?.publicUrl || null;
+          console.log(`[Sessions API] Found hot_take_video_2 for session ${session.session_id}: ${session.hot_take_video_2}`);
+          const { data: video2Data, error: video2Error } = await supabase.storage
+            .from('interview-hot-take-videos')
+            .createSignedUrl(session.hot_take_video_2, 3600); // 3600 seconds = 1 hour
+          
+          if (video2Error) {
+            console.error(`[Sessions API] Error creating signed URL for video 2:`, video2Error);
+          } else {
+            hot_take_video_2_url = video2Data?.signedUrl || null;
+            console.log(`[Sessions API] Hot take video 2 signed URL created`);
+          }
         }
 
         return {
