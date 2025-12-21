@@ -34,3 +34,16 @@ export interface SandboxConfig {
     | { type: 'boolean'; value: boolean }
     | null;
 }
+
+export interface Session {
+  session_id: string;
+  user_id: string;
+  created_at: string;
+  main_topic: string | null;
+  hot_take_video_1: string | null;
+  hot_take_video_2: string | null;
+  hot_take_video_1_url: string | null;
+  hot_take_video_2_url: string | null;
+  social_post_draft: string | null;
+  avatar_image_url: string | null;
+}
