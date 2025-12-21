@@ -27,6 +27,13 @@ export const Dashboard = ({
     }
   }, [disabled, refetch]);
 
+  // Log session count for debugging
+  useEffect(() => {
+    if (!loading && sessions) {
+      console.log(`[Dashboard] Displaying ${sessions.length} sessions`);
+    }
+  }, [sessions, loading]);
+
   return (
     <section
       ref={ref}
@@ -39,7 +46,14 @@ export const Dashboard = ({
       {/* Header with Create + button */}
       <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
         <div className="container mx-auto px-8 py-6 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">My Sessions</h1>
+          <div>
+            <h1 className="text-2xl font-semibold">My Sessions</h1>
+            {!loading && sessions.length > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {sessions.length} session{sessions.length !== 1 ? 's' : ''} total
+              </p>
+            )}
+          </div>
           <Button 
             variant="default" 
             size="lg" 
