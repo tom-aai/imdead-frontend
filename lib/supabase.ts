@@ -63,7 +63,9 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
     throw new Error('You must be logged in to upload an avatar image');
   }
   
-  const filePath = `${imageId}.png`;
+  // Include user ID in path for proper access control
+  const userId = session.user.id;
+  const filePath = `${userId}/${imageId}.png`;
   
   const { data, error } = await supabase
     .storage
@@ -88,5 +90,41 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
     path: data.path,
     publicUrl: publicURLData.publicUrl,
   };
+}
+
+// Helper to upload a new avatar photo and generate a Hedra avatar
+export async function uploadAndGenerateAvatar(file: File, sessionId: string) {
+  const supabase = getSupabaseClient();
+  
+  // Get session for auth header
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session) {
+    console.error('Failed to generate avatar: No active session', sessionError);
+    throw new Error('You must be logged in to generate an avatar');
+  }
+  
+  // Build form data
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('session_id', sessionId);
+  
+  // Call the API route (which proxies to the Flask backend)
+  const response = await fetch('/api/upload-avatar', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: formData,
+  });
+  
+  const data = await response.json();
+  
+  if (!response.ok) {
+    console.error('Failed to generate avatar:', data);
+    throw new Error(data.error || 'Failed to generate avatar');
+  }
+  
+  return data;
 }
 
