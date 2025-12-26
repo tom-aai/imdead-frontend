@@ -46,4 +46,15 @@ export interface Session {
   hot_take_video_2_url: string | null;
   social_post_draft: string | null;
   avatar_image_url: string | null;
+  share_token: string | null;
+}
+
+export interface AvatarShareToken {
+  id: string;
+  share_token: string;
+  session_id: string;
+  owner_user_id: string;
+  created_at: string;
+  expires_at: string | null;
+  is_active: boolean;
 }

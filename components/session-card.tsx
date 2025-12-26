@@ -1,14 +1,23 @@
 'use client';
 
-import { DownloadSimple, User } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import type { Session } from '@/hooks/useSessions';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface SessionCardProps {
   session: Session;
+  onShareCreated?: (sessionId: string, shareToken: string) => void;
 }
 
-export const SessionCard = ({ session }: SessionCardProps) => {
+export const SessionCard = ({ session, onShareCreated }: SessionCardProps) => {
+  const router = useRouter();
+  const [isCreatingShare, setIsCreatingShare] = useState(false);
+  const [justCopied, setJustCopied] = useState(false);
+  const [localShareToken, setLocalShareToken] = useState<string | null>(session.share_token);
+
   // Format the date as "Month Day, Year, Hour:Minute AM/PM"
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -76,6 +85,63 @@ export const SessionCard = ({ session }: SessionCardProps) => {
       `);
       newWindow.document.close();
     }
+  };
+
+  const handleCreateShare = async () => {
+    setIsCreatingShare(true);
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+
+      if (!authSession) {
+        console.error('Not authenticated');
+        return;
+      }
+
+      const response = await fetch('/api/avatar-share/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: session.session_id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create share link');
+      }
+
+      const data = await response.json();
+      setLocalShareToken(data.share_token);
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(data.share_url);
+      setJustCopied(true);
+      setTimeout(() => setJustCopied(false), 2000);
+
+      // Notify parent
+      if (onShareCreated) {
+        onShareCreated(session.session_id, data.share_token);
+      }
+    } catch (error) {
+      console.error('Error creating share:', error);
+    } finally {
+      setIsCreatingShare(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!localShareToken) return;
+    
+    const shareUrl = `${window.location.origin}/chat/${localShareToken}`;
+    await navigator.clipboard.writeText(shareUrl);
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 2000);
+  };
+
+  const handleOpenAvatar = () => {
+    if (!localShareToken) return;
+    router.push(`/chat/${localShareToken}`);
   };
 
   return (
@@ -155,17 +221,58 @@ export const SessionCard = ({ session }: SessionCardProps) => {
           </Button>
         )}
 
-        {/* Interactive Avatar (Placeholder) */}
-        <Button
-          variant="secondary"
-          size="sm"
-          className="w-full"
-          disabled
-        >
-          Interactive Avatar (Coming Soon)
-        </Button>
+        {/* Interactive Avatar */}
+        {localShareToken ? (
+          // Share exists - show copy and open buttons
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={handleCopyLink}
+            >
+              {justCopied ? (
+                <>
+                  <Check size={16} className="mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy size={16} className="mr-2" />
+                  Copy Link
+                </>
+              )}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+              onClick={handleOpenAvatar}
+            >
+              <Play size={16} className="mr-2" />
+              Open Avatar
+            </Button>
+          </div>
+        ) : (
+          // No share yet - show create button
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            onClick={handleCreateShare}
+            disabled={isCreatingShare}
+          >
+            {isCreatingShare ? (
+              'Creating...'
+            ) : (
+              <>
+                <LinkIcon size={16} className="mr-2" />
+                Create Avatar Link
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );
 };
-

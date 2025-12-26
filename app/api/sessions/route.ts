@@ -40,11 +40,35 @@ export async function GET(req: Request) {
     console.log('[Sessions API] Using user_id:', userId);
 
     // Query interview_call_analysis for this user's sessions
+    // Also join with avatar_share_tokens to get share_token if exists
     const { data: sessions, error: sessionsError } = await supabase
       .from('interview_call_analysis')
-      .select('session_id, user_id, created_at, main_topic, hot_take_video_1, hot_take_video_2, social_post_draft')
+      .select(`
+        session_id, 
+        user_id, 
+        created_at, 
+        main_topic, 
+        hot_take_video_1, 
+        hot_take_video_2, 
+        social_post_draft
+      `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
+
+    // Fetch share tokens separately (to avoid complex join issues)
+    const sessionIds = sessions?.map(s => s.session_id) || [];
+    const { data: shareTokens } = await supabase
+      .from('avatar_share_tokens')
+      .select('session_id, share_token')
+      .in('session_id', sessionIds)
+      .eq('is_active', true)
+      .or('expires_at.is.null,expires_at.gt.now()');
+
+    // Create a map for quick lookup
+    const shareTokenMap = new Map<string, string>();
+    shareTokens?.forEach(token => {
+      shareTokenMap.set(token.session_id, token.share_token);
+    });
 
     if (sessionsError) {
       console.error('[Sessions API] Error fetching sessions:', sessionsError);
@@ -129,6 +153,7 @@ export async function GET(req: Request) {
           avatar_image_url,
           hot_take_video_1_url,
           hot_take_video_2_url,
+          share_token: shareTokenMap.get(session.session_id) || null,
         };
       })
     );

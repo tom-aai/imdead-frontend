@@ -10,6 +10,7 @@ export interface Session {
   hot_take_video_2_url: string | null;
   social_post_draft: string | null;
   avatar_image_url: string | null;
+  share_token: string | null;
 }
 
 export default function useSessions(shouldFetch: boolean = true) {
