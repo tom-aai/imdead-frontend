@@ -52,8 +52,8 @@ export const Welcome = ({
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            width: { ideal: 640 },
-            height: { ideal: 480 },
+            width: { ideal: 720 },
+            height: { ideal: 1280 },
             facingMode: 'user'
           },
           audio: false
@@ -198,8 +198,8 @@ export const Welcome = ({
             autoPlay
             playsInline
             muted
-            className="w-96 h-72 bg-gray-200 rounded-lg object-cover"
-            style={{ display: cameraEnabled ? 'block' : 'none' }}
+            className="w-72 h-128 bg-gray-200 rounded-lg object-cover"
+            style={{ display: cameraEnabled ? 'block' : 'none', maxHeight: '70vh' }}
           />
           <canvas
             ref={canvasRef}
