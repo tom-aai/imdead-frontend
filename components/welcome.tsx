@@ -52,8 +52,8 @@ export const Welcome = ({
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            width: { ideal: 720 },
-            height: { ideal: 1280 },
+            width: { ideal: 512 },
+            height: { ideal: 512 },
             facingMode: 'user'
           },
           audio: false
@@ -132,9 +132,20 @@ export const Welcome = ({
         console.log('Generated new picture ID:', newPictureId);
         setPictureId(newPictureId);
         
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
+        // Set canvas to 512x512 for the output image
+        const targetSize = 512;
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        
+        // Calculate center crop from the video
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        const minDimension = Math.min(videoWidth, videoHeight);
+        const sx = (videoWidth - minDimension) / 2;
+        const sy = (videoHeight - minDimension) / 2;
+        
+        // Draw center-cropped square from video, scaled to 512x512
+        context.drawImage(video, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
         
         canvas.toBlob(async (blob) => {
           if (blob) {
@@ -190,23 +201,23 @@ export const Welcome = ({
         disabled ? 'z-10' : 'z-20'
       )}
     >
-      {/* Video preview */}
+      {/* Video preview - 512x512 pixel square tile */}
       <div className="mb-6 relative">
-        <div className="relative">
+        <div className="relative w-[512px] h-[512px]">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-72 h-128 bg-gray-200 rounded-lg object-cover"
-            style={{ display: cameraEnabled ? 'block' : 'none', maxHeight: '70vh' }}
+            className="w-[512px] h-[512px] bg-gray-200 rounded-lg object-cover"
+            style={{ display: cameraEnabled ? 'block' : 'none' }}
           />
           <canvas
             ref={canvasRef}
             className="hidden"
           />
           {!cameraEnabled && (
-            <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
+            <div className="absolute inset-0 w-[512px] h-[512px] bg-gray-200 rounded-lg flex items-center justify-center">
               <div className="text-center">
                 <p className="text-gray-500 mb-2">
                   {cameraError || 'Loading camera...'}

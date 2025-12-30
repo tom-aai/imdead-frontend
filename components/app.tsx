@@ -69,11 +69,11 @@ export function App({ appConfig }: AppProps) {
           }
         }
 
-        // Request camera permission early for avatar creation
+        // Request camera permission early for avatar creation (512x512 square)
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            width: { ideal: 720 },
-            height: { ideal: 1280 },
+            width: { ideal: 512 },
+            height: { ideal: 512 },
             facingMode: 'user'
           },
           audio: false
