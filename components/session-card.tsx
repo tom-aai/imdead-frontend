@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import type { Session } from '@/hooks/useSessions';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -10,13 +10,45 @@ import { getSupabaseClient } from '@/lib/supabase';
 interface SessionCardProps {
   session: Session;
   onShareCreated?: (sessionId: string, shareToken: string) => void;
+  onSessionUpdated?: () => void;
 }
 
-export const SessionCard = ({ session, onShareCreated }: SessionCardProps) => {
+type GenerationStatus = 'idle' | 'generating' | 'polling' | 'completed' | 'failed';
+
+interface GenerationState {
+  status: GenerationStatus;
+  jobId: string | null;
+  error: string | null;
+}
+
+export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: SessionCardProps) => {
   const router = useRouter();
   const [isCreatingShare, setIsCreatingShare] = useState(false);
   const [justCopied, setJustCopied] = useState(false);
   const [localShareToken, setLocalShareToken] = useState<string | null>(session.share_token);
+
+  // Hot take text state
+  const [hotTake1Text, setHotTake1Text] = useState(session.hot_take_1 || '');
+  const [hotTake2Text, setHotTake2Text] = useState(session.hot_take_2 || '');
+
+  // Generation state for each hot take
+  const [generation1, setGeneration1] = useState<GenerationState>({
+    status: 'idle',
+    jobId: null,
+    error: null,
+  });
+  const [generation2, setGeneration2] = useState<GenerationState>({
+    status: 'idle',
+    jobId: null,
+    error: null,
+  });
+
+  // Update local state when session prop changes
+  useEffect(() => {
+    setHotTake1Text(session.hot_take_1 || '');
+    setHotTake2Text(session.hot_take_2 || '');
+    setLocalShareToken(session.share_token);
+  }, [session.hot_take_1, session.hot_take_2, session.share_token]);
 
   // Format the date as "Month Day, Year, Hour:Minute AM/PM"
   const formatDate = (dateString: string) => {
@@ -144,6 +176,209 @@ export const SessionCard = ({ session, onShareCreated }: SessionCardProps) => {
     router.push(`/chat/${localShareToken}`);
   };
 
+  // Poll for job status
+  const pollJobStatus = useCallback(async (
+    jobId: string,
+    hotTakeNumber: 1 | 2,
+    setGeneration: React.Dispatch<React.SetStateAction<GenerationState>>
+  ) => {
+    const supabase = getSupabaseClient();
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+
+    if (!authSession) {
+      setGeneration({
+        status: 'failed',
+        jobId: null,
+        error: 'Not authenticated',
+      });
+      return;
+    }
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/hot-take/status/${jobId}`, {
+          headers: {
+            'Authorization': `Bearer ${authSession.access_token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get job status');
+        }
+
+        const data = await response.json();
+
+        if (data.status === 'completed') {
+          setGeneration({
+            status: 'completed',
+            jobId: null,
+            error: null,
+          });
+          // Notify parent to refresh sessions
+          if (onSessionUpdated) {
+            onSessionUpdated();
+          }
+          return;
+        } else if (data.status === 'failed') {
+          setGeneration({
+            status: 'failed',
+            jobId: null,
+            error: data.error || 'Video generation failed',
+          });
+          return;
+        } else {
+          // Still processing, poll again after 3 seconds
+          setTimeout(poll, 3000);
+        }
+      } catch (error) {
+        console.error('Error polling job status:', error);
+        setGeneration({
+          status: 'failed',
+          jobId: null,
+          error: 'Failed to check job status',
+        });
+      }
+    };
+
+    poll();
+  }, [onSessionUpdated]);
+
+  // Handle generate hot take video
+  const handleGenerateHotTake = async (hotTakeNumber: 1 | 2) => {
+    const text = hotTakeNumber === 1 ? hotTake1Text : hotTake2Text;
+    const setGeneration = hotTakeNumber === 1 ? setGeneration1 : setGeneration2;
+
+    if (!text.trim()) {
+      setGeneration({
+        status: 'failed',
+        jobId: null,
+        error: 'Hot take text is required',
+      });
+      return;
+    }
+
+    setGeneration({
+      status: 'generating',
+      jobId: null,
+      error: null,
+    });
+
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+
+      if (!authSession) {
+        setGeneration({
+          status: 'failed',
+          jobId: null,
+          error: 'Not authenticated',
+        });
+        return;
+      }
+
+      const response = await fetch('/api/hot-take/generate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: session.session_id,
+          hot_take_number: hotTakeNumber,
+          hot_take_text: text.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to start video generation');
+      }
+
+      // Job enqueued, start polling
+      setGeneration({
+        status: 'polling',
+        jobId: data.job_id,
+        error: null,
+      });
+
+      pollJobStatus(data.job_id, hotTakeNumber, setGeneration);
+    } catch (error) {
+      console.error('Error generating hot take:', error);
+      setGeneration({
+        status: 'failed',
+        jobId: null,
+        error: error instanceof Error ? error.message : 'Failed to generate video',
+      });
+    }
+  };
+
+  const renderHotTakeSection = (
+    hotTakeNumber: 1 | 2,
+    text: string,
+    setText: (text: string) => void,
+    generation: GenerationState,
+    videoUrl: string | null
+  ) => {
+    const isGenerating = generation.status === 'generating' || generation.status === 'polling';
+    
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">
+          Hot Take {hotTakeNumber}
+        </label>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          disabled={isGenerating}
+          className="w-full min-h-[80px] p-2 text-sm border border-border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          placeholder={`Enter hot take ${hotTakeNumber} text...`}
+        />
+        
+        {generation.error && (
+          <p className="text-xs text-destructive">{generation.error}</p>
+        )}
+        
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1"
+            onClick={() => handleGenerateHotTake(hotTakeNumber)}
+            disabled={isGenerating || !text.trim()}
+          >
+            {isGenerating ? (
+              <>
+                <CircleNotch size={16} className="mr-2 animate-spin" />
+                {generation.status === 'polling' ? 'Processing...' : 'Starting...'}
+              </>
+            ) : (
+              <>
+                <VideoCamera size={16} className="mr-2" />
+                Generate Video
+              </>
+            )}
+          </Button>
+          
+          {videoUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                handleDownload(
+                  videoUrl,
+                  `hot_take_${hotTakeNumber}_${session.session_id}.mp4`
+                )
+              }
+            >
+              <DownloadSimple size={16} />
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Avatar Image */}
@@ -160,7 +395,7 @@ export const SessionCard = ({ session, onShareCreated }: SessionCardProps) => {
       </div>
 
       {/* Card Content */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-4">
         {/* Main Topic */}
         <div>
           <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
@@ -173,41 +408,23 @@ export const SessionCard = ({ session, onShareCreated }: SessionCardProps) => {
           {formatDate(session.created_at)}
         </div>
 
-        {/* Hot Take Videos */}
-        <div className="space-y-2">
-          {session.hot_take_video_1_url && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() =>
-                handleDownload(
-                  session.hot_take_video_1_url!,
-                  `hot_take_1_${session.session_id}.mp4`
-                )
-              }
-            >
-              <DownloadSimple size={16} className="mr-2" />
-              Hot Take Video 1
-            </Button>
-          )}
-          {session.hot_take_video_2_url && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() =>
-                handleDownload(
-                  session.hot_take_video_2_url!,
-                  `hot_take_2_${session.session_id}.mp4`
-                )
-              }
-            >
-              <DownloadSimple size={16} className="mr-2" />
-              Hot Take Video 2
-            </Button>
-          )}
-        </div>
+        {/* Hot Take 1 */}
+        {renderHotTakeSection(
+          1,
+          hotTake1Text,
+          setHotTake1Text,
+          generation1,
+          session.hot_take_video_1_url
+        )}
+
+        {/* Hot Take 2 */}
+        {renderHotTakeSection(
+          2,
+          hotTake2Text,
+          setHotTake2Text,
+          generation2,
+          session.hot_take_video_2_url
+        )}
 
         {/* Social Post Draft */}
         {session.social_post_draft && (

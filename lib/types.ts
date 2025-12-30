@@ -40,6 +40,8 @@ export interface Session {
   user_id: string;
   created_at: string;
   main_topic: string | null;
+  hot_take_1: string | null;
+  hot_take_2: string | null;
   hot_take_video_1: string | null;
   hot_take_video_2: string | null;
   hot_take_video_1_url: string | null;

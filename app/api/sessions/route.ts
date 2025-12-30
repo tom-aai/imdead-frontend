@@ -48,6 +48,8 @@ export async function GET(req: Request) {
         user_id, 
         created_at, 
         main_topic, 
+        hot_take_1,
+        hot_take_2,
         hot_take_video_1, 
         hot_take_video_2, 
         social_post_draft
