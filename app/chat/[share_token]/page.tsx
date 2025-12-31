@@ -38,7 +38,6 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [connectionDetails, setConnectionDetails] = useState<ChatConnectionDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [expertInfo, setExpertInfo] = useState<{ name: string; topic: string } | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -94,7 +93,6 @@ export default function ChatPage({ params }: ChatPageProps) {
 
         const details: ChatConnectionDetails = await response.json();
         setConnectionDetails(details);
-        setExpertInfo({ name: details.expertName, topic: details.mainTopic });
         // Auto-start the session - skip the preview page
         setSessionStarted(true);
       } catch (err) {
@@ -163,14 +161,10 @@ export default function ChatPage({ params }: ChatPageProps) {
     };
   }, [room, sessionStarted, connectionDetails]);
 
-  // Loading state
+  // Loading state - show blank screen for seamless transition
   if (isAuthenticated === null) {
     return (
-      <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <div className="font-mono text-sm">Loading...</div>
-        </div>
-      </div>
+      <div className="bg-background fixed inset-0" />
     );
   }
 
@@ -192,7 +186,7 @@ export default function ChatPage({ params }: ChatPageProps) {
     );
   }
 
-  // Pre-session state - show info and start button
+  // Post-session state - show create avatar prompt
   if (!sessionStarted && connectionDetails) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
@@ -202,35 +196,24 @@ export default function ChatPage({ params }: ChatPageProps) {
           transition={{ duration: 0.5 }}
           className="text-center max-w-lg px-4"
         >
-          <h1 className="text-3xl font-bold mb-2">Chat with {expertInfo?.name}</h1>
-          <p className="text-muted-foreground mb-8">
-            Ask questions about {expertInfo?.topic}
-          </p>
+          <h1 className="text-3xl font-bold mb-8 whitespace-nowrap">Ready to create your expert avatar?</h1>
           
           <button
-            onClick={() => setSessionStarted(true)}
+            onClick={() => router.push('/')}
             className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-lg"
           >
-            Start Conversation
+            CREATE +
           </button>
-          
-          <p className="text-xs text-muted-foreground mt-6">
-            Your microphone will be enabled to speak with the avatar
-          </p>
         </motion.div>
         <Toaster />
       </div>
     );
   }
 
-  // Loading connection details
+  // Loading connection details - show blank screen for seamless transition
   if (!connectionDetails) {
     return (
-      <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <div className="font-mono text-sm">Preparing chat session...</div>
-        </div>
-      </div>
+      <div className="bg-background fixed inset-0" />
     );
   }
 
