@@ -64,7 +64,7 @@ export default function ChatPage({ params }: ChatPageProps) {
     checkAuth();
   }, [router, share_token]);
 
-  // Fetch connection details once authenticated
+  // Fetch connection details once authenticated and auto-start session
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -95,6 +95,8 @@ export default function ChatPage({ params }: ChatPageProps) {
         const details: ChatConnectionDetails = await response.json();
         setConnectionDetails(details);
         setExpertInfo({ name: details.expertName, topic: details.mainTopic });
+        // Auto-start the session - skip the preview page
+        setSessionStarted(true);
       } catch (err) {
         console.error('Error fetching connection:', err);
         setError('Failed to connect to chat session');

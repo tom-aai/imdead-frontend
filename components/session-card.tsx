@@ -28,16 +28,10 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   const [localShareToken, setLocalShareToken] = useState<string | null>(session.share_token);
 
   // Hot take text state
-  const [hotTake1Text, setHotTake1Text] = useState(session.hot_take_1 || '');
-  const [hotTake2Text, setHotTake2Text] = useState(session.hot_take_2 || '');
+  const [hotTakeText, setHotTakeText] = useState(session.hot_take_1 || '');
 
-  // Generation state for each hot take
-  const [generation1, setGeneration1] = useState<GenerationState>({
-    status: 'idle',
-    jobId: null,
-    error: null,
-  });
-  const [generation2, setGeneration2] = useState<GenerationState>({
+  // Generation state for hot take
+  const [generation, setGeneration] = useState<GenerationState>({
     status: 'idle',
     jobId: null,
     error: null,
@@ -45,10 +39,9 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
 
   // Update local state when session prop changes
   useEffect(() => {
-    setHotTake1Text(session.hot_take_1 || '');
-    setHotTake2Text(session.hot_take_2 || '');
+    setHotTakeText(session.hot_take_1 || '');
     setLocalShareToken(session.share_token);
-  }, [session.hot_take_1, session.hot_take_2, session.share_token]);
+  }, [session.hot_take_1, session.share_token]);
 
   // Format the date as "Month Day, Year, Hour:Minute AM/PM"
   const formatDate = (dateString: string) => {
@@ -179,14 +172,13 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   // Poll for job status
   const pollJobStatus = useCallback(async (
     jobId: string,
-    hotTakeNumber: 1 | 2,
-    setGeneration: React.Dispatch<React.SetStateAction<GenerationState>>
+    setGenerationState: React.Dispatch<React.SetStateAction<GenerationState>>
   ) => {
     const supabase = getSupabaseClient();
     const { data: { session: authSession } } = await supabase.auth.getSession();
 
     if (!authSession) {
-      setGeneration({
+      setGenerationState({
         status: 'failed',
         jobId: null,
         error: 'Not authenticated',
@@ -209,7 +201,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
         const data = await response.json();
 
         if (data.status === 'completed') {
-          setGeneration({
+          setGenerationState({
             status: 'completed',
             jobId: null,
             error: null,
@@ -220,7 +212,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
           }
           return;
         } else if (data.status === 'failed') {
-          setGeneration({
+          setGenerationState({
             status: 'failed',
             jobId: null,
             error: data.error || 'Video generation failed',
@@ -232,7 +224,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
         }
       } catch (error) {
         console.error('Error polling job status:', error);
-        setGeneration({
+        setGenerationState({
           status: 'failed',
           jobId: null,
           error: 'Failed to check job status',
@@ -244,11 +236,8 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   }, [onSessionUpdated]);
 
   // Handle generate hot take video
-  const handleGenerateHotTake = async (hotTakeNumber: 1 | 2) => {
-    const text = hotTakeNumber === 1 ? hotTake1Text : hotTake2Text;
-    const setGeneration = hotTakeNumber === 1 ? setGeneration1 : setGeneration2;
-
-    if (!text.trim()) {
+  const handleGenerateHotTake = async () => {
+    if (!hotTakeText.trim()) {
       setGeneration({
         status: 'failed',
         jobId: null,
@@ -284,8 +273,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
         },
         body: JSON.stringify({
           session_id: session.session_id,
-          hot_take_number: hotTakeNumber,
-          hot_take_text: text.trim(),
+          hot_take_text: hotTakeText.trim(),
         }),
       });
 
@@ -302,7 +290,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
         error: null,
       });
 
-      pollJobStatus(data.job_id, hotTakeNumber, setGeneration);
+      pollJobStatus(data.job_id, setGeneration);
     } catch (error) {
       console.error('Error generating hot take:', error);
       setGeneration({
@@ -313,26 +301,20 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
     }
   };
 
-  const renderHotTakeSection = (
-    hotTakeNumber: 1 | 2,
-    text: string,
-    setText: (text: string) => void,
-    generation: GenerationState,
-    videoUrl: string | null
-  ) => {
+  const renderHotTakeSection = () => {
     const isGenerating = generation.status === 'generating' || generation.status === 'polling';
     
     return (
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">
-          Hot Take {hotTakeNumber}
+          Social Media Video
         </label>
         <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          value={hotTakeText}
+          onChange={(e) => setHotTakeText(e.target.value)}
           disabled={isGenerating}
           className="w-full min-h-[80px] p-2 text-sm border border-border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-          placeholder={`Enter hot take ${hotTakeNumber} text...`}
+          placeholder="Enter social media video text..."
         />
         
         {generation.error && (
@@ -344,8 +326,8 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
             variant="secondary"
             size="sm"
             className="flex-1"
-            onClick={() => handleGenerateHotTake(hotTakeNumber)}
-            disabled={isGenerating || !text.trim()}
+            onClick={() => handleGenerateHotTake()}
+            disabled={isGenerating || !hotTakeText.trim()}
           >
             {isGenerating ? (
               <>
@@ -360,14 +342,14 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
             )}
           </Button>
           
-          {videoUrl && (
+          {session.hot_take_video_1_url && (
             <Button
               variant="outline"
               size="sm"
               onClick={() =>
                 handleDownload(
-                  videoUrl,
-                  `hot_take_${hotTakeNumber}_${session.session_id}.mp4`
+                  session.hot_take_video_1_url!,
+                  `social_video_${session.session_id}.mp4`
                 )
               }
             >
@@ -396,35 +378,18 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
 
       {/* Card Content */}
       <div className="p-4 space-y-4">
-        {/* Main Topic */}
+        {/* Main Topic and Date */}
         <div>
-          <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
+          <h3 className="font-semibold text-lg line-clamp-2">
             {session.main_topic || 'Untitled Session'}
           </h3>
+          <div className="font-semibold text-lg">
+            {formatDate(session.created_at)}
+          </div>
         </div>
 
-        {/* Date */}
-        <div className="text-sm text-muted-foreground">
-          {formatDate(session.created_at)}
-        </div>
-
-        {/* Hot Take 1 */}
-        {renderHotTakeSection(
-          1,
-          hotTake1Text,
-          setHotTake1Text,
-          generation1,
-          session.hot_take_video_1_url
-        )}
-
-        {/* Hot Take 2 */}
-        {renderHotTakeSection(
-          2,
-          hotTake2Text,
-          setHotTake2Text,
-          generation2,
-          session.hot_take_video_2_url
-        )}
+        {/* Social Media Video */}
+        {renderHotTakeSection()}
 
         {/* Social Post Draft */}
         {session.social_post_draft && (
@@ -467,7 +432,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
               onClick={handleOpenAvatar}
             >
               <Play size={16} className="mr-2" />
-              Open Avatar
+              Start Avatar
             </Button>
           </div>
         ) : (

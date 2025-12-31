@@ -49,9 +49,7 @@ export async function GET(req: Request) {
         created_at, 
         main_topic, 
         hot_take_1,
-        hot_take_2,
         hot_take_video_1, 
-        hot_take_video_2, 
         social_post_draft
       `)
       .eq('user_id', userId)
@@ -118,9 +116,8 @@ export async function GET(req: Request) {
           console.log(`[Sessions API] No cartoon_id found for session ${session.session_id}`);
         }
 
-        // Generate signed URLs for hot take videos if they exist (valid for 1 hour)
+        // Generate signed URL for hot take video if it exists (valid for 1 hour)
         let hot_take_video_1_url = null;
-        let hot_take_video_2_url = null;
 
         if (session.hot_take_video_1) {
           console.log(`[Sessions API] Found hot_take_video_1 for session ${session.session_id}: ${session.hot_take_video_1}`);
@@ -136,25 +133,10 @@ export async function GET(req: Request) {
           }
         }
 
-        if (session.hot_take_video_2) {
-          console.log(`[Sessions API] Found hot_take_video_2 for session ${session.session_id}: ${session.hot_take_video_2}`);
-          const { data: video2Data, error: video2Error } = await supabase.storage
-            .from('interview-hot-take-videos')
-            .createSignedUrl(session.hot_take_video_2, 3600); // 3600 seconds = 1 hour
-          
-          if (video2Error) {
-            console.error(`[Sessions API] Error creating signed URL for video 2:`, video2Error);
-          } else {
-            hot_take_video_2_url = video2Data?.signedUrl || null;
-            console.log(`[Sessions API] Hot take video 2 signed URL created`);
-          }
-        }
-
         return {
           ...session,
           avatar_image_url,
           hot_take_video_1_url,
-          hot_take_video_2_url,
           share_token: shareTokenMap.get(session.session_id) || null,
         };
       })

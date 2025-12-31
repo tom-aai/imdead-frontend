@@ -55,7 +55,7 @@ export const Dashboard = ({
             )}
           </div>
           <Button 
-            variant="default" 
+            variant="primary" 
             size="lg" 
             onClick={onCreateNew}
             className="font-mono"

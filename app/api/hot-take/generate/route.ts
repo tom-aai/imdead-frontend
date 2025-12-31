@@ -13,14 +13,10 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { session_id, hot_take_number, hot_take_text } = body;
+    const { session_id, hot_take_text } = body;
 
     if (!session_id) {
       return NextResponse.json({ error: 'session_id is required' }, { status: 400 });
-    }
-
-    if (hot_take_number !== 1 && hot_take_number !== 2) {
-      return NextResponse.json({ error: 'hot_take_number must be 1 or 2' }, { status: 400 });
     }
 
     if (!hot_take_text || !hot_take_text.trim()) {
@@ -36,7 +32,6 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         session_id,
-        hot_take_number,
         hot_take_text,
       }),
     });
