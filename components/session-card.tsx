@@ -2,8 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch, Trash } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import type { Session } from '@/hooks/useSessions';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -27,8 +38,19 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   const [justCopied, setJustCopied] = useState(false);
   const [localShareToken, setLocalShareToken] = useState<string | null>(session.share_token);
 
+  // Delete state
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   // Hot take text state
   const [hotTakeText, setHotTakeText] = useState(session.hot_take_1 || '');
+
+  // Social post text state - generated from main_topic
+  const generateSocialPostText = (mainTopic: string | null) => {
+    if (!mainTopic) return '';
+    return `I trained my avatar on ${mainTopic}. Click on the link to talk to my expert avatar!`;
+  };
+  const [socialPostText, setSocialPostText] = useState(generateSocialPostText(session.main_topic));
 
   // Generation state for hot take
   const [generation, setGeneration] = useState<GenerationState>({
@@ -40,8 +62,9 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   // Update local state when session prop changes
   useEffect(() => {
     setHotTakeText(session.hot_take_1 || '');
+    setSocialPostText(generateSocialPostText(session.main_topic));
     setLocalShareToken(session.share_token);
-  }, [session.hot_take_1, session.share_token]);
+  }, [session.hot_take_1, session.main_topic, session.share_token]);
 
   // Format the date as "Month Day, Year, Hour:Minute AM/PM"
   const formatDate = (dateString: string) => {
@@ -301,6 +324,47 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
     }
   };
 
+  // Check if deletion is allowed (not during active operations)
+  const isGeneratingVideo = generation.status === 'generating' || generation.status === 'polling';
+  const canDelete = !isCreatingShare && !isGeneratingVideo && !isDeleting;
+
+  // Handle session deletion
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+
+      if (!authSession) {
+        console.error('Not authenticated');
+        return;
+      }
+
+      const response = await fetch(`/api/sessions/${session.session_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete session');
+      }
+
+      // Close dialog and notify parent to refresh
+      setDeleteDialogOpen(false);
+      if (onSessionUpdated) {
+        onSessionUpdated();
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      // Keep dialog open on error so user can try again
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const renderHotTakeSection = () => {
     const isGenerating = generation.status === 'generating' || generation.status === 'polling';
     
@@ -362,9 +426,9 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Avatar Image */}
-      <div className="aspect-square bg-muted flex items-center justify-center">
+    <div className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      {/* Avatar Image with Delete Button */}
+      <div className="relative aspect-square bg-muted flex items-center justify-center">
         {session.avatar_image_url ? (
           <img
             src={session.avatar_image_url}
@@ -374,6 +438,46 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
         ) : (
           <User size={64} className="text-muted-foreground" />
         )}
+        
+        {/* Delete Button */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+              disabled={!canDelete}
+              title={!canDelete ? 'Cannot delete while operations are in progress' : 'Delete session'}
+            >
+              <Trash size={16} />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Session?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. The session data and all chat sessions using this avatar will be permanently deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? (
+                  <>
+                    <CircleNotch size={16} className="mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Card Content */}
@@ -391,17 +495,18 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
         {/* Social Media Video */}
         {renderHotTakeSection()}
 
-        {/* Social Post Draft */}
-        {session.social_post_draft && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => handleViewText(session.social_post_draft!, 'Social Post Draft')}
-          >
-            View Social Post
-          </Button>
-        )}
+        {/* Social Post */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">
+            Social Media Post
+          </label>
+          <textarea
+            value={socialPostText}
+            onChange={(e) => setSocialPostText(e.target.value)}
+            className="w-full min-h-[80px] p-2 text-sm border border-border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+            placeholder="Social media post text..."
+          />
+        </div>
 
         {/* Interactive Avatar */}
         {localShareToken ? (

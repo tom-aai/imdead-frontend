@@ -49,8 +49,7 @@ export async function GET(req: Request) {
         created_at, 
         main_topic, 
         hot_take_1,
-        hot_take_video_1, 
-        social_post_draft
+        hot_take_video_1
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });

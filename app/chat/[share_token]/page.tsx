@@ -38,6 +38,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [connectionDetails, setConnectionDetails] = useState<ChatConnectionDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isUnavailable, setIsUnavailable] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -87,6 +88,19 @@ export default function ChatPage({ params }: ChatPageProps) {
 
         if (!response.ok) {
           const data = await response.json();
+          // Check if the avatar/session is no longer available
+          // This includes: deleted sessions, revoked links, missing source session,
+          // invalid tokens (deleted or never existed), or explicit deletion flag
+          const unavailableErrors = [
+            'Source session not found',
+            'This session has been deleted',
+            'Share link has been revoked',
+            'Invalid share token',
+          ];
+          if (data.deleted || unavailableErrors.includes(data.error)) {
+            setIsUnavailable(true);
+            return;
+          }
           setError(data.error || 'Failed to load chat session');
           return;
         }
@@ -165,6 +179,30 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (isAuthenticated === null) {
     return (
       <div className="bg-background fixed inset-0" />
+    );
+  }
+
+  // Avatar unavailable state - matches post-session style
+  if (isUnavailable) {
+    return (
+      <div className="bg-background fixed inset-0 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center max-w-lg px-4"
+        >
+          <h1 className="text-3xl font-bold mb-8">Avatar is no longer available</h1>
+          
+          <button
+            onClick={() => router.push('/')}
+            className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-lg"
+          >
+            CREATE +
+          </button>
+        </motion.div>
+        <Toaster />
+      </div>
     );
   }
 

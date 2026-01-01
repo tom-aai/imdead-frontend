@@ -70,9 +70,9 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Invalid share token' }, { status: 404 });
     }
 
-    // Verify token is active and not expired
+    // Verify token is active (is_active is set to false when session is deleted)
     if (!shareData.is_active) {
-      console.error('[Chat Session API] Share token is revoked');
+      console.error('[Chat Session API] Share token is inactive (session may have been deleted)');
       return NextResponse.json({ error: 'Share link has been revoked' }, { status: 403 });
     }
 
