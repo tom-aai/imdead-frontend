@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch, Trash } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch, Trash, PencilSimple } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -439,6 +439,17 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
           <User size={64} className="text-muted-foreground" />
         )}
         
+        {/* Edit Button */}
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+          onClick={() => router.push(`/edit-avatar/${session.session_id}`)}
+          title="Edit avatar"
+        >
+          <PencilSimple size={16} />
+        </Button>
+
         {/* Delete Button */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogTrigger asChild>
