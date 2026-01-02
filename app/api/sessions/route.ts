@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     console.log('[Sessions API] Using user_id:', userId);
 
     // Query interview_call_analysis for this user's sessions
-    // Also join with avatar_share_tokens to get share_token if exists
+    // interview_call_analysis is the source of truth for both hedra_avatar_id and cartoon_id
     const { data: sessions, error: sessionsError } = await supabase
       .from('interview_call_analysis')
       .select(`
@@ -49,7 +49,8 @@ export async function GET(req: Request) {
         created_at, 
         main_topic, 
         hot_take_1,
-        hot_take_video_1
+        hot_take_video_1,
+        cartoon_id
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
@@ -76,35 +77,50 @@ export async function GET(req: Request) {
 
     console.log(`[Sessions API] Found ${sessions?.length || 0} sessions for user_id ${userId}`);
 
-    // For each session, get the avatar image URL from user_avatar_images
+    // Check if there are any interview_calls that don't have a corresponding interview_call_analysis
+    // This indicates sessions that are still being processed
+    const { data: pendingCalls } = await supabase
+      .from('interview_calls')
+      .select('session_id')
+      .eq('user_id', userId);
+
+    const analysisSessionIds = new Set(sessions?.map(s => s.session_id) || []);
+    const processingSessionIds = pendingCalls?.filter(
+      call => !analysisSessionIds.has(call.session_id)
+    ) || [];
+    const hasProcessingSessions = processingSessionIds.length > 0;
+
+    console.log(`[Sessions API] Found ${processingSessionIds.length} sessions still processing`);
+
+    // Check if there are any pending avatar_update jobs for the user's sessions
+    // This indicates an avatar image is being regenerated
+    const { data: pendingAvatarJobs } = await supabase
+      .from('post_call_jobs')
+      .select('session_id')
+      .in('session_id', sessionIds)
+      .eq('job_type', 'avatar_update')
+      .in('status', ['pending', 'processing']);
+
+    const hasPendingAvatarUpdates = (pendingAvatarJobs?.length || 0) > 0;
+
+    console.log(`[Sessions API] Found ${pendingAvatarJobs?.length || 0} pending avatar update jobs`);
+
+    // For each session, generate signed URLs for avatar images and videos
+    // cartoon_id is now stored directly on interview_call_analysis (source of truth)
     const sessionsWithImages = await Promise.all(
       (sessions || []).map(async (session) => {
         console.log(`[Sessions API] Processing session ${session.session_id}`);
         
-        // Get the avatar image for this session (most recent one if there are multiple)
-        const { data: avatarData, error: avatarError } = await supabase
-          .from('user_avatar_images')
-          .select('cartoon_id')
-          .eq('user_id', userId)
-          .eq('session_id', session.session_id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (avatarError && avatarError.code !== 'PGRST116') {
-          // PGRST116 is "no rows returned", which is okay
-          console.error(`[Sessions API] Error fetching avatar for session ${session.session_id}:`, avatarError);
-        }
-
         let avatar_image_url = null;
         
-        if (avatarData?.cartoon_id) {
-          console.log(`[Sessions API] Found cartoon_id for session ${session.session_id}: ${avatarData.cartoon_id}`);
+        // Use cartoon_id directly from interview_call_analysis (source of truth)
+        if (session.cartoon_id) {
+          console.log(`[Sessions API] Found cartoon_id for session ${session.session_id}: ${session.cartoon_id}`);
           // Generate a signed URL (valid for 1 hour) since the bucket has RLS policies
           // Note: cartoon_id should already include the file extension (e.g., "uuid_cartoon.png")
           const { data: urlData, error: urlError } = await supabase.storage
             .from('avatar-images-bucket')
-            .createSignedUrl(avatarData.cartoon_id, 3600); // 3600 seconds = 1 hour
+            .createSignedUrl(session.cartoon_id, 3600); // 3600 seconds = 1 hour
           
           if (urlError) {
             console.error(`[Sessions API] Error creating signed URL for avatar:`, urlError);
@@ -142,8 +158,12 @@ export async function GET(req: Request) {
       })
     );
 
-    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images`);
-    return NextResponse.json({ sessions: sessionsWithImages });
+    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${hasProcessingSessions}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}`);
+    return NextResponse.json({ 
+      sessions: sessionsWithImages,
+      hasProcessingSessions,
+      hasPendingAvatarUpdates,
+    });
   } catch (error) {
     console.error('[Sessions API] Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

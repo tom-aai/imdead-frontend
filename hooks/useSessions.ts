@@ -16,6 +16,8 @@ export default function useSessions(shouldFetch: boolean = true) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasProcessingSessions, setHasProcessingSessions] = useState(false);
+  const [hasPendingAvatarUpdates, setHasPendingAvatarUpdates] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -49,8 +51,10 @@ export default function useSessions(shouldFetch: boolean = true) {
       }
 
       const data = await response.json();
-      console.log('Sessions fetched:', data.sessions?.length || 0, 'sessions');
+      console.log('Sessions fetched:', data.sessions?.length || 0, 'sessions, hasProcessingSessions:', data.hasProcessingSessions, 'hasPendingAvatarUpdates:', data.hasPendingAvatarUpdates);
       setSessions(data.sessions || []);
+      setHasProcessingSessions(data.hasProcessingSessions || false);
+      setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
       setError(null);
     } catch (err) {
       console.error('Error fetching sessions:', err);
@@ -66,6 +70,6 @@ export default function useSessions(shouldFetch: boolean = true) {
     }
   }, [shouldFetch, fetchSessions]);
 
-  return { sessions, loading, error, refetch: fetchSessions };
+  return { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, refetch: fetchSessions };
 }
 

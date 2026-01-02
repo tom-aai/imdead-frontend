@@ -6,6 +6,7 @@ import { Room, RoomEvent } from 'livekit-client';
 import { motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
+import { HamburgerMenu } from '@/components/hamburger-menu';
 import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -186,6 +187,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (isUnavailable) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
+        <HamburgerMenu />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -228,6 +230,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (!sessionStarted && connectionDetails) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
+        <HamburgerMenu />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

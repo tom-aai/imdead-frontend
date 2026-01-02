@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { HamburgerMenu } from '@/components/hamburger-menu';
 import { cn } from '@/lib/utils';
 import { SessionCard } from '@/components/session-card';
 import useSessions from '@/hooks/useSessions';
@@ -17,7 +18,7 @@ export const Dashboard = ({
   onCreateNew,
   ref,
 }: React.ComponentProps<'div'> & DashboardProps) => {
-  const { sessions, loading, error, refetch } = useSessions(!disabled);
+  const { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, refetch } = useSessions(!disabled);
 
   // Refetch when dashboard becomes visible
   useEffect(() => {
@@ -30,9 +31,34 @@ export const Dashboard = ({
   // Log session count for debugging
   useEffect(() => {
     if (!loading && sessions) {
-      console.log(`[Dashboard] Displaying ${sessions.length} sessions`);
+      console.log(`[Dashboard] Displaying ${sessions.length} sessions, hasProcessingSessions: ${hasProcessingSessions}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}`);
     }
-  }, [sessions, loading]);
+  }, [sessions, loading, hasProcessingSessions, hasPendingAvatarUpdates]);
+
+  // Auto-poll when there are processing sessions, pending avatar updates, or sessions without avatar images
+  useEffect(() => {
+    if (disabled || loading) return;
+
+    // Check if any session is missing an avatar image
+    const hasMissingAvatars = sessions.some(s => !s.avatar_image_url);
+    
+    // Poll if there are processing sessions, pending avatar updates, or sessions with missing avatars
+    const shouldPoll = hasProcessingSessions || hasPendingAvatarUpdates || hasMissingAvatars;
+    
+    if (!shouldPoll) return;
+
+    console.log('[Dashboard] Starting auto-poll for processing sessions, avatar updates, or missing avatars');
+    
+    const pollInterval = setInterval(() => {
+      console.log('[Dashboard] Auto-polling for updates...');
+      refetch();
+    }, 5000); // Poll every 5 seconds
+
+    return () => {
+      console.log('[Dashboard] Stopping auto-poll');
+      clearInterval(pollInterval);
+    };
+  }, [disabled, loading, hasProcessingSessions, hasPendingAvatarUpdates, sessions, refetch]);
 
   return (
     <section
@@ -43,7 +69,7 @@ export const Dashboard = ({
         disabled ? 'z-10' : 'z-20'
       )}
     >
-      {/* Header with Create + button */}
+      {/* Header with Create + button and hamburger menu */}
       <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
         <div className="container mx-auto px-8 py-6 flex justify-between items-center">
           <div>
@@ -54,14 +80,17 @@ export const Dashboard = ({
               </p>
             )}
           </div>
-          <Button 
-            variant="primary" 
-            size="lg" 
-            onClick={onCreateNew}
-            className="font-mono"
-          >
-            create +
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="primary" 
+              size="lg" 
+              onClick={onCreateNew}
+              className="font-mono text-1xl px-6 py-4"
+            >
+              CREATE +
+            </Button>
+            {!disabled && <HamburgerMenu inline />}
+          </div>
         </div>
       </div>
 
@@ -83,10 +112,19 @@ export const Dashboard = ({
         ) : sessions.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
-              <p className="text-muted-foreground text-lg">No sessions yet</p>
-              <p className="text-sm text-muted-foreground">
-                Click "create +" to start your first session
-              </p>
+              {hasProcessingSessions ? (
+                <>
+                  <CircleNotch size={32} className="animate-spin text-muted-foreground mx-auto" />
+                  <p className="text-muted-foreground text-lg">Your session is still processing.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-muted-foreground text-lg">No sessions yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Click "create +" to start your first session
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ) : (

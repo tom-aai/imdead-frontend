@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { HamburgerMenu } from '@/components/hamburger-menu';
 import { cn } from '@/lib/utils';
 import { uploadAvatarImage } from '@/lib/supabase';
 
@@ -201,6 +202,8 @@ export const Welcome = ({
         disabled ? 'z-10' : 'z-20'
       )}
     >
+      {!disabled && <HamburgerMenu />}
+
       {/* Video preview - 512x512 pixel square tile */}
       <div className="mb-6 relative">
         <div className="relative w-[512px] h-[512px]">
