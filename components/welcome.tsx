@@ -209,7 +209,7 @@ export const Welcome = ({
             autoPlay
             playsInline
             muted
-            className="w-[512px] h-[512px] bg-gray-200 rounded-lg object-cover"
+            className="w-[512px] h-[512px] bg-gray-200 rounded-lg object-cover -scale-x-100"
             style={{ display: cameraEnabled ? 'block' : 'none' }}
           />
           <canvas
