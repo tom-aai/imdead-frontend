@@ -81,12 +81,13 @@ export async function GET(req: Request) {
       (sessions || []).map(async (session) => {
         console.log(`[Sessions API] Processing session ${session.session_id}`);
         
-        // Get the avatar image for this session
+        // Get the avatar image for this session (most recent one if there are multiple)
         const { data: avatarData, error: avatarError } = await supabase
           .from('user_avatar_images')
           .select('cartoon_id')
           .eq('user_id', userId)
           .eq('session_id', session.session_id)
+          .order('created_at', { ascending: false })
           .limit(1)
           .single();
 

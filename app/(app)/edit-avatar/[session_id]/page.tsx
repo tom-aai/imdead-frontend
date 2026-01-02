@@ -155,7 +155,11 @@ export default function EditAvatarPage() {
       }
 
       // Call the update-avatar API
-      console.log('Calling update-avatar API for session:', sessionId);
+      // The picture_id needs to include the full path as stored in Supabase: {userId}/{uuid}.png
+      const userId = session.user.id;
+      const fullPictureId = `${userId}/${pictureId}.png`;
+      
+      console.log('Calling update-avatar API for session:', sessionId, 'with picture:', fullPictureId);
       const response = await fetch('/api/update-avatar', {
         method: 'POST',
         headers: {
@@ -164,7 +168,7 @@ export default function EditAvatarPage() {
         },
         body: JSON.stringify({
           session_id: sessionId,
-          picture_id: pictureId,
+          picture_id: fullPictureId,
         }),
       });
 
@@ -177,7 +181,7 @@ export default function EditAvatarPage() {
       console.log('Avatar update initiated:', data);
 
       // Navigate back to dashboard
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       console.error('Error updating avatar:', err);
       setError(err instanceof Error ? err.message : 'Failed to update avatar');
@@ -192,7 +196,7 @@ export default function EditAvatarPage() {
         variant="ghost"
         size="sm"
         className="absolute top-4 left-4"
-        onClick={() => router.push('/')}
+        onClick={() => router.push('/dashboard')}
         disabled={isProcessing}
       >
         <ArrowLeft size={20} className="mr-2" />
