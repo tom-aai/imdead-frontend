@@ -133,3 +133,86 @@ export async function DELETE(req: Request, { params }: RouteParams) {
   }
 }
 
+export async function PATCH(req: Request, { params }: RouteParams) {
+  try {
+    const { session_id } = await params;
+
+    console.log('[Update Session API] Request received for session:', session_id);
+
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.log('[Update Session API] No authorization header');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Parse request body
+    const body = await req.json();
+    const { main_topic } = body;
+
+    // Validate input
+    if (main_topic === undefined) {
+      return NextResponse.json({ error: 'main_topic is required' }, { status: 400 });
+    }
+
+    if (typeof main_topic !== 'string' || main_topic.trim().length === 0) {
+      return NextResponse.json({ error: 'main_topic must be a non-empty string' }, { status: 400 });
+    }
+
+    const trimmedTopic = main_topic.trim();
+
+    // Initialize Supabase client with service key for server-side queries
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    );
+
+    // Verify user authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      console.error('[Update Session API] Auth error:', authError?.message || 'No user');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    console.log('[Update Session API] User authenticated:', user.id);
+
+    // Verify user owns this session (check interview_call_analysis which is the source of truth)
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('interview_call_analysis')
+      .select('session_id, user_id')
+      .eq('session_id', session_id)
+      .single();
+
+    if (sessionError || !sessionData) {
+      console.error('[Update Session API] Session not found:', sessionError?.message);
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    if (sessionData.user_id !== user.id) {
+      console.error('[Update Session API] User does not own this session');
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Update the main_topic in interview_call_analysis
+    const { error: updateError } = await supabase
+      .from('interview_call_analysis')
+      .update({ main_topic: trimmedTopic })
+      .eq('session_id', session_id);
+
+    if (updateError) {
+      console.error('[Update Session API] Error updating session:', updateError.message);
+      return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
+    }
+
+    console.log('[Update Session API] Successfully updated session:', session_id);
+
+    return NextResponse.json({ success: true, main_topic: trimmedTopic });
+
+  } catch (error) {
+    console.error('[Update Session API] Unexpected error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+

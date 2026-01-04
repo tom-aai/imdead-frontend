@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch, Trash, PencilSimple } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch, Trash, PencilSimple, X } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -42,6 +42,12 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  // Title editing state
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(session.main_topic || '');
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
+
   // Hot take text state
   const [hotTakeText, setHotTakeText] = useState(session.hot_take_1 || '');
 
@@ -64,6 +70,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
     setHotTakeText(session.hot_take_1 || '');
     setSocialPostText(generateSocialPostText(session.main_topic));
     setLocalShareToken(session.share_token);
+    setEditedTitle(session.main_topic || '');
   }, [session.hot_take_1, session.main_topic, session.share_token]);
 
   // Format the date as "Month Day, Year, Hour:Minute AM/PM"
@@ -365,6 +372,68 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
     }
   };
 
+  // Handle title save
+  const handleSaveTitle = async () => {
+    const trimmedTitle = editedTitle.trim();
+    
+    if (!trimmedTitle) {
+      setTitleError('Title cannot be empty');
+      return;
+    }
+
+    // If no change, just exit edit mode
+    if (trimmedTitle === session.main_topic) {
+      setIsEditingTitle(false);
+      setTitleError(null);
+      return;
+    }
+
+    setIsSavingTitle(true);
+    setTitleError(null);
+
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+
+      if (!authSession) {
+        setTitleError('Not authenticated');
+        return;
+      }
+
+      const response = await fetch(`/api/sessions/${session.session_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ main_topic: trimmedTitle }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update title');
+      }
+
+      // Success - exit edit mode and refresh
+      setIsEditingTitle(false);
+      if (onSessionUpdated) {
+        onSessionUpdated();
+      }
+    } catch (error) {
+      console.error('Error updating title:', error);
+      setTitleError(error instanceof Error ? error.message : 'Failed to update title');
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
+
+  // Handle cancel title edit
+  const handleCancelTitleEdit = () => {
+    setEditedTitle(session.main_topic || '');
+    setIsEditingTitle(false);
+    setTitleError(null);
+  };
+
   const renderHotTakeSection = () => {
     const isGenerating = generation.status === 'generating' || generation.status === 'polling';
     
@@ -495,10 +564,76 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
       <div className="p-4 space-y-4">
         {/* Main Topic and Date */}
         <div>
-          <h3 className="font-semibold text-lg line-clamp-2">
-            {session.main_topic || 'Untitled Session'}
-          </h3>
-          <div className="font-semibold text-lg">
+          {isEditingTitle ? (
+            // Edit mode
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                disabled={isSavingTitle}
+                className="w-full p-2 text-lg font-semibold border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                placeholder="Enter session title..."
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSaveTitle();
+                  } else if (e.key === 'Escape') {
+                    handleCancelTitleEdit();
+                  }
+                }}
+              />
+              {titleError && (
+                <p className="text-xs text-destructive">{titleError}</p>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSaveTitle}
+                  disabled={isSavingTitle}
+                >
+                  {isSavingTitle ? (
+                    <>
+                      <CircleNotch size={14} className="mr-1 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={14} className="mr-1" />
+                      Save
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelTitleEdit}
+                  disabled={isSavingTitle}
+                >
+                  <X size={14} className="mr-1" />
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Display mode with hover edit button
+            <div className="group/title relative">
+              <h3 className="font-semibold text-lg line-clamp-2 pr-8">
+                {session.main_topic || 'Untitled Session'}
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-0 right-0 h-6 w-6 opacity-0 group-hover/title:opacity-100 hover:opacity-100 transition-opacity"
+                onClick={() => setIsEditingTitle(true)}
+                title="Edit title"
+              >
+                <PencilSimple size={14} />
+              </Button>
+            </div>
+          )}
+          <div className="font-semibold text-lg text-muted-foreground">
             {formatDate(session.created_at)}
           </div>
         </div>
