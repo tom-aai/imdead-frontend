@@ -60,7 +60,7 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
       {/* Hamburger circle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors shadow-lg"
+        className="w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors shadow-lg cursor-pointer"
         aria-label="Open menu"
       >
         <List size={24} weight="bold" className="text-foreground" />
@@ -71,19 +71,19 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
         <div className="absolute top-14 right-0 bg-primary rounded-lg shadow-xl overflow-hidden min-w-[160px]">
           <button
             onClick={handleDashboard}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors"
+            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
           >
             Dashboard
           </button>
           <button
             onClick={handleRecloneVoice}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors"
+            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
           >
             Re-Clone Voice
           </button>
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors"
+            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
           >
             Logout
           </button>
