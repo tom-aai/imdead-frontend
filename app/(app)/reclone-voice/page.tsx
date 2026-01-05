@@ -7,7 +7,7 @@ import { HamburgerMenu } from '@/components/hamburger-menu';
 import { Button } from '@/components/ui/button';
 import { ProtectedRoute } from '@/components/protected-route';
 import { getSupabaseClient } from '@/lib/supabase';
-import { ArrowLeft, CheckCircle, CircleNotch, Warning } from '@phosphor-icons/react';
+import { CheckCircle, CircleNotch, Warning } from '@phosphor-icons/react';
 
 type SubmissionState = 'idle' | 'submitting' | 'processing' | 'success' | 'error';
 
@@ -150,18 +150,7 @@ export default function RecloneVoicePage() {
         {/* Header */}
         <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
           <div className="container mx-auto px-8 py-6 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft size={16} />
-                Back
-              </Button>
-              <h1 className="text-2xl font-semibold">Re-Clone Voice</h1>
-            </div>
+            <h1 className="text-2xl font-semibold">Re-Clone Voice</h1>
             <HamburgerMenu inline />
           </div>
         </div>
