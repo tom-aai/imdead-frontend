@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export interface Session {
@@ -18,10 +18,17 @@ export default function useSessions(shouldFetch: boolean = true) {
   const [error, setError] = useState<string | null>(null);
   const [hasProcessingSessions, setHasProcessingSessions] = useState(false);
   const [hasPendingAvatarUpdates, setHasPendingAvatarUpdates] = useState(false);
+  const hasFetchedOnce = useRef(false);
 
   const fetchSessions = useCallback(async () => {
+    // Capture whether this is the initial load before we potentially change it
+    const isInitialLoad = !hasFetchedOnce.current;
+    
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load, not during background refreshes
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       
       // Get the user's session token
       const supabase = getSupabaseClient();
@@ -31,7 +38,9 @@ export default function useSessions(shouldFetch: boolean = true) {
       if (!session) {
         console.log('No session found - user may not be authenticated');
         setError('Not authenticated');
-        setLoading(false);
+        if (isInitialLoad) {
+          setLoading(false);
+        }
         return;
       }
 
@@ -56,11 +65,15 @@ export default function useSessions(shouldFetch: boolean = true) {
       setHasProcessingSessions(data.hasProcessingSessions || false);
       setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
       setError(null);
+      hasFetchedOnce.current = true;
     } catch (err) {
       console.error('Error fetching sessions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
     } finally {
-      setLoading(false);
+      // Only update loading state if this was the initial load
+      if (isInitialLoad) {
+        setLoading(false);
+      }
     }
   }, []);
 
