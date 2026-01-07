@@ -42,6 +42,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
     const pictureId: string | undefined = body?.pictureId;
+    
+    // Resume session data (optional - for resuming existing sessions)
+    const originalSessionId: string | undefined = body?.originalSessionId;
+    const conversationNarrative: string | undefined = body?.conversationNarrative;
 
     // Get user data from Supabase session
     let userData: UserData | null = null;
@@ -84,7 +88,9 @@ export async function POST(req: Request) {
       roomName,
       agentName,
       pictureId,
-      userData
+      userData,
+      originalSessionId,
+      conversationNarrative
     );
 
     // Return connection details
@@ -111,7 +117,9 @@ function createParticipantToken(
   roomName: string,
   agentName?: string,
   pictureId?: string,
-  userData?: UserData | null
+  userData?: UserData | null,
+  originalSessionId?: string,
+  conversationNarrative?: string
 ): Promise<string> {
   // Build token options with metadata included
   const tokenOptions: AccessTokenOptions = {
@@ -120,7 +128,7 @@ function createParticipantToken(
   };
   
   // Build metadata object with all user info
-  const metadata: any = {};
+  const metadata: Record<string, unknown> = {};
   
   if (pictureId) {
     metadata.pictureId = pictureId;
@@ -134,6 +142,13 @@ function createParticipantToken(
       firstName: userData.firstName,
       lastName: userData.lastName,
     };
+  }
+  
+  // Add resume session data if provided
+  if (originalSessionId) {
+    metadata.originalSessionId = originalSessionId;
+    metadata.conversationNarrative = conversationNarrative || '';
+    metadata.isResumeSession = true;
   }
   
   // Add metadata to token if we have any

@@ -1,39 +1,43 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Room, RoomEvent } from 'livekit-client';
 import { motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
 import { SessionView } from '@/components/session-view';
-import { Dashboard } from '@/components/dashboard';
 import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
-import useConnectionDetails from '@/hooks/useConnectionDetails';
+import useConnectionDetails, { ResumeSessionData } from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
 
 const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
-const MotionDashboard = motion.create(Dashboard);
 
 interface AppProps {
   appConfig: AppConfig;
+  resumeSessionId?: string | null;
 }
 
-export function App({ appConfig }: AppProps) {
+export function App({ appConfig, resumeSessionId }: AppProps) {
+  const router = useRouter();
   const room = useMemo(() => new Room(), []);
+  // If resuming, start with session hidden (don't show Welcome)
+  const [isResuming, setIsResuming] = useState(!!resumeSessionId);
   const [sessionStarted, setSessionStarted] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
   const [pictureId, setPictureId] = useState<string | null>(null);
-  const [welcomeKey, setWelcomeKey] = useState(0); // Track welcome component resets
+  const [resumeSessionData, setResumeSessionData] = useState<ResumeSessionData | null>(null);
+  const [hasHandledResumeParam, setHasHandledResumeParam] = useState(false);
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
-    useConnectionDetails(appConfig, pictureId);
+    useConnectionDetails(appConfig, pictureId, resumeSessionData);
 
   useEffect(() => {
     const onDisconnected = () => {
       setSessionStarted(false);
-      setShowDashboard(true);
-      // Don't fetch new connection details here - wait until user starts a new session
+      setResumeSessionData(null);
+      // Navigate to dashboard after call ends
+      router.push('/dashboard');
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
@@ -47,7 +51,7 @@ export function App({ appConfig }: AppProps) {
       room.off(RoomEvent.Disconnected, onDisconnected);
       room.off(RoomEvent.MediaDevicesError, onMediaDevicesError);
     };
-  }, [room]);
+  }, [room, router]);
 
   // Enable camera early for avatar creation (before session starts)
   useEffect(() => {
@@ -134,35 +138,73 @@ export function App({ appConfig }: AppProps) {
 
   const { startButtonText } = appConfig;
 
-  const handleCreateNew = () => {
-    setShowDashboard(false);
-    setPictureId(null);
-    setWelcomeKey(prev => prev + 1); // Force Welcome component to remount with fresh state
+  const handleResumeSession = async (sessionId: string) => {
+    console.log('Resuming session:', sessionId);
+    
+    try {
+      // Fetch the session's conversation_narrative from the API
+      const { getSupabaseClient } = await import('@/lib/supabase');
+      const supabase = getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error('Not authenticated');
+        return;
+      }
+
+      const response = await fetch(`/api/sessions/${sessionId}/narrative`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch session narrative');
+      }
+
+      const data = await response.json();
+      
+      // Set resume session data and start session immediately (skip welcome/picture)
+      setResumeSessionData({
+        originalSessionId: sessionId,
+        conversationNarrative: data.conversation_narrative || '',
+      });
+      setSessionStarted(true);
+    } catch (error) {
+      console.error('Error resuming session:', error);
+      setIsResuming(false); // Show Welcome on error so user can start fresh
+      toastAlert({
+        title: 'Error resuming session',
+        description: error instanceof Error ? error.message : 'Failed to resume session',
+      });
+    }
   };
+
+  // Handle resume session from URL parameter
+  useEffect(() => {
+    if (resumeSessionId && !hasHandledResumeParam) {
+      setHasHandledResumeParam(true);
+      console.log('Resuming session from URL param:', resumeSessionId);
+      handleResumeSession(resumeSessionId);
+    }
+  }, [resumeSessionId, hasHandledResumeParam]);
 
   return (
     <main>
-      <MotionWelcome
-        key={`welcome-${welcomeKey}`}
-        startButtonText={startButtonText}
-        onStartCall={(pictureId: string) => {
-          setPictureId(pictureId);
-          setSessionStarted(true);
-        }}
-        disabled={sessionStarted || showDashboard}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: sessionStarted || showDashboard ? 0 : 1 }}
-        transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
-      />
-
-      <MotionDashboard
-        key="dashboard"
-        onCreateNew={handleCreateNew}
-        disabled={!showDashboard}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showDashboard ? 1 : 0 }}
-        transition={{ duration: 0.5, ease: 'linear', delay: showDashboard ? 0.5 : 0 }}
-      />
+      {/* Hide Welcome entirely when resuming a session */}
+      {!isResuming && (
+        <MotionWelcome
+          startButtonText={startButtonText}
+          onStartCall={(pictureId: string) => {
+            setPictureId(pictureId);
+            setSessionStarted(true);
+          }}
+          disabled={sessionStarted}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: sessionStarted ? 0 : 1 }}
+          transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
+        />
+      )}
 
       <RoomContext.Provider value={room}>
         <RoomAudioRenderer />

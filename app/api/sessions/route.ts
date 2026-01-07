@@ -46,7 +46,8 @@ export async function GET(req: Request) {
       .select(`
         session_id, 
         user_id, 
-        created_at, 
+        created_at,
+        updated_at,
         main_topic, 
         hot_take_1,
         hot_take_video_1,

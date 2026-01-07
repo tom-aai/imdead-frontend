@@ -5,6 +5,7 @@ export interface Session {
   session_id: string;
   user_id: string;
   created_at: string;
+  updated_at: string | null;
   main_topic: string | null;
   hot_take_1: string | null;
   hot_take_video_1_url: string | null;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, Play, VideoCamera, CircleNotch, Trash, PencilSimple, X } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -22,6 +22,7 @@ interface SessionCardProps {
   session: Session;
   onShareCreated?: (sessionId: string, shareToken: string) => void;
   onSessionUpdated?: () => void;
+  onResumeSession?: (sessionId: string) => void;
 }
 
 type GenerationStatus = 'idle' | 'generating' | 'polling' | 'completed' | 'failed';
@@ -32,7 +33,7 @@ interface GenerationState {
   error: string | null;
 }
 
-export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: SessionCardProps) => {
+export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResumeSession }: SessionCardProps) => {
   const router = useRouter();
   const [isCreatingShare, setIsCreatingShare] = useState(false);
   const [justCopied, setJustCopied] = useState(false);
@@ -192,11 +193,6 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
     await navigator.clipboard.writeText(shareUrl);
     setJustCopied(true);
     setTimeout(() => setJustCopied(false), 2000);
-  };
-
-  const handleOpenAvatar = () => {
-    if (!localShareToken) return;
-    router.push(`/chat/${localShareToken}`);
   };
 
   // Poll for job status
@@ -634,7 +630,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
             </div>
           )}
           <div className="font-semibold text-lg text-muted-foreground">
-            {formatDate(session.created_at)}
+            {formatDate(session.updated_at || session.created_at)}
           </div>
         </div>
 
@@ -654,38 +650,38 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated }: Sessi
           />
         </div>
 
-        {/* Interactive Avatar */}
+        {/* Resume Session Button */}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full"
+          onClick={() => onResumeSession?.(session.session_id)}
+        >
+          <ArrowClockwise size={16} className="mr-2" />
+          Resume Session
+        </Button>
+
+        {/* Interactive Avatar - Share Button */}
         {localShareToken ? (
-          // Share exists - show copy and open buttons
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleCopyLink}
-            >
-              {justCopied ? (
-                <>
-                  <Check size={16} className="mr-2" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy size={16} className="mr-2" />
-                  Copy Link
-                </>
-              )}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1"
-              onClick={handleOpenAvatar}
-            >
-              <Play size={16} className="mr-2" />
-              Start Avatar
-            </Button>
-          </div>
+          // Share exists - show share button
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={handleCopyLink}
+          >
+            {justCopied ? (
+              <>
+                <Check size={16} className="mr-2" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy size={16} className="mr-2" />
+                SHARE AVATAR
+              </>
+            )}
+          </Button>
         ) : (
           // No share yet - show create button
           <Button

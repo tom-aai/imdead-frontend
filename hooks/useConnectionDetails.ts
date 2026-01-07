@@ -6,7 +6,16 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
-export default function useConnectionDetails(appConfig: AppConfig, pictureId: string | null) {
+export interface ResumeSessionData {
+  originalSessionId: string;
+  conversationNarrative: string;
+}
+
+export default function useConnectionDetails(
+  appConfig: AppConfig, 
+  pictureId: string | null,
+  resumeSessionData?: ResumeSessionData | null
+) {
   // Generate room connection details, including:
   //   - A random Room name
   //   - A random Participant name
@@ -18,6 +27,7 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
 
   const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | null>(null);
   const [connectionDetailsPictureId, setConnectionDetailsPictureId] = useState<string | null>(null);
+  const [connectionDetailsOriginalSessionId, setConnectionDetailsOriginalSessionId] = useState<string | null>(null);
 
   const fetchConnectionDetails = useCallback(async () => {
     setConnectionDetails(null);
@@ -32,7 +42,7 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
       const supabase = getSupabaseClient();
       const { data: { session } } = await supabase.auth.getSession();
       
-      const requestBody = {
+      const requestBody: Record<string, unknown> = {
         room_config: appConfig.agentName
           ? {
               agents: [{ agent_name: appConfig.agentName }],
@@ -40,6 +50,12 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
           : undefined,
         pictureId: pictureId,
       };
+      
+      // Add resume session data if resuming
+      if (resumeSessionData) {
+        requestBody.originalSessionId = resumeSessionData.originalSessionId;
+        requestBody.conversationNarrative = resumeSessionData.conversationNarrative;
+      }
       
       // Include authorization header with session token
       const headers: HeadersInit = {
@@ -64,8 +80,9 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
 
     setConnectionDetails(data);
     setConnectionDetailsPictureId(pictureId);
+    setConnectionDetailsOriginalSessionId(resumeSessionData?.originalSessionId ?? null);
     return data;
-  }, [pictureId, appConfig.agentName, appConfig.sandboxId]);
+  }, [pictureId, appConfig.agentName, appConfig.sandboxId, resumeSessionData]);
 
   // Don't fetch automatically on mount - let the app fetch when it's ready to connect
   // (after the user has taken a picture and clicked start)
@@ -91,20 +108,28 @@ export default function useConnectionDetails(appConfig: AppConfig, pictureId: st
     // 1. Connection details don't exist
     // 2. Token is expired
     // 3. Picture ID has changed (important for multi-session use!)
+    // 4. Original session ID has changed (for resume mode)
     const pictureIdChanged = connectionDetailsPictureId !== pictureId;
+    const originalSessionIdChanged = connectionDetailsOriginalSessionId !== (resumeSessionData?.originalSessionId ?? null);
     
-    if (isConnectionDetailsExpired() || !connectionDetails || pictureIdChanged) {
+    if (isConnectionDetailsExpired() || !connectionDetails || pictureIdChanged || originalSessionIdChanged) {
       if (pictureIdChanged) {
         console.log('Picture ID changed, fetching new connection details', {
           old: connectionDetailsPictureId,
           new: pictureId
         });
       }
+      if (originalSessionIdChanged) {
+        console.log('Original session ID changed, fetching new connection details (resume mode)', {
+          old: connectionDetailsOriginalSessionId,
+          new: resumeSessionData?.originalSessionId
+        });
+      }
       return fetchConnectionDetails();
     } else {
       return connectionDetails;
     }
-  }, [connectionDetails, connectionDetailsPictureId, pictureId, fetchConnectionDetails, isConnectionDetailsExpired]);
+  }, [connectionDetails, connectionDetailsPictureId, connectionDetailsOriginalSessionId, pictureId, resumeSessionData, fetchConnectionDetails, isConnectionDetailsExpired]);
 
   return {
     connectionDetails,

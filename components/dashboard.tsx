@@ -11,11 +11,13 @@ import { CircleNotch } from '@phosphor-icons/react';
 interface DashboardProps {
   disabled: boolean;
   onCreateNew: () => void;
+  onResumeSession?: (sessionId: string) => void;
 }
 
 export const Dashboard = ({
   disabled,
   onCreateNew,
+  onResumeSession,
   ref,
 }: React.ComponentProps<'div'> & DashboardProps) => {
   const { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, refetch } = useSessions(!disabled);
@@ -134,6 +136,7 @@ export const Dashboard = ({
                 key={session.session_id} 
                 session={session} 
                 onSessionUpdated={refetch}
+                onResumeSession={onResumeSession}
               />
             ))}
           </div>
