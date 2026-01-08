@@ -8,7 +8,7 @@ const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
 export interface ResumeSessionData {
   originalSessionId: string;
-  conversationNarrative: string;
+  conversationSummary: string;
 }
 
 export default function useConnectionDetails(
@@ -54,7 +54,7 @@ export default function useConnectionDetails(
       // Add resume session data if resuming
       if (resumeSessionData) {
         requestBody.originalSessionId = resumeSessionData.originalSessionId;
-        requestBody.conversationNarrative = resumeSessionData.conversationNarrative;
+        requestBody.conversationSummary = resumeSessionData.conversationSummary;
       }
       
       // Include authorization header with session token

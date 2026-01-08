@@ -169,11 +169,6 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
 
       const data = await response.json();
       setLocalShareToken(data.share_token);
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(data.share_url);
-      setJustCopied(true);
-      setTimeout(() => setJustCopied(false), 2000);
 
       // Notify parent
       if (onShareCreated) {

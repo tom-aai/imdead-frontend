@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     
     // Resume session data (optional - for resuming existing sessions)
     const originalSessionId: string | undefined = body?.originalSessionId;
-    const conversationNarrative: string | undefined = body?.conversationNarrative;
+    const conversationSummary: string | undefined = body?.conversationSummary;
 
     // Get user data from Supabase session
     let userData: UserData | null = null;
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       pictureId,
       userData,
       originalSessionId,
-      conversationNarrative
+      conversationSummary
     );
 
     // Return connection details
@@ -119,7 +119,7 @@ function createParticipantToken(
   pictureId?: string,
   userData?: UserData | null,
   originalSessionId?: string,
-  conversationNarrative?: string
+  conversationSummary?: string
 ): Promise<string> {
   // Build token options with metadata included
   const tokenOptions: AccessTokenOptions = {
@@ -147,7 +147,7 @@ function createParticipantToken(
   // Add resume session data if provided
   if (originalSessionId) {
     metadata.originalSessionId = originalSessionId;
-    metadata.conversationNarrative = conversationNarrative || '';
+    metadata.conversationSummary = conversationSummary || '';
     metadata.isResumeSession = true;
   }
   

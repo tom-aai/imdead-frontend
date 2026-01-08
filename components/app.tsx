@@ -142,7 +142,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
     console.log('Resuming session:', sessionId);
     
     try {
-      // Fetch the session's conversation_narrative from the API
+      // Fetch the session's conversation_summary from the API
       const { getSupabaseClient } = await import('@/lib/supabase');
       const supabase = getSupabaseClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -159,7 +159,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch session narrative');
+        throw new Error('Failed to fetch session summary');
       }
 
       const data = await response.json();
@@ -167,7 +167,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       // Set resume session data and start session immediately (skip welcome/picture)
       setResumeSessionData({
         originalSessionId: sessionId,
-        conversationNarrative: data.conversation_narrative || '',
+        conversationSummary: data.conversation_summary || '',
       });
       setSessionStarted(true);
     } catch (error) {

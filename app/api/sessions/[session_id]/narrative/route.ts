@@ -39,10 +39,10 @@ export async function GET(req: Request, { params }: RouteParams) {
 
     console.log('[Get Session Narrative API] User authenticated:', user.id);
 
-    // Fetch session with conversation_narrative
+    // Fetch session with conversation_summary
     const { data: sessionData, error: sessionError } = await supabase
       .from('interview_call_analysis')
-      .select('session_id, user_id, conversation_narrative')
+      .select('session_id, user_id, conversation_summary')
       .eq('session_id', session_id)
       .single();
 
@@ -61,7 +61,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 
     return NextResponse.json({
       session_id: sessionData.session_id,
-      conversation_narrative: sessionData.conversation_narrative || '',
+      conversation_summary: sessionData.conversation_summary || '',
     });
 
   } catch (error) {
