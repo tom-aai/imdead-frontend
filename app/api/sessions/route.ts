@@ -71,6 +71,20 @@ export async function GET(req: Request) {
       shareTokenMap.set(token.session_id, token.share_token);
     });
 
+    // Fetch unread message counts for each session
+    const { data: messageCounts } = await supabase
+      .from('student_messages')
+      .select('source_session_id')
+      .in('source_session_id', sessionIds)
+      .eq('status', 'pending');
+
+    // Create a map for unread message counts
+    const unreadCountMap = new Map<string, number>();
+    messageCounts?.forEach(msg => {
+      const currentCount = unreadCountMap.get(msg.source_session_id) || 0;
+      unreadCountMap.set(msg.source_session_id, currentCount + 1);
+    });
+
     if (sessionsError) {
       console.error('[Sessions API] Error fetching sessions:', sessionsError);
       return NextResponse.json({ error: 'Failed to fetch sessions', details: sessionsError.message }, { status: 500 });
@@ -155,6 +169,7 @@ export async function GET(req: Request) {
           avatar_image_url,
           hot_take_video_1_url,
           share_token: shareTokenMap.get(session.session_id) || null,
+          unread_message_count: unreadCountMap.get(session.session_id) || 0,
         };
       })
     );

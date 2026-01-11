@@ -43,6 +43,11 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
     router.push('/reclone-voice');
   };
 
+  const handleSettings = () => {
+    setIsOpen(false);
+    router.push('/settings');
+  };
+
   const handleLogout = async () => {
     setIsOpen(false);
     await signOut();
@@ -80,6 +85,12 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
             className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
           >
             Re-Clone Voice
+          </button>
+          <button
+            onClick={handleSettings}
+            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+          >
+            Settings
           </button>
           <button
             onClick={handleLogout}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -645,16 +645,34 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
           />
         </div>
 
-        {/* Resume Session Button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          className="w-full"
-          onClick={() => onResumeSession?.(session.session_id)}
-        >
-          <ArrowClockwise size={16} className="mr-2" />
-          Resume Session
-        </Button>
+        {/* Resume Session Button with Message Badge */}
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1"
+            onClick={() => onResumeSession?.(session.session_id)}
+          >
+            <ArrowClockwise size={16} className="mr-2" />
+            Resume Session
+          </Button>
+          
+          {/* Message Indicator Button */}
+          <Button
+            variant={session.unread_message_count > 0 ? "default" : "outline"}
+            size="sm"
+            className="relative"
+            onClick={() => onResumeSession?.(session.session_id)}
+            title={session.unread_message_count > 0 ? `${session.unread_message_count} unread message${session.unread_message_count !== 1 ? 's' : ''}` : 'No new messages'}
+          >
+            <Envelope size={16} />
+            {session.unread_message_count > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                {session.unread_message_count > 99 ? '99+' : session.unread_message_count}
+              </span>
+            )}
+          </Button>
+        </div>
 
         {/* Interactive Avatar - Share Button */}
         {localShareToken ? (

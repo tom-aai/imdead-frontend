@@ -11,6 +11,7 @@ export interface Session {
   hot_take_video_1_url: string | null;
   avatar_image_url: string | null;
   share_token: string | null;
+  unread_message_count: number;
 }
 
 export default function useSessions(shouldFetch: boolean = true) {
