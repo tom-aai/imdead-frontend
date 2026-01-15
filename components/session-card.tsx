@@ -667,7 +667,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
           >
             <Envelope size={16} />
             {session.unread_message_count > 0 && (
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                 {session.unread_message_count > 99 ? '99+' : session.unread_message_count}
               </span>
             )}

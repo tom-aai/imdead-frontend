@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { cn } from '@/lib/utils';
@@ -12,15 +12,32 @@ interface DashboardProps {
   disabled: boolean;
   onCreateNew: () => void;
   onResumeSession?: (sessionId: string) => void;
+  justFinishedSession?: boolean;
 }
 
 export const Dashboard = ({
   disabled,
   onCreateNew,
   onResumeSession,
+  justFinishedSession = false,
   ref,
 }: React.ComponentProps<'div'> & DashboardProps) => {
   const { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, refetch } = useSessions(!disabled);
+  
+  // Track if we're still waiting for a session to appear after just finishing one
+  // This handles the race condition where interview_calls record hasn't been created yet
+  const [isWaitingForSession, setIsWaitingForSession] = useState(justFinishedSession);
+  
+  // When we detect sessions, stop waiting
+  useEffect(() => {
+    if (sessions.length > 0 || hasProcessingSessions) {
+      setIsWaitingForSession(false);
+    }
+  }, [sessions.length, hasProcessingSessions]);
+  
+  // Note: No timeout on isWaitingForSession - it will be set to false automatically
+  // when sessions appear or hasProcessingSessions becomes true. Avatar generation
+  // typically takes 3+ minutes in production.
 
   // Refetch when dashboard becomes visible
   useEffect(() => {
@@ -37,19 +54,21 @@ export const Dashboard = ({
     }
   }, [sessions, loading, hasProcessingSessions, hasPendingAvatarUpdates]);
 
-  // Auto-poll when there are processing sessions, pending avatar updates, or sessions without avatar images
+  // Auto-poll when there are processing sessions, pending avatar updates, sessions without avatar images,
+  // or we're waiting for a session to appear after just finishing one
   useEffect(() => {
     if (disabled || loading) return;
 
     // Check if any session is missing an avatar image
     const hasMissingAvatars = sessions.some(s => !s.avatar_image_url);
     
-    // Poll if there are processing sessions, pending avatar updates, or sessions with missing avatars
-    const shouldPoll = hasProcessingSessions || hasPendingAvatarUpdates || hasMissingAvatars;
+    // Poll if there are processing sessions, pending avatar updates, sessions with missing avatars,
+    // or we're waiting for a session to appear (handles race condition after finishing a session)
+    const shouldPoll = hasProcessingSessions || hasPendingAvatarUpdates || hasMissingAvatars || isWaitingForSession;
     
     if (!shouldPoll) return;
 
-    console.log('[Dashboard] Starting auto-poll for processing sessions, avatar updates, or missing avatars');
+    console.log('[Dashboard] Starting auto-poll for processing sessions, avatar updates, missing avatars, or waiting for session');
     
     const pollInterval = setInterval(() => {
       console.log('[Dashboard] Auto-polling for updates...');
@@ -60,7 +79,7 @@ export const Dashboard = ({
       console.log('[Dashboard] Stopping auto-poll');
       clearInterval(pollInterval);
     };
-  }, [disabled, loading, hasProcessingSessions, hasPendingAvatarUpdates, sessions, refetch]);
+  }, [disabled, loading, hasProcessingSessions, hasPendingAvatarUpdates, sessions, isWaitingForSession, refetch]);
 
   return (
     <section
@@ -114,10 +133,13 @@ export const Dashboard = ({
         ) : sessions.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
-              {hasProcessingSessions ? (
+              {hasProcessingSessions || isWaitingForSession ? (
                 <>
                   <CircleNotch size={32} className="animate-spin text-muted-foreground mx-auto" />
-                  <p className="text-muted-foreground text-lg">Your session is still processing.</p>
+                  <p className="text-muted-foreground text-lg">Your avatar is being generated.</p>
+                  <p className="text-sm text-muted-foreground">
+                    This usually takes about a minute.
+                  </p>
                 </>
               ) : (
                 <>

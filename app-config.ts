@@ -11,9 +11,9 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   isPreConnectBufferEnabled: true,
 
   logo: '/lk-logo.svg',
-  accent: '#002cf2',
+  accent: '#ff10f0',
   logoDark: '/lk-logo-dark.svg',
-  accentDark: '#1fd5f9',
+  accentDark: '#ff10f0',
   startButtonText: 'Start call',
 
   agentName: undefined,

@@ -37,7 +37,8 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       setSessionStarted(false);
       setResumeSessionData(null);
       // Navigate to dashboard after call ends
-      router.push('/dashboard');
+      // Pass from_session=true so dashboard knows to poll for the new session
+      router.push('/dashboard?from_session=true');
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
