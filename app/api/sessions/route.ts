@@ -73,7 +73,7 @@ export async function GET(req: Request) {
 
     // Fetch unread message counts for each session
     const { data: messageCounts } = await supabase
-      .from('student_messages')
+      .from('seeker_messages')
       .select('source_session_id')
       .in('source_session_id', sessionIds)
       .eq('status', 'pending');
