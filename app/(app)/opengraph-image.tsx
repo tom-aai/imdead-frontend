@@ -106,9 +106,9 @@ export default async function Image() {
   const appConfig = await getAppConfig(hdrs);
 
   const pageTitle = cleanPageTitle(appConfig.pageTitle);
-  const logoUri = appConfig.logoDark || appConfig.logo;
+  const logoUri = appConfig.logoDark || appConfig.logo || 'public/lk-logo-dark.svg';
   const isLogoUriLocal = logoUri.includes('lk-logo');
-  const wordmarkUri = logoUri === APP_CONFIG_DEFAULTS.logoDark ? 'public/lk-wordmark.svg' : logoUri;
+  const wordmarkUri = logoUri === APP_CONFIG_DEFAULTS.logoDark || !appConfig.logo ? 'public/lk-wordmark.svg' : logoUri;
 
   // Load fonts - use file system in dev, fetch in production
   let commitMonoData: ArrayBuffer | undefined;

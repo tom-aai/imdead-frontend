@@ -22,7 +22,7 @@ const appConfig = {
   supportsVideoInput: false,
   supportsScreenShare: false,
   isPreConnectBufferEnabled: true,
-  logo: '/logo.svg',
+  logo: '',
   startButtonText: 'Start Chat',
 };
 

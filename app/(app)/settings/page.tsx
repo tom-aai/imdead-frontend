@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { Button } from '@/components/ui/button';
 import { getSupabaseClient } from '@/lib/supabase';
-import { CircleNotch, ArrowLeft } from '@phosphor-icons/react';
+import { CircleNotch } from '@phosphor-icons/react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -103,17 +103,6 @@ export default function SettingsPage() {
       <HamburgerMenu />
       
       <div className="max-w-xl mx-auto px-4 py-12">
-        {/* Back button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-6"
-          onClick={() => router.push('/dashboard')}
-        >
-          <ArrowLeft size={16} className="mr-2" />
-          Back to Dashboard
-        </Button>
-
         <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
         {/* Email Notifications Section */}

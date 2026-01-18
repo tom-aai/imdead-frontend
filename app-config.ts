@@ -1,8 +1,8 @@
 import type { AppConfig } from './lib/types';
 
 export const APP_CONFIG_DEFAULTS: AppConfig = {
-  companyName: 'LiveKit',
-  pageTitle: 'LiveKit Voice Agent',
+  companyName: 'Expert Avatar',
+  pageTitle: 'Expert Avatar',
   pageDescription: 'A voice agent built with LiveKit',
 
   supportsChatInput: true,
@@ -10,9 +10,9 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   supportsScreenShare: true,
   isPreConnectBufferEnabled: true,
 
-  logo: '/lk-logo.svg',
+  logo: '',
   accent: '#ff10f0',
-  logoDark: '/lk-logo-dark.svg',
+  logoDark: '',
   accentDark: '#ff10f0',
   startButtonText: 'Start call',
 
