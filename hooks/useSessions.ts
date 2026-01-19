@@ -12,6 +12,22 @@ export interface Session {
   avatar_image_url: string | null;
   share_token: string | null;
   unread_message_count: number;
+  total_chat_duration_seconds: number;
+}
+
+export interface BillingInfo {
+  used_seconds: number;
+  used_minutes: number;
+  free_tier_seconds: number;
+  free_tier_minutes: number;
+  remaining_seconds: number;
+  remaining_minutes: number;
+  usage_percentage: number;
+  is_exceeded: boolean;
+  is_warning: boolean;
+  billing_status: string;
+  is_admin: boolean;
+  is_paid: boolean;
 }
 
 export default function useSessions(shouldFetch: boolean = true) {
@@ -20,7 +36,9 @@ export default function useSessions(shouldFetch: boolean = true) {
   const [error, setError] = useState<string | null>(null);
   const [hasProcessingSessions, setHasProcessingSessions] = useState(false);
   const [hasPendingAvatarUpdates, setHasPendingAvatarUpdates] = useState(false);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const hasFetchedOnce = useRef(false);
+  const hasFetchedBilling = useRef(false);
 
   const fetchSessions = useCallback(async () => {
     // Capture whether this is the initial load before we potentially change it
@@ -66,6 +84,25 @@ export default function useSessions(shouldFetch: boolean = true) {
       setSessions(data.sessions || []);
       setHasProcessingSessions(data.hasProcessingSessions || false);
       setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
+      
+      // Only fetch billing info once on initial load (it's slow-changing data)
+      if (!hasFetchedBilling.current) {
+        try {
+          const billingResponse = await fetch('/api/billing/usage', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+          });
+          if (billingResponse.ok) {
+            const billingData = await billingResponse.json();
+            setBillingInfo(billingData);
+            hasFetchedBilling.current = true;
+          }
+        } catch (billingErr) {
+          console.warn('Could not fetch billing info:', billingErr);
+        }
+      }
+      
       setError(null);
       hasFetchedOnce.current = true;
     } catch (err) {
@@ -85,6 +122,6 @@ export default function useSessions(shouldFetch: boolean = true) {
     }
   }, [shouldFetch, fetchSessions]);
 
-  return { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, refetch: fetchSessions };
+  return { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, billingInfo, refetch: fetchSessions };
 }
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope, Clock } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -23,6 +23,7 @@ interface SessionCardProps {
   onShareCreated?: (sessionId: string, shareToken: string) => void;
   onSessionUpdated?: () => void;
   onResumeSession?: (sessionId: string) => void;
+  isFreeTierExceeded?: boolean;
 }
 
 type GenerationStatus = 'idle' | 'generating' | 'polling' | 'completed' | 'failed';
@@ -33,7 +34,18 @@ interface GenerationState {
   error: string | null;
 }
 
-export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResumeSession }: SessionCardProps) => {
+// Format seconds into human-readable duration (e.g., "5m", "1h 23m")
+const formatDuration = (seconds: number): string => {
+  if (!seconds || seconds <= 0) return '0m';
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (remainingMinutes === 0) return `${hours}h`;
+  return `${hours}h ${remainingMinutes}m`;
+};
+
+export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResumeSession, isFreeTierExceeded = false }: SessionCardProps) => {
   const router = useRouter();
   const [isCreatingShare, setIsCreatingShare] = useState(false);
   const [justCopied, setJustCopied] = useState(false);
@@ -674,46 +686,60 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
           </Button>
         </div>
 
-        {/* Interactive Avatar - Share Button */}
-        {localShareToken ? (
-          // Share exists - show share button
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={handleCopyLink}
-          >
-            {justCopied ? (
-              <>
-                <Check size={16} className="mr-2" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy size={16} className="mr-2" />
-                SHARE AVATAR
-              </>
+        {/* Usage and Share Avatar Row */}
+        <div className="flex gap-2 items-center">
+          {/* Usage Display */}
+          <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0">
+            <Clock size={14} />
+            <span>{formatDuration(session.total_chat_duration_seconds || 0)}</span>
+            {isFreeTierExceeded && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive rounded">
+                Limit reached
+              </span>
             )}
-          </Button>
-        ) : (
-          // No share yet - show create button
-          <Button
-            variant="secondary"
-            size="sm"
-            className="w-full"
-            onClick={handleCreateShare}
-            disabled={isCreatingShare}
-          >
-            {isCreatingShare ? (
-              'Creating...'
+          </div>
+          
+          {/* Share Button */}
+          <div className="flex-1">
+            {localShareToken ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={handleCopyLink}
+              >
+                {justCopied ? (
+                  <>
+                    <Check size={16} className="mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={16} className="mr-2" />
+                    SHARE
+                  </>
+                )}
+              </Button>
             ) : (
-              <>
-                <LinkIcon size={16} className="mr-2" />
-                Create Avatar Link
-              </>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                onClick={handleCreateShare}
+                disabled={isCreatingShare}
+              >
+                {isCreatingShare ? (
+                  'Creating...'
+                ) : (
+                  <>
+                    <LinkIcon size={16} className="mr-2" />
+                    Create Link
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

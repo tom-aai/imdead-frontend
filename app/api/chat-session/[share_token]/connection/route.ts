@@ -6,6 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 const API_KEY = process.env.LIVEKIT_API_KEY;
 const API_SECRET = process.env.LIVEKIT_API_SECRET;
 const LIVEKIT_URL = process.env.LIVEKIT_URL;
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5001';
+const BACKEND_API_KEY = process.env.BACKEND_API_KEY;
 
 export const revalidate = 0;
 
@@ -103,6 +105,28 @@ export async function POST(req: Request, { params }: RouteParams) {
     const expertName = `${interviewData.user_firstname || ''} ${interviewData.user_lastname || ''}`.trim() || 'Expert';
     const mainTopic = analysisData?.main_topic || 'their expertise';
 
+    // Check if expert has available credits before creating the room
+    const expertUserId = interviewData.user_id;
+    const creditCheck = await checkExpertCredits(expertUserId);
+    
+    if (!creditCheck.canStart) {
+      console.log('[Chat Session API] Expert has no credits:', creditCheck.reason);
+      
+      // Send notification email to expert (fire and forget)
+      notifyExpertOutOfCredits(expertUserId, user.user_metadata?.given_name || 'Someone').catch(err => {
+        console.error('[Chat Session API] Failed to send out-of-credits notification:', err);
+      });
+      
+      return NextResponse.json(
+        { 
+          error: 'Expert has reached their free usage limit',
+          code: 'NO_CREDITS',
+          reason: creditCheck.reason 
+        }, 
+        { status: 402 }
+      );
+    }
+
     // Generate participant token
     const participantName = user.user_metadata?.given_name || user.user_metadata?.name || 'Student';
     const participantIdentity = `chat_student_${user.id.substring(0, 8)}_${Math.floor(Math.random() * 1000)}`;
@@ -180,3 +204,59 @@ function createParticipantToken(
   return at.toJwt();
 }
 
+/**
+ * Check if the expert has available credits for a chat session.
+ */
+async function checkExpertCredits(expertUserId: string): Promise<{ canStart: boolean; reason: string }> {
+  try {
+    const headers: HeadersInit = {};
+    if (BACKEND_API_KEY) {
+      headers['X-API-Key'] = BACKEND_API_KEY;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/api/billing/can-start-session/${expertUserId}`, {
+      headers,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        canStart: data.can_start ?? true,
+        reason: data.reason ?? '',
+      };
+    } else {
+      // On error, allow session to proceed (fail open)
+      console.warn('[Chat Session API] Credit check failed with status', response.status, '- allowing session');
+      return { canStart: true, reason: 'Credit check unavailable' };
+    }
+  } catch (error) {
+    console.warn('[Chat Session API] Error checking credits:', error, '- allowing session');
+    return { canStart: true, reason: 'Credit check unavailable' };
+  }
+}
+
+/**
+ * Send notification to expert that someone tried to chat but credits are exhausted.
+ * Fire and forget - errors are logged but don't block the response.
+ */
+async function notifyExpertOutOfCredits(expertUserId: string, seekerName: string): Promise<void> {
+  try {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (BACKEND_API_KEY) {
+      headers['X-API-Key'] = BACKEND_API_KEY;
+    }
+
+    await fetch(`${BACKEND_URL}/api/billing/notify-out-of-credits`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        expert_user_id: expertUserId,
+        seeker_name: seekerName,
+      }),
+    });
+  } catch (error) {
+    console.error('[Chat Session API] Error sending out-of-credits notification:', error);
+  }
+}

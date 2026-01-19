@@ -85,6 +85,22 @@ export async function GET(req: Request) {
       unreadCountMap.set(msg.source_session_id, currentCount + 1);
     });
 
+    // Fetch chat session durations for each source session
+    // We sum up stt_audio_duration from the usage JSONB field
+    const { data: chatDurations } = await supabase
+      .from('chat_sessions')
+      .select('source_session_id, usage')
+      .in('source_session_id', sessionIds);
+
+    // Create a map for total chat duration per session
+    const chatDurationMap = new Map<string, number>();
+    chatDurations?.forEach(chat => {
+      const sourceSessionId = chat.source_session_id;
+      const sttDuration = chat.usage?.stt_audio_duration || 0;
+      const currentTotal = chatDurationMap.get(sourceSessionId) || 0;
+      chatDurationMap.set(sourceSessionId, currentTotal + sttDuration);
+    });
+
     if (sessionsError) {
       console.error('[Sessions API] Error fetching sessions:', sessionsError);
       return NextResponse.json({ error: 'Failed to fetch sessions', details: sessionsError.message }, { status: 500 });
@@ -170,6 +186,7 @@ export async function GET(req: Request) {
           hot_take_video_1_url,
           share_token: shareTokenMap.get(session.session_id) || null,
           unread_message_count: unreadCountMap.get(session.session_id) || 0,
+          total_chat_duration_seconds: chatDurationMap.get(session.session_id) || 0,
         };
       })
     );

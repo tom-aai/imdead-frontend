@@ -22,7 +22,7 @@ export const Dashboard = ({
   justFinishedSession = false,
   ref,
 }: React.ComponentProps<'div'> & DashboardProps) => {
-  const { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, refetch } = useSessions(!disabled);
+  const { sessions, loading, error, hasProcessingSessions, hasPendingAvatarUpdates, billingInfo, refetch } = useSessions(!disabled);
   
   // Track if we're still waiting for a session to appear after just finishing one
   // This handles the race condition where interview_calls record hasn't been created yet
@@ -159,6 +159,7 @@ export const Dashboard = ({
                 session={session} 
                 onSessionUpdated={refetch}
                 onResumeSession={onResumeSession}
+                isFreeTierExceeded={billingInfo?.is_exceeded ?? false}
               />
             ))}
           </div>

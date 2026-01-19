@@ -40,6 +40,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [connectionDetails, setConnectionDetails] = useState<ChatConnectionDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUnavailable, setIsUnavailable] = useState(false);
+  const [isNoCredits, setIsNoCredits] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -89,6 +90,13 @@ export default function ChatPage({ params }: ChatPageProps) {
 
         if (!response.ok) {
           const data = await response.json();
+          
+          // Check if expert has no credits (402 Payment Required)
+          if (data.code === 'NO_CREDITS' || response.status === 402) {
+            setIsNoCredits(true);
+            return;
+          }
+          
           // Check if the avatar/session is no longer available
           // This includes: deleted sessions, revoked links, missing source session,
           // invalid tokens (deleted or never existed), or explicit deletion flag
@@ -195,6 +203,35 @@ export default function ChatPage({ params }: ChatPageProps) {
           className="text-center max-w-lg px-4"
         >
           <h1 className="text-3xl font-bold mb-8">Avatar is no longer available</h1>
+          
+          <button
+            onClick={() => router.push('/')}
+            className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-lg"
+          >
+            CREATE +
+          </button>
+        </motion.div>
+        <Toaster />
+      </div>
+    );
+  }
+
+  // Expert has no credits - friendly message
+  if (isNoCredits) {
+    return (
+      <div className="bg-background fixed inset-0 flex items-center justify-center">
+        <HamburgerMenu />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center max-w-lg px-4"
+        >
+          <h1 className="text-3xl font-bold mb-4">Avatar temporarily unavailable</h1>
+          <p className="text-muted-foreground mb-8">
+            This expert has reached their free usage limit for the month. 
+            They&apos;ve been notified and may upgrade soon.
+          </p>
           
           <button
             onClick={() => router.push('/')}
