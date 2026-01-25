@@ -14,7 +14,7 @@ export function Provider({
   appConfig: AppConfig;
   children: React.ReactNode;
 }) {
-  const { connectionDetails } = useConnectionDetails(appConfig);
+  const { connectionDetails } = useConnectionDetails(appConfig, null);
   const room = React.useMemo(() => new Room(), []);
 
   React.useEffect(() => {
