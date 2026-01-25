@@ -4,8 +4,19 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { Button } from '@/components/ui/button';
-import { getSupabaseClient } from '@/lib/supabase';
-import { CircleNotch, Lightning, CheckCircle } from '@phosphor-icons/react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { getSupabaseClient, signOut } from '@/lib/supabase';
+import { CircleNotch, Lightning, CheckCircle, Gear, Trash, Warning } from '@phosphor-icons/react';
 
 interface BillingInfo {
   used_seconds: number;
@@ -34,7 +45,12 @@ export default function SettingsPage() {
   // Billing state
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const [billingMessage, setBillingMessage] = useState<string | null>(null);
+  
+  // Account deletion state
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Check for billing redirect params
   useEffect(() => {
@@ -181,6 +197,83 @@ export default function SettingsPage() {
     }
   };
 
+  const handleManageSubscription = async () => {
+    setIsManagingSubscription(true);
+    setBillingMessage(null);
+    
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to open subscription management');
+      }
+
+      const data = await response.json();
+      if (data.portal_url) {
+        // Redirect to Stripe Customer Portal
+        window.location.href = data.portal_url;
+      } else {
+        throw new Error('No portal URL returned');
+      }
+    } catch (err) {
+      console.error('Error opening subscription portal:', err);
+      setBillingMessage(err instanceof Error ? err.message : 'Failed to open subscription management');
+    } finally {
+      setIsManagingSubscription(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch('/api/user/delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete account');
+      }
+
+      // Sign out and redirect to login
+      await signOut();
+      router.push('/login');
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete account');
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center">
@@ -262,7 +355,7 @@ export default function SettingsPage() {
                   <span className="font-medium">Admin - Unlimited Usage</span>
                 </div>
               ) : billingInfo.is_paid ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle size={20} />
                     <span className="font-medium">Paid Plan Active</span>
@@ -270,6 +363,24 @@ export default function SettingsPage() {
                   <p className="text-muted-foreground text-sm">
                     This month: {billingInfo.used_minutes} minutes used
                   </p>
+                  <Button
+                    onClick={handleManageSubscription}
+                    disabled={isManagingSubscription}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isManagingSubscription ? (
+                      <>
+                        <CircleNotch size={16} className="mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Gear size={16} className="mr-2" />
+                        Manage Subscription
+                      </>
+                    )}
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -343,6 +454,71 @@ export default function SettingsPage() {
               <CircleNotch size={24} className="animate-spin text-muted-foreground" />
             </div>
           )}
+        </div>
+
+        {/* Delete Account Section */}
+        <div className="bg-card border border-destructive/30 rounded-lg p-6 space-y-4 mt-6">
+          <h2 className="text-xl font-semibold text-destructive">Danger Zone</h2>
+          
+          <p className="text-muted-foreground text-sm">
+            Once you delete your account, there is no going back. All your data, avatars, 
+            and chat history will be permanently deleted. Any active subscription will be cancelled.
+          </p>
+
+          {deleteError && (
+            <p className="text-destructive text-sm">{deleteError}</p>
+          )}
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-full"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <CircleNotch size={16} className="mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash size={16} className="mr-2" />
+                    Delete Account
+                  </>
+                )}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <Warning size={20} className="text-destructive" />
+                  Delete your account?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. All your data, avatars, and chat history 
+                  will be permanently deleted. Any active subscription will be cancelled immediately.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  disabled={isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isDeleting ? (
+                    <>
+                      <CircleNotch size={16} className="mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete Account'
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

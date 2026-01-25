@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const LoginPage = () => {
@@ -67,7 +68,30 @@ export const LoginPage = () => {
 
       {/* Rest of the page is blank */}
       <div className="flex-1" />
+
+      {/* Footer with legal links */}
+      <footer className="pb-8 px-8">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-fg3">
+          <Link href="/terms" className="hover:text-foreground transition-colors">
+            Terms of Service
+          </Link>
+          <span className="text-separator2">·</span>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">
+            Privacy Policy
+          </Link>
+          <span className="text-separator2">·</span>
+          <Link href="/biometric-policy" className="hover:text-foreground transition-colors">
+            Biometric Policy
+          </Link>
+          <span className="text-separator2">·</span>
+          <a
+            href="mailto:support@melochora.com"
+            className="hover:text-foreground transition-colors"
+          >
+            Contact Us
+          </a>
+        </div>
+      </footer>
     </section>
   );
 };
-
