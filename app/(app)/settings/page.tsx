@@ -458,7 +458,7 @@ export default function SettingsPage() {
 
         {/* Delete Account Section */}
         <div className="bg-card border border-destructive/30 rounded-lg p-6 space-y-4 mt-6">
-          <h2 className="text-xl font-semibold text-destructive">Danger Zone</h2>
+          <h2 className="text-xl font-semibold text-white">Danger Zone</h2>
           
           <p className="text-muted-foreground text-sm">
             Once you delete your account, there is no going back. All your data, avatars, 
