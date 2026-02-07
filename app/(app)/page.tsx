@@ -1,6 +1,5 @@
 import { headers } from 'next/headers';
 import { App } from '@/components/app';
-import { ProtectedRoute } from '@/components/protected-route';
 import { getAppConfig } from '@/lib/utils';
 
 interface PageProps {
@@ -13,9 +12,5 @@ export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
   const resumeSessionId = params.resume || null;
 
-  return (
-    <ProtectedRoute>
-      <App appConfig={appConfig} resumeSessionId={resumeSessionId} />
-    </ProtectedRoute>
-  );
+  return <App appConfig={appConfig} resumeSessionId={resumeSessionId} />;
 }
