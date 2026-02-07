@@ -6,6 +6,7 @@ import { VoiceRecorder } from '@/components/voice-recorder';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { Button } from '@/components/ui/button';
 import { ProtectedRoute } from '@/components/protected-route';
+import { VoiceConsentModal } from '@/components/voice-consent-modal';
 import { getSupabaseClient } from '@/lib/supabase';
 import { CheckCircle, CircleNotch, Warning } from '@phosphor-icons/react';
 
@@ -21,6 +22,7 @@ export default function RecloneVoicePage() {
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Clean up polling on unmount
@@ -265,18 +267,14 @@ export default function RecloneVoicePage() {
                         </Button>
                         <Button
                           variant="primary"
-                          onClick={handleSubmit}
+                          onClick={() => {
+                            // Show consent modal instead of submitting directly
+                            setShowConsentModal(true);
+                          }}
                           disabled={isProcessing}
                           className="gap-2"
                         >
-                          {submissionState === 'submitting' ? (
-                            <>
-                              <CircleNotch size={16} className="animate-spin" />
-                              Submitting...
-                            </>
-                          ) : (
-                            'Submit & Clone Voice'
-                          )}
+                          Submit & Clone Voice
                         </Button>
                       </div>
                     )}
@@ -287,6 +285,18 @@ export default function RecloneVoicePage() {
           )}
         </div>
       </div>
+
+      <VoiceConsentModal
+        open={showConsentModal}
+        onOpenChange={setShowConsentModal}
+        onConsent={() => {
+          // User consented, proceed with submitting the recording
+          handleSubmit();
+        }}
+        onCancel={() => {
+          // User cancelled, stay on the recording page (modal will close)
+        }}
+      />
     </ProtectedRoute>
   );
 }

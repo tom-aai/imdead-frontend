@@ -9,6 +9,7 @@ import { toastAlert } from '@/components/alert-toast';
 import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
+import { VoiceConsentModal } from '@/components/voice-consent-modal';
 import useConnectionDetails, { ResumeSessionData } from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
 
@@ -29,6 +30,8 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
   const [pictureId, setPictureId] = useState<string | null>(null);
   const [resumeSessionData, setResumeSessionData] = useState<ResumeSessionData | null>(null);
   const [hasHandledResumeParam, setHasHandledResumeParam] = useState(false);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [pendingPictureId, setPendingPictureId] = useState<string | null>(null);
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig, pictureId, resumeSessionData);
 
@@ -197,8 +200,9 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
         <MotionWelcome
           startButtonText={startButtonText}
           onStartCall={(pictureId: string) => {
-            setPictureId(pictureId);
-            setSessionStarted(true);
+            // Show consent modal instead of immediately starting session
+            setPendingPictureId(pictureId);
+            setShowConsentModal(true);
           }}
           disabled={sessionStarted}
           initial={{ opacity: 1 }}
@@ -206,6 +210,23 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
           transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
         />
       )}
+
+      <VoiceConsentModal
+        open={showConsentModal}
+        onOpenChange={setShowConsentModal}
+        onConsent={() => {
+          // User consented, proceed with starting the session
+          if (pendingPictureId) {
+            setPictureId(pendingPictureId);
+            setSessionStarted(true);
+            setPendingPictureId(null);
+          }
+        }}
+        onCancel={() => {
+          // User cancelled, reset to welcome state
+          setPendingPictureId(null);
+        }}
+      />
 
       <RoomContext.Provider value={room}>
         <RoomAudioRenderer />
