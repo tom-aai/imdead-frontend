@@ -73,6 +73,7 @@ export function VoiceConsentModal({
     setIsChecked(false);
     setIsSubmitting(false);
     onCancel();
+    onOpenChange(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {

@@ -32,6 +32,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
   const [hasHandledResumeParam, setHasHandledResumeParam] = useState(false);
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [pendingPictureId, setPendingPictureId] = useState<string | null>(null);
+  const [welcomeKey, setWelcomeKey] = useState(0);
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig, pictureId, resumeSessionData);
 
@@ -198,6 +199,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       {/* Hide Welcome entirely when resuming a session */}
       {!isResuming && (
         <MotionWelcome
+          key={welcomeKey}
           startButtonText={startButtonText}
           onStartCall={(pictureId: string) => {
             // Show consent modal instead of immediately starting session
@@ -223,8 +225,9 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
           }
         }}
         onCancel={() => {
-          // User cancelled, reset to welcome state
+          // User cancelled, reset Welcome component so camera restarts
           setPendingPictureId(null);
+          setWelcomeKey((k) => k + 1);
         }}
       />
 
