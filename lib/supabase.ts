@@ -17,6 +17,9 @@ export function getSupabaseClient() {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
+        // Use implicit flow (the default for browser clients).
+        // Tokens are returned in the URL hash and detectSessionInUrl picks them up.
+        flowType: 'implicit',
       },
     });
   }
