@@ -36,6 +36,7 @@ export default function useSessions(shouldFetch: boolean = true) {
   const [error, setError] = useState<string | null>(null);
   const [hasProcessingSessions, setHasProcessingSessions] = useState(false);
   const [processingSessionIds, setProcessingSessionIds] = useState<string[]>([]);
+  const [skippedSessionIds, setSkippedSessionIds] = useState<string[]>([]);
   const [hasPendingAvatarUpdates, setHasPendingAvatarUpdates] = useState(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const hasFetchedOnce = useRef(false);
@@ -85,6 +86,7 @@ export default function useSessions(shouldFetch: boolean = true) {
       setSessions(data.sessions || []);
       setHasProcessingSessions(data.hasProcessingSessions || false);
       setProcessingSessionIds(data.processingSessionIds || []);
+      setSkippedSessionIds(data.skippedSessionIds || []);
       setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
       
       // Only fetch billing info once on initial load (it's slow-changing data)
@@ -124,6 +126,6 @@ export default function useSessions(shouldFetch: boolean = true) {
     }
   }, [shouldFetch, fetchSessions]);
 
-  return { sessions, loading, error, hasProcessingSessions, processingSessionIds, hasPendingAvatarUpdates, billingInfo, refetch: fetchSessions };
+  return { sessions, loading, error, hasProcessingSessions, processingSessionIds, skippedSessionIds, hasPendingAvatarUpdates, billingInfo, refetch: fetchSessions };
 }
 

@@ -112,11 +112,16 @@ export async function GET(req: Request) {
     // This indicates sessions that are still being processed.
     // Exclude resume sessions (call_type = 'resume') since they never create their own
     // interview_call_analysis — their conversation is appended to the original session instead.
-    const { data: pendingCalls } = await supabase
+    const { data: pendingCalls, error: pendingError } = await supabase
       .from('interview_calls')
       .select('session_id, call_type')
       .eq('user_id', userId)
       .neq('call_type', 'resume');
+
+    if (pendingError) {
+      console.error(`[Sessions API] Error fetching pending calls:`, pendingError);
+    }
+    console.log(`[Sessions API] Found ${pendingCalls?.length || 0} total interview_calls for user`);
 
     const analysisSessionIds = new Set(sessions?.map(s => s.session_id) || []);
     const processingSessionIds = pendingCalls?.filter(
@@ -125,6 +130,37 @@ export async function GET(req: Request) {
     const hasProcessingSessions = processingSessionIds.length > 0;
 
     console.log(`[Sessions API] Found ${processingSessionIds.length} sessions still processing`);
+
+    // Check for skipped sessions: completed post_call jobs with result.status = 'skipped'.
+    // Query using ALL interview_calls for this user (not just pending ones), because
+    // the job may complete so fast that the session never appears in processingSessionIds.
+    const allUserCallSessionIds = (pendingCalls || []).map(c => c.session_id);
+    let skippedSessionIds: string[] = [];
+    if (allUserCallSessionIds.length > 0) {
+      const { data: completedJobs } = await supabase
+        .from('post_call_jobs')
+        .select('session_id, result')
+        .in('session_id', allUserCallSessionIds)
+        .eq('job_type', 'post_call')
+        .eq('status', 'completed');
+
+      skippedSessionIds = (completedJobs || [])
+        .filter(job => (job.result as Record<string, unknown>)?.status === 'skipped')
+        .map(job => job.session_id)
+        // Only include sessions that don't already have analysis (not in sessions list)
+        .filter(sid => !analysisSessionIds.has(sid));
+
+      if (skippedSessionIds.length > 0) {
+        console.log(`[Sessions API] Found ${skippedSessionIds.length} skipped sessions (not enough data): ${skippedSessionIds.join(', ')}`);
+      }
+
+      // Ensure skipped sessions also appear in processingSessionIds so they render as cards
+      for (const sid of skippedSessionIds) {
+        if (!processingSessionIds.some(p => p.session_id === sid)) {
+          processingSessionIds.push({ session_id: sid, call_type: 'skipped' } as typeof processingSessionIds[0]);
+        }
+      }
+    }
 
     // Check if there are any pending avatar_update jobs for the user's sessions
     // This indicates an avatar image is being regenerated
@@ -194,11 +230,15 @@ export async function GET(req: Request) {
       })
     );
 
-    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${hasProcessingSessions}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}`);
+    // Recalculate hasProcessingSessions after potentially adding skipped sessions
+    const finalHasProcessingSessions = processingSessionIds.length > 0;
+
+    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${finalHasProcessingSessions}, skippedSessionIds: ${skippedSessionIds.length}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}`);
     return NextResponse.json({ 
       sessions: sessionsWithImages,
-      hasProcessingSessions,
+      hasProcessingSessions: finalHasProcessingSessions,
       processingSessionIds: processingSessionIds.map(c => c.session_id),
+      skippedSessionIds,
       hasPendingAvatarUpdates,
     });
   } catch (error) {

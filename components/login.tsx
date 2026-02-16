@@ -91,6 +91,27 @@ export const LoginPage = () => {
           </span>
         </h1>
 
+        {/* Feature Steps */}
+        <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+          {[
+            { title: 'Train', description: 'Train your avatar by talking to our AI.' },
+            { title: 'Share', description: 'Share your avatar with your network.' },
+            { title: 'Engage', description: 'Users talk to your avatar and send you messages.' },
+            { title: 'Scale', description: <>Get inbound leads.<br />Grow your followers.</>},
+          ].map((step, i) => (
+            <div
+              key={step.title}
+              className="bg-bg2 border border-separator1 rounded-2xl p-6 text-center flex flex-col items-center"
+            >
+              <span className="text-xs font-mono text-fg3 uppercase tracking-widest mb-2">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h3 className="text-lg font-bold text-fgAccent mb-1">{step.title}</h3>
+              <p className="text-sm text-fg3">{step.description}</p>
+            </div>
+          ))}
+        </div>
+
         {/* Pricing Card */}
         <div className="w-full max-w-lg bg-bg2 border border-separator1 rounded-2xl p-8 mb-8">
           <h2 className="text-xl font-semibold text-fgAccent mb-6 text-center">

@@ -558,7 +558,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
           size="icon"
           className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
           onClick={() => router.push(`/edit-avatar/${session.session_id}`)}
-          title="Edit avatar"
+          title="Create new avatar image"
         >
           <PencilSimple size={16} />
         </Button>
