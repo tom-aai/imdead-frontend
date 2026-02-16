@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope, Clock } from '@phosphor-icons/react';
+import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -34,16 +34,6 @@ interface GenerationState {
   error: string | null;
 }
 
-// Format seconds into human-readable duration (e.g., "5m", "1h 23m")
-const formatDuration = (seconds: number): string => {
-  if (!seconds || seconds <= 0) return '0m';
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  if (remainingMinutes === 0) return `${hours}h`;
-  return `${hours}h ${remainingMinutes}m`;
-};
 
 export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResumeSession, isFreeTierExceeded = false }: SessionCardProps) => {
   const router = useRouter();
@@ -67,7 +57,7 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
   // Social post text state - generated from main_topic
   const generateSocialPostText = (mainTopic: string | null) => {
     if (!mainTopic) return '';
-    return `I trained my avatar on ${mainTopic}. Click on the link to talk to my expert avatar!`;
+    return `I trained my avatar on ${mainTopic}. Click on the link to talk to my Expert Avatar!`;
   };
   const [socialPostText, setSocialPostText] = useState(generateSocialPostText(session.main_topic));
 
@@ -202,71 +192,124 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
     setTimeout(() => setJustCopied(false), 2000);
   };
 
-  // Poll for job status
-  const pollJobStatus = useCallback(async (
-    jobId: string,
-    setGenerationState: React.Dispatch<React.SetStateAction<GenerationState>>
-  ) => {
-    const supabase = getSupabaseClient();
-    const { data: { session: authSession } } = await supabase.auth.getSession();
-
-    if (!authSession) {
-      setGenerationState({
-        status: 'failed',
-        jobId: null,
-        error: 'Not authenticated',
-      });
-      return;
-    }
-
-    const poll = async () => {
-      try {
-        const response = await fetch(`/api/hot-take/status/${jobId}`, {
-          headers: {
-            'Authorization': `Bearer ${authSession.access_token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to get job status');
-        }
-
-        const data = await response.json();
-
-        if (data.status === 'completed') {
-          setGenerationState({
-            status: 'completed',
-            jobId: null,
-            error: null,
-          });
-          // Notify parent to refresh sessions
-          if (onSessionUpdated) {
-            onSessionUpdated();
-          }
-          return;
-        } else if (data.status === 'failed') {
-          setGenerationState({
-            status: 'failed',
-            jobId: null,
-            error: data.error || 'Video generation failed',
-          });
-          return;
-        } else {
-          // Still processing, poll again after 3 seconds
-          setTimeout(poll, 3000);
-        }
-      } catch (error) {
-        console.error('Error polling job status:', error);
-        setGenerationState({
-          status: 'failed',
-          jobId: null,
-          error: 'Failed to check job status',
-        });
-      }
-    };
-
-    poll();
+  // Stable ref for onSessionUpdated to avoid re-subscribing on every render
+  const onSessionUpdatedRef = useRef(onSessionUpdated);
+  useEffect(() => {
+    onSessionUpdatedRef.current = onSessionUpdated;
   }, [onSessionUpdated]);
+
+  // Subscribe to Supabase Realtime for job status updates (replaces polling)
+  useEffect(() => {
+    if (!generation.jobId || generation.status !== 'polling') return;
+
+    const supabase = getSupabaseClient();
+    const jobId = generation.jobId;
+    let cancelled = false;
+
+    console.log(`[Realtime] Subscribing to job ${jobId}`);
+
+    const channel = supabase
+      .channel(`hot-take-job-${jobId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'post_call_jobs',
+          filter: `id=eq.${jobId}`,
+        },
+        (payload) => {
+          if (cancelled) return;
+          const newStatus = (payload.new as Record<string, unknown>).status as string;
+          console.log(`[Realtime] Job ${jobId} status changed: ${newStatus}`);
+
+          if (newStatus === 'completed') {
+            setGeneration({ status: 'completed', jobId: null, error: null });
+            onSessionUpdatedRef.current?.();
+          } else if (newStatus === 'failed') {
+            setGeneration({
+              status: 'failed',
+              jobId: null,
+              error: ((payload.new as Record<string, unknown>).error as string) || 'Video generation failed',
+            });
+          }
+        }
+      )
+      .subscribe(async (status) => {
+        if (cancelled) return;
+
+        if (status === 'SUBSCRIBED') {
+          console.log(`[Realtime] Subscribed to job ${jobId}, doing initial status check`);
+
+          // One-time status check in case job completed before subscription was established
+          try {
+            const { data: { session: authSession } } = await supabase.auth.getSession();
+            if (!authSession || cancelled) return;
+
+            const response = await fetch(`/api/hot-take/status/${jobId}`, {
+              headers: { 'Authorization': `Bearer ${authSession.access_token}` },
+            });
+
+            if (!response.ok || cancelled) return;
+
+            const data = await response.json();
+            if (data.status === 'completed') {
+              setGeneration({ status: 'completed', jobId: null, error: null });
+              onSessionUpdatedRef.current?.();
+            } else if (data.status === 'failed') {
+              setGeneration({
+                status: 'failed',
+                jobId: null,
+                error: data.error || 'Video generation failed',
+              });
+            }
+          } catch (error) {
+            console.error('[Realtime] Initial status check failed:', error);
+            // Non-fatal — Realtime subscription will still deliver updates
+          }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn(`[Realtime] Subscription issue (${status}), falling back to single poll`);
+          // Fallback: do a one-time check after 10 seconds, then every 30 seconds
+          const fallbackPoll = async () => {
+            if (cancelled) return;
+            try {
+              const { data: { session: authSession } } = await supabase.auth.getSession();
+              if (!authSession || cancelled) return;
+
+              const response = await fetch(`/api/hot-take/status/${jobId}`, {
+                headers: { 'Authorization': `Bearer ${authSession.access_token}` },
+              });
+
+              if (!response.ok || cancelled) return;
+
+              const data = await response.json();
+              if (data.status === 'completed') {
+                setGeneration({ status: 'completed', jobId: null, error: null });
+                onSessionUpdatedRef.current?.();
+              } else if (data.status === 'failed') {
+                setGeneration({
+                  status: 'failed',
+                  jobId: null,
+                  error: data.error || 'Video generation failed',
+                });
+              } else if (!cancelled) {
+                // Still processing, check again in 30 seconds (much less than 3s polling)
+                setTimeout(fallbackPoll, 30000);
+              }
+            } catch {
+              if (!cancelled) setTimeout(fallbackPoll, 30000);
+            }
+          };
+          setTimeout(fallbackPoll, 10000);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      console.log(`[Realtime] Unsubscribing from job ${jobId}`);
+      supabase.removeChannel(channel);
+    };
+  }, [generation.jobId, generation.status]);
 
   // Handle generate hot take video
   const handleGenerateHotTake = async () => {
@@ -316,14 +359,12 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
         throw new Error(data.error || 'Failed to start video generation');
       }
 
-      // Job enqueued, start polling
+      // Job enqueued — Realtime subscription will handle status updates automatically
       setGeneration({
         status: 'polling',
         jobId: data.job_id,
         error: null,
       });
-
-      pollJobStatus(data.job_id, setGeneration);
     } catch (error) {
       console.error('Error generating hot take:', error);
       setGeneration({
@@ -639,6 +680,14 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
           <div className="font-semibold text-lg text-muted-foreground">
             {formatDate(session.updated_at || session.created_at)}
           </div>
+          <div className="text-sm text-muted-foreground mt-1">
+            Total Minutes Seekers Spoke To Avatar: {Math.round((session.total_chat_duration_seconds || 0) / 60)}
+            {isFreeTierExceeded && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive rounded">
+                Limit reached
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Social Media Video */}
@@ -686,59 +735,45 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
           </Button>
         </div>
 
-        {/* Usage and Share Avatar Row */}
-        <div className="flex gap-2 items-center">
-          {/* Usage Display */}
-          <div className="flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0">
-            <Clock size={14} />
-            <span>{formatDuration(session.total_chat_duration_seconds || 0)}</span>
-            {isFreeTierExceeded && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive rounded">
-                Limit reached
-              </span>
-            )}
-          </div>
-          
-          {/* Share Button */}
-          <div className="flex-1">
-            {localShareToken ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={handleCopyLink}
-              >
-                {justCopied ? (
-                  <>
-                    <Check size={16} className="mr-2" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy size={16} className="mr-2" />
-                    SHARE
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full"
-                onClick={handleCreateShare}
-                disabled={isCreatingShare}
-              >
-                {isCreatingShare ? (
-                  'Creating...'
-                ) : (
-                  <>
-                    <LinkIcon size={16} className="mr-2" />
-                    Create Link
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
+        {/* Share Avatar */}
+        <div>
+          {localShareToken ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleCopyLink}
+            >
+              {justCopied ? (
+                <>
+                  <Check size={16} className="mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy size={16} className="mr-2" />
+                  SHARE
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              onClick={handleCreateShare}
+              disabled={isCreatingShare}
+            >
+              {isCreatingShare ? (
+                'Creating...'
+              ) : (
+                <>
+                  <LinkIcon size={16} className="mr-2" />
+                  Create Link
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </div>

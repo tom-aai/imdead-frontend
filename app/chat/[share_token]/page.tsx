@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState, use } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Room, RoomEvent } from 'livekit-client';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
 import { HamburgerMenu } from '@/components/hamburger-menu';
@@ -41,6 +41,8 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isUnavailable, setIsUnavailable] = useState(false);
   const [isNoCredits, setIsNoCredits] = useState(false);
+  const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -127,10 +129,47 @@ export default function ChatPage({ params }: ChatPageProps) {
     fetchConnection();
   }, [isAuthenticated, share_token]);
 
+  // Start the countdown timer (called when agent sends the signal)
+  const startCountdown = useCallback((seconds: number) => {
+    // Clear any existing interval
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+
+    setCountdownSeconds(seconds);
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdownSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // Clean up countdown interval on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
+
   // Handle room events
   useEffect(() => {
     const onDisconnected = () => {
       setSessionStarted(false);
+      setCountdownSeconds(null);
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
       toastAlert({
         title: 'Session ended',
         description: 'The chat session has ended.',
@@ -152,6 +191,22 @@ export default function ChatPage({ params }: ChatPageProps) {
       room.off(RoomEvent.MediaDevicesError, onMediaDevicesError);
     };
   }, [room]);
+
+  // Register text stream handler for session timer countdown
+  useEffect(() => {
+    room.registerTextStreamHandler('session.timer', async (reader) => {
+      const text = await reader.readAll();
+      const seconds = parseInt(text, 10);
+      if (!isNaN(seconds) && seconds > 0) {
+        console.log(`Session timer: starting ${seconds}s countdown`);
+        startCountdown(seconds);
+      }
+    });
+
+    return () => {
+      room.unregisterTextStreamHandler('session.timer');
+    };
+  }, [room, startCountdown]);
 
   // Connect to room when user starts
   useEffect(() => {
@@ -295,6 +350,13 @@ export default function ChatPage({ params }: ChatPageProps) {
     );
   }
 
+  // Format seconds as M:SS
+  const formatTime = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   // Session view
   return (
     <main>
@@ -315,6 +377,27 @@ export default function ChatPage({ params }: ChatPageProps) {
           }}
         />
       </RoomContext.Provider>
+
+      {/* Countdown timer overlay */}
+      <AnimatePresence>
+        {countdownSeconds !== null && countdownSeconds >= 0 && (
+          <motion.div
+            key="countdown-timer"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed top-4 left-1/2 z-[100] -translate-x-1/2"
+          >
+            <div className="rounded-full bg-black/70 px-5 py-2 backdrop-blur-sm">
+              <span className="font-mono text-sm font-semibold text-white tabular-nums">
+                Session ends in {formatTime(countdownSeconds)}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Toaster />
     </main>
   );

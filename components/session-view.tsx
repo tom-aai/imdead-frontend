@@ -152,6 +152,7 @@ export const SessionView = ({
 
             <AgentControlBar
               capabilities={capabilities}
+              controls={{ chat: false }}
               onChatOpenChange={setChatOpen}
               onSendMessage={handleSendMessage}
             />

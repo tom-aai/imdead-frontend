@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Room, RoomEvent } from 'livekit-client';
 import { motion } from 'motion/react';
@@ -10,6 +10,7 @@ import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
 import { VoiceConsentModal } from '@/components/voice-consent-modal';
+import { getSupabaseClient } from '@/lib/supabase';
 import useConnectionDetails, { ResumeSessionData } from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
 
@@ -33,16 +34,51 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [pendingPictureId, setPendingPictureId] = useState<string | null>(null);
   const [welcomeKey, setWelcomeKey] = useState(0);
+  const [hasExistingConsent, setHasExistingConsent] = useState<boolean | null>(null);
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig, pictureId, resumeSessionData);
 
+  // Track whether the current session is a resume (ref so disconnect handler can read it)
+  const isResumeSessionRef = useRef(false);
+  useEffect(() => {
+    isResumeSessionRef.current = resumeSessionData !== null;
+  }, [resumeSessionData]);
+
+  // Check if user already has voice consent on mount
+  useEffect(() => {
+    const checkConsent = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const response = await fetch('/api/user/voice-consent', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setHasExistingConsent(data.hasConsent);
+        }
+      } catch (error) {
+        console.error('Error checking voice consent status:', error);
+      }
+    };
+
+    checkConsent();
+  }, []);
+
   useEffect(() => {
     const onDisconnected = () => {
+      const wasResumeSession = isResumeSessionRef.current;
       setSessionStarted(false);
       setResumeSessionData(null);
       // Navigate to dashboard after call ends
-      // Pass from_session=true so dashboard knows to poll for the new session
-      router.push('/dashboard?from_session=true');
+      // Only pass from_session=true for new sessions so dashboard shows processing indicator
+      // Resume sessions don't create new avatars, so no processing indicator needed
+      router.push(wasResumeSession ? '/dashboard' : '/dashboard?from_session=true');
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
@@ -185,6 +221,13 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
     }
   };
 
+  // Start session directly (bypassing consent modal)
+  const startSessionWithPicture = useCallback((picId: string) => {
+    setPictureId(picId);
+    setSessionStarted(true);
+    setPendingPictureId(null);
+  }, []);
+
   // Handle resume session from URL parameter
   useEffect(() => {
     if (resumeSessionId && !hasHandledResumeParam) {
@@ -202,9 +245,14 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
           key={welcomeKey}
           startButtonText={startButtonText}
           onStartCall={(pictureId: string) => {
-            // Show consent modal instead of immediately starting session
-            setPendingPictureId(pictureId);
-            setShowConsentModal(true);
+            if (hasExistingConsent) {
+              // User already consented previously, skip the modal
+              startSessionWithPicture(pictureId);
+            } else {
+              // First time — show consent modal
+              setPendingPictureId(pictureId);
+              setShowConsentModal(true);
+            }
           }}
           disabled={sessionStarted}
           initial={{ opacity: 1 }}
@@ -218,10 +266,9 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
         onOpenChange={setShowConsentModal}
         onConsent={() => {
           // User consented, proceed with starting the session
+          setHasExistingConsent(true);
           if (pendingPictureId) {
-            setPictureId(pendingPictureId);
-            setSessionStarted(true);
-            setPendingPictureId(null);
+            startSessionWithPicture(pendingPictureId);
           }
         }}
         onCancel={() => {

@@ -109,11 +109,14 @@ export async function GET(req: Request) {
     console.log(`[Sessions API] Found ${sessions?.length || 0} sessions for user_id ${userId}`);
 
     // Check if there are any interview_calls that don't have a corresponding interview_call_analysis
-    // This indicates sessions that are still being processed
+    // This indicates sessions that are still being processed.
+    // Exclude resume sessions (call_type = 'resume') since they never create their own
+    // interview_call_analysis — their conversation is appended to the original session instead.
     const { data: pendingCalls } = await supabase
       .from('interview_calls')
-      .select('session_id')
-      .eq('user_id', userId);
+      .select('session_id, call_type')
+      .eq('user_id', userId)
+      .neq('call_type', 'resume');
 
     const analysisSessionIds = new Set(sessions?.map(s => s.session_id) || []);
     const processingSessionIds = pendingCalls?.filter(
@@ -195,6 +198,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ 
       sessions: sessionsWithImages,
       hasProcessingSessions,
+      processingSessionIds: processingSessionIds.map(c => c.session_id),
       hasPendingAvatarUpdates,
     });
   } catch (error) {
