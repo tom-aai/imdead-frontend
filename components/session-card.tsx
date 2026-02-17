@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Link as LinkIcon, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
+import { DownloadSimple, User, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -20,7 +20,6 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 interface SessionCardProps {
   session: Session;
-  onShareCreated?: (sessionId: string, shareToken: string) => void;
   onSessionUpdated?: () => void;
   onResumeSession?: (sessionId: string) => void;
   isFreeTierExceeded?: boolean;
@@ -35,10 +34,10 @@ interface GenerationState {
 }
 
 
-export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResumeSession, isFreeTierExceeded = false }: SessionCardProps) => {
+export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFreeTierExceeded = false }: SessionCardProps) => {
   const router = useRouter();
   const [isCreatingShare, setIsCreatingShare] = useState(false);
-  const [justCopied, setJustCopied] = useState(false);
+  const [justCopiedPost, setJustCopiedPost] = useState(false);
   const [localShareToken, setLocalShareToken] = useState<string | null>(session.share_token);
 
   // Delete state
@@ -54,12 +53,17 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
   // Hot take text state
   const [hotTakeText, setHotTakeText] = useState(session.hot_take_1 || '');
 
-  // Social post text state - generated from main_topic
-  const generateSocialPostText = (mainTopic: string | null) => {
+  // Social post text state - generated from main_topic and share URL
+  const generateSocialPostText = (mainTopic: string | null, shareToken: string | null) => {
     if (!mainTopic) return '';
-    return `I trained my avatar on ${mainTopic}. Click on the link to talk to my Expert Avatar!`;
+    const baseText = `I trained my avatar on ${mainTopic}. Click on the link to talk to my Expert Avatar!`;
+    if (shareToken) {
+      const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/chat/${shareToken}`;
+      return `${baseText} ${shareUrl}`;
+    }
+    return baseText;
   };
-  const [socialPostText, setSocialPostText] = useState(generateSocialPostText(session.main_topic));
+  const [socialPostText, setSocialPostText] = useState(generateSocialPostText(session.main_topic, session.share_token));
 
   // Generation state for hot take
   const [generation, setGeneration] = useState<GenerationState>({
@@ -71,10 +75,56 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
   // Update local state when session prop changes
   useEffect(() => {
     setHotTakeText(session.hot_take_1 || '');
-    setSocialPostText(generateSocialPostText(session.main_topic));
     setLocalShareToken(session.share_token);
     setEditedTitle(session.main_topic || '');
+    setSocialPostText(generateSocialPostText(session.main_topic, session.share_token));
   }, [session.hot_take_1, session.main_topic, session.share_token]);
+
+  // Auto-generate share token on mount if it doesn't exist
+  const hasAttemptedAutoCreate = useRef(false);
+  useEffect(() => {
+    const createShareIfNeeded = async () => {
+      if (!hasAttemptedAutoCreate.current && !session.share_token && !isCreatingShare) {
+        hasAttemptedAutoCreate.current = true;
+        setIsCreatingShare(true);
+        try {
+          const supabase = getSupabaseClient();
+          const { data: { session: authSession } } = await supabase.auth.getSession();
+
+          if (!authSession) {
+            console.error('Not authenticated');
+            return;
+          }
+
+          const response = await fetch('/api/avatar-share/create', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${authSession.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ session_id: session.session_id }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to create share link');
+          }
+
+          const data = await response.json();
+          setLocalShareToken(data.share_token);
+        } catch (error) {
+          console.error('Error creating share:', error);
+        } finally {
+          setIsCreatingShare(false);
+        }
+      }
+    };
+    createShareIfNeeded();
+  }, [session.share_token, session.session_id]);
+
+  // Update social post text when share token changes
+  useEffect(() => {
+    setSocialPostText(generateSocialPostText(session.main_topic, localShareToken));
+  }, [localShareToken, session.main_topic]);
 
   // Format the date as "Month Day, Year, Hour:Minute AM/PM"
   const formatDate = (dateString: string) => {
@@ -171,11 +221,6 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
 
       const data = await response.json();
       setLocalShareToken(data.share_token);
-
-      // Notify parent
-      if (onShareCreated) {
-        onShareCreated(session.session_id, data.share_token);
-      }
     } catch (error) {
       console.error('Error creating share:', error);
     } finally {
@@ -183,13 +228,10 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
     }
   };
 
-  const handleCopyLink = async () => {
-    if (!localShareToken) return;
-    
-    const shareUrl = `${window.location.origin}/chat/${localShareToken}`;
-    await navigator.clipboard.writeText(shareUrl);
-    setJustCopied(true);
-    setTimeout(() => setJustCopied(false), 2000);
+  const handleCopyPost = async () => {
+    await navigator.clipboard.writeText(socialPostText);
+    setJustCopiedPost(true);
+    setTimeout(() => setJustCopiedPost(false), 2000);
   };
 
   // Stable ref for onSessionUpdated to avoid re-subscribing on every render
@@ -704,6 +746,24 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
             className="w-full min-h-[80px] p-2 text-sm border border-border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Social media post text..."
           />
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={handleCopyPost}
+          >
+            {justCopiedPost ? (
+              <>
+                <Check size={16} className="mr-2" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy size={16} className="mr-2" />
+                Copy Post
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Resume Session Button with Message Badge */}
@@ -733,47 +793,6 @@ export const SessionCard = ({ session, onShareCreated, onSessionUpdated, onResum
               </span>
             )}
           </Button>
-        </div>
-
-        {/* Share Avatar */}
-        <div>
-          {localShareToken ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={handleCopyLink}
-            >
-              {justCopied ? (
-                <>
-                  <Check size={16} className="mr-2" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy size={16} className="mr-2" />
-                  SHARE
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full"
-              onClick={handleCreateShare}
-              disabled={isCreatingShare}
-            >
-              {isCreatingShare ? (
-                'Creating...'
-              ) : (
-                <>
-                  <LinkIcon size={16} className="mr-2" />
-                  Create Link
-                </>
-              )}
-            </Button>
-          )}
         </div>
       </div>
     </div>
