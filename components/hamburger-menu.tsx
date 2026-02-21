@@ -92,6 +92,13 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
           >
             Settings
           </button>
+          <a
+            href="mailto:support@melochora.com"
+            onClick={() => setIsOpen(false)}
+            className="block w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+          >
+            Support
+          </a>
           <button
             onClick={handleLogout}
             className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"

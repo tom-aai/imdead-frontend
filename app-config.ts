@@ -16,5 +16,5 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   accentDark: '#ff10f0',
   startButtonText: 'Start call',
 
-  agentName: undefined,
+  agentName: 'interview-agent',
 };

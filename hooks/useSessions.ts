@@ -89,22 +89,24 @@ export default function useSessions(shouldFetch: boolean = true) {
       setSkippedSessionIds(data.skippedSessionIds || []);
       setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
       
+      // Fetch billing info in the background (don't block UI)
       // Only fetch billing info once on initial load (it's slow-changing data)
       if (!hasFetchedBilling.current) {
-        try {
-          const billingResponse = await fetch('/api/billing/usage', {
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-            },
+        hasFetchedBilling.current = true; // Set immediately to prevent multiple fetches
+        fetch('/api/billing/usage', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        })
+          .then(async (billingResponse) => {
+            if (billingResponse.ok) {
+              const billingData = await billingResponse.json();
+              setBillingInfo(billingData);
+            }
+          })
+          .catch((billingErr) => {
+            console.warn('Could not fetch billing info:', billingErr);
           });
-          if (billingResponse.ok) {
-            const billingData = await billingResponse.json();
-            setBillingInfo(billingData);
-            hasFetchedBilling.current = true;
-          }
-        } catch (billingErr) {
-          console.warn('Could not fetch billing info:', billingErr);
-        }
       }
       
       setError(null);
