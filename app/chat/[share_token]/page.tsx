@@ -36,6 +36,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   const room = useMemo(() => new Room(), []);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isPublic, setIsPublic] = useState<boolean | null>(null);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [connectionDetails, setConnectionDetails] = useState<ChatConnectionDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +45,38 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Check authentication
+  // Check if token is public first
   useEffect(() => {
+    const checkPublic = async () => {
+      try {
+        const response = await fetch(`/api/chat-session/${share_token}/public`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsPublic(data.isPublic);
+        } else {
+          setIsPublic(false);
+        }
+      } catch (error) {
+        console.error('Error checking if token is public:', error);
+        setIsPublic(false);
+      }
+    };
+
+    checkPublic();
+  }, [share_token]);
+
+  // Check authentication (only if not public)
+  useEffect(() => {
+    // Wait for public check to complete
+    if (isPublic === null) return;
+
+    // If public, skip auth
+    if (isPublic) {
+      setIsAuthenticated(true);
+      return;
+    }
+
+    // For non-public tokens, require authentication
     const checkAuth = async () => {
       try {
         const supabase = getSupabaseClient();
@@ -66,7 +97,7 @@ export default function ChatPage({ params }: ChatPageProps) {
     };
 
     checkAuth();
-  }, [router, share_token]);
+  }, [router, share_token, isPublic]);
 
   // Fetch connection details once authenticated and auto-start session
   useEffect(() => {
@@ -74,20 +105,27 @@ export default function ChatPage({ params }: ChatPageProps) {
 
     const fetchConnection = async () => {
       try {
-        const supabase = getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        // For public sessions, don't send auth header
+        // For authenticated sessions, include auth header
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
 
-        if (!session) {
-          setError('Not authenticated');
-          return;
+        if (!isPublic) {
+          const supabase = getSupabaseClient();
+          const { data: { session } } = await supabase.auth.getSession();
+
+          if (!session) {
+            setError('Not authenticated');
+            return;
+          }
+
+          headers['Authorization'] = `Bearer ${session.access_token}`;
         }
 
         const response = await fetch(`/api/chat-session/${share_token}/connection`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
         });
 
         if (!response.ok) {
@@ -239,8 +277,8 @@ export default function ChatPage({ params }: ChatPageProps) {
     };
   }, [room, sessionStarted, connectionDetails]);
 
-  // Loading state - show blank screen for seamless transition
-  if (isAuthenticated === null) {
+  // Loading state - show blank screen while checking public status or authentication
+  if (isPublic === null || isAuthenticated === null) {
     return (
       <div className="bg-background fixed inset-0" />
     );

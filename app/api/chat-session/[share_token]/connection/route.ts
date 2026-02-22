@@ -36,34 +36,16 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    // Check authorization header
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     // Initialize Supabase client with service key
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_KEY!
     );
 
-    // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-
-    if (authError || !user) {
-      console.error('[Chat Session API] Auth error:', authError?.message || 'No user');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    console.log('[Chat Session API] Student authenticated:', user.id);
-
-    // Look up share token
+    // Look up share token first to check if it's public
     const { data: shareData, error: shareError } = await supabase
       .from('avatar_share_tokens')
-      .select('session_id, owner_user_id, is_active, expires_at')
+      .select('session_id, owner_user_id, is_active, expires_at, is_public')
       .eq('share_token', share_token)
       .single();
 
@@ -81,6 +63,33 @@ export async function POST(req: Request, { params }: RouteParams) {
     if (shareData.expires_at && new Date(shareData.expires_at) < new Date()) {
       console.error('[Chat Session API] Share token is expired');
       return NextResponse.json({ error: 'Share link has expired' }, { status: 403 });
+    }
+
+    // Check if this is a public token
+    const isPublic = shareData.is_public === true;
+
+    // For non-public tokens, require authentication
+    let user = null;
+    if (!isPublic) {
+      const authHeader = req.headers.get('authorization');
+      if (!authHeader) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Verify user authentication
+      const { data: authUser, error: authError } = await supabase.auth.getUser(
+        authHeader.replace('Bearer ', '')
+      );
+
+      if (authError || !authUser) {
+        console.error('[Chat Session API] Auth error:', authError?.message || 'No user');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      user = authUser;
+      console.log('[Chat Session API] Student authenticated:', user.id);
+    } else {
+      console.log('[Chat Session API] Public token - allowing unauthenticated access');
     }
 
     // Fetch source session data from interview_calls
@@ -113,7 +122,8 @@ export async function POST(req: Request, { params }: RouteParams) {
       console.log('[Chat Session API] Expert has no credits:', creditCheck.reason);
       
       // Send notification email to expert (fire and forget)
-      notifyExpertOutOfCredits(expertUserId, user.user_metadata?.given_name || 'Someone').catch(err => {
+      const seekerName = user?.user_metadata?.given_name || user?.user_metadata?.name || 'Someone';
+      notifyExpertOutOfCredits(expertUserId, seekerName).catch(err => {
         console.error('[Chat Session API] Failed to send out-of-credits notification:', err);
       });
       
@@ -128,15 +138,18 @@ export async function POST(req: Request, { params }: RouteParams) {
     }
 
     // Generate participant token
-    const participantName = user.user_metadata?.given_name || user.user_metadata?.name || 'Student';
-    const participantIdentity = `chat_student_${user.id.substring(0, 8)}_${Math.floor(Math.random() * 1000)}`;
+    // For public sessions, use guest identity; for authenticated sessions, use user info
+    const participantName = user?.user_metadata?.given_name || user?.user_metadata?.name || 'Guest';
+    const participantIdentity = user 
+      ? `chat_student_${user.id.substring(0, 8)}_${Math.floor(Math.random() * 1000)}`
+      : `chat_guest_${Math.floor(Math.random() * 10000)}_${Date.now()}`;
     const roomName = `chat_session_${share_token.substring(0, 8)}_${Math.floor(Math.random() * 10_000)}`;
 
     // Build metadata for the chat-agent
     const metadata = {
       share_token,
       source_session_id: shareData.session_id,
-      student_user_id: user.id,
+      student_user_id: user?.id || 'anonymous',
       expert_name: expertName,
       main_topic: mainTopic,
     };
@@ -148,10 +161,11 @@ export async function POST(req: Request, { params }: RouteParams) {
       metadata
     );
 
-    console.log('[Chat Session API] Created connection for student:', {
-      student: user.id,
+    console.log('[Chat Session API] Created connection:', {
+      student: user?.id || 'anonymous (public)',
       sourceSession: shareData.session_id,
       room: roomName,
+      isPublic,
     });
 
     const data: ChatConnectionDetails = {

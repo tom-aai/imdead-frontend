@@ -112,6 +112,27 @@ export const LoginPage = () => {
           ))}
         </div>
 
+        {/* Demo Section */}
+        <div className="w-full max-w-2xl flex flex-col items-center mb-12">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full max-w-[256px] rounded-2xl mb-6"
+          >
+            <source src="/demo-video.mp4" type="video/mp4" />
+          </video>
+          <p className="text-center text-xl font-semibold text-fgAccent mb-4">
+            Curious about Expert Avatar? Talk to Ashley, an expert in Expert Avatar!
+          </p>
+          <Link href="https://expertavatar.com/chat/9a852267-2ebb-4465-8ab4-96d4879958e0">
+            <Button variant="primary" size="lg" className="font-mono">
+              Talk to Ashley
+            </Button>
+          </Link>
+        </div>
+
         {/* Pricing Card */}
         <div className="w-full max-w-lg bg-bg2 border border-separator1 rounded-2xl p-8 mb-8">
           <h2 className="text-xl font-semibold text-fgAccent mb-6 text-center">

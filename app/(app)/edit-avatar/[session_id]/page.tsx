@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { HamburgerMenu } from '@/components/hamburger-menu';
-import { uploadAvatarImage, getSupabaseClient } from '@/lib/supabase';
+import { uploadAvatarImage, getSupabaseClient, checkIsAdmin } from '@/lib/supabase';
 import { CircleNotch } from '@phosphor-icons/react';
 
 export default function EditAvatarPage() {
@@ -17,10 +17,26 @@ export default function EditAvatarPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if user is admin on mount
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const admin = await checkIsAdmin();
+        setIsAdmin(admin);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   // Poll for job completion
   const pollJobStatus = useCallback(async (jobId: string, accessToken: string) => {
@@ -136,15 +152,8 @@ export default function EditAvatarPage() {
     };
   }, []);
 
-  const takePictureAndSubmit = async () => {
-    if (!videoRef.current || !canvasRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    if (!context || video.videoWidth === 0 || video.videoHeight === 0) return;
-
+  // Common function to process and submit an image blob
+  const processAndSubmitImage = useCallback(async (blob: Blob) => {
     setIsProcessing(true);
     setError(null);
 
@@ -152,39 +161,6 @@ export default function EditAvatarPage() {
       // Generate a unique ID for this picture
       const pictureId = crypto.randomUUID();
       console.log('Generated new picture ID:', pictureId);
-
-      // Set canvas to 512x512 for the output image
-      const targetSize = 512;
-      canvas.width = targetSize;
-      canvas.height = targetSize;
-
-      // Calculate center crop from the video
-      const videoWidth = video.videoWidth;
-      const videoHeight = video.videoHeight;
-      const minDimension = Math.min(videoWidth, videoHeight);
-      const sx = (videoWidth - minDimension) / 2;
-      const sy = (videoHeight - minDimension) / 2;
-
-      // Draw center-cropped square from video, scaled to 512x512
-      context.drawImage(video, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
-
-      // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((b) => {
-          if (b) resolve(b);
-          else reject(new Error('Failed to create image blob'));
-        }, 'image/png');
-      });
-
-      // Stop camera stream
-      if (streamRef.current) {
-        console.log('Stopping camera stream after picture taken');
-        streamRef.current.getTracks().forEach((track) => {
-          track.stop();
-        });
-        streamRef.current = null;
-      }
-      setCameraEnabled(false);
 
       // Upload to Supabase Storage
       console.log('Uploading picture:', pictureId);
@@ -240,6 +216,123 @@ export default function EditAvatarPage() {
       console.error('Error updating avatar:', err);
       setError(err instanceof Error ? err.message : 'Failed to update avatar image');
       setIsProcessing(false);
+    }
+  }, [sessionId, pollJobStatus, router]);
+
+  const takePictureAndSubmit = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    if (!context || video.videoWidth === 0 || video.videoHeight === 0) return;
+
+    try {
+      // Set canvas to 512x512 for the output image
+      const targetSize = 512;
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Calculate center crop from the video
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      const minDimension = Math.min(videoWidth, videoHeight);
+      const sx = (videoWidth - minDimension) / 2;
+      const sy = (videoHeight - minDimension) / 2;
+
+      // Draw center-cropped square from video, scaled to 512x512
+      context.drawImage(video, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
+
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create image blob'));
+        }, 'image/png');
+      });
+
+      // Stop camera stream
+      if (streamRef.current) {
+        console.log('Stopping camera stream after picture taken');
+        streamRef.current.getTracks().forEach((track) => {
+          track.stop();
+        });
+        streamRef.current = null;
+      }
+      setCameraEnabled(false);
+
+      // Process and submit the image
+      await processAndSubmitImage(blob);
+    } catch (err) {
+      console.error('Error taking picture:', err);
+      setError(err instanceof Error ? err.message : 'Failed to take picture');
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Load the image file
+      const image = new Image();
+      const imageUrl = URL.createObjectURL(file);
+      
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => {
+          URL.revokeObjectURL(imageUrl);
+          resolve();
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(imageUrl);
+          reject(new Error('Failed to load image'));
+        };
+        image.src = imageUrl;
+      });
+
+      // Create a canvas to process the image
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Failed to get canvas context');
+      }
+
+      // Set canvas to 512x512 for the output image
+      const targetSize = 512;
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Calculate center crop from the image
+      const imageWidth = image.width;
+      const imageHeight = image.height;
+      const minDimension = Math.min(imageWidth, imageHeight);
+      const sx = (imageWidth - minDimension) / 2;
+      const sy = (imageHeight - minDimension) / 2;
+
+      // Draw center-cropped square from image, scaled to 512x512
+      context.drawImage(image, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
+
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create image blob'));
+        }, 'image/png');
+      });
+
+      // Process and submit the image
+      await processAndSubmitImage(blob);
+    } catch (err) {
+      console.error('Error processing uploaded file:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process uploaded image');
+      setIsProcessing(false);
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -298,22 +391,46 @@ export default function EditAvatarPage() {
         </p>
       )}
 
-      <Button
-        variant="primary"
-        size="lg"
-        onClick={takePictureAndSubmit}
-        className="mt-6 w-64 font-mono"
-        disabled={!cameraEnabled || isProcessing}
-      >
-        {isProcessing ? (
+      <div className="mt-6 flex flex-col gap-4 items-center">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={takePictureAndSubmit}
+          className="w-64 font-mono"
+          disabled={!cameraEnabled || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <CircleNotch size={20} className="mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            'Take Picture'
+          )}
+        </Button>
+
+        {isAdmin && (
           <>
-            <CircleNotch size={20} className="mr-2 animate-spin" />
-            Processing...
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              disabled={isProcessing}
+            />
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-64 font-mono"
+              disabled={isProcessing}
+            >
+              Upload Image
+            </Button>
           </>
-        ) : (
-          'Take Picture'
         )}
-      </Button>
+      </div>
     </section>
   );
 }

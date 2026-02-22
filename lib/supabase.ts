@@ -95,6 +95,33 @@ export async function uploadAvatarImage(imageId: string, blob: Blob) {
   };
 }
 
+// Helper to check if the current user is an admin
+export async function checkIsAdmin(): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  
+  // Verify we have an active session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session) {
+    console.error('Failed to check admin status: No active session', sessionError);
+    return false;
+  }
+  
+  // Query user_profiles table for is_admin
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('is_admin')
+    .eq('user_id', session.user.id)
+    .single();
+  
+  if (error) {
+    console.error('Failed to check admin status:', error);
+    return false;
+  }
+  
+  return data?.is_admin === true;
+}
+
 // Helper to upload a new avatar photo and generate a Hedra avatar
 export async function uploadAndGenerateAvatar(file: File, sessionId: string) {
   const supabase = getSupabaseClient();

@@ -97,8 +97,8 @@ export function VoiceConsentModal({
               I consent to Expert Avatar using my voice recording and voiceprint (collectively, voice data) to create my Cloned Voice for my Expert avatar. I understand that:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>My Cloned Voice will generate AI responses I did not personally speak</li>
-              <li>My voice data will be retained while my account is active</li>
+              <li>My Cloned Voice will generate AI responses I did not personally speak.</li>
+              <li>My voice data will be retained while my account is active.</li>
               <li>My voice data will be shared with third-party voice cloning services who create my Cloned Voice and who may use my voice data to analyze and improve their services.</li>
               <li>I can revoke consent and delete my voice data by deleting my Expert Avatar account.</li>
             </ul>
