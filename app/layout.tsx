@@ -2,7 +2,6 @@ import { Public_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
 import { headers } from 'next/headers';
 import { APP_CONFIG_DEFAULTS } from '@/app-config';
-import { ApplyThemeScript, ThemeToggle } from '@/components/theme-toggle';
 import { getAppConfig } from '@/lib/utils';
 import './globals.css';
 
@@ -59,21 +58,17 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     .join('\n');
 
   return (
-    <html lang="en" suppressHydrationWarning className="scroll-smooth">
+    <html lang="en" className="scroll-smooth dark">
       <head>
         {styles && <style>{styles}</style>}
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <ApplyThemeScript />
       </head>
       <body
         className={`${publicSans.variable} ${commitMono.variable} overflow-x-hidden antialiased`}
       >
         {children}
-        <div className="group fixed bottom-0 left-1/2 z-50 mb-2 -translate-x-1/2">
-          <ThemeToggle className="translate-y-20 transition-transform delay-150 duration-300 group-hover:translate-y-0" />
-        </div>
       </body>
     </html>
   );
