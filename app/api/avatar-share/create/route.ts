@@ -27,9 +27,10 @@ export async function POST(req: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       console.error('[Avatar Share API] Auth error:', authError?.message || 'No user');
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
       const shareUrl = `${baseUrl}/chat/${existingToken.share_token}`;
 
       console.log('[Avatar Share API] Returning existing share token for session:', session_id);
-      
+
       return NextResponse.json({
         share_token: existingToken.share_token,
         share_url: shareUrl,
@@ -108,10 +109,8 @@ export async function POST(req: Request) {
       share_token: newToken.share_token,
       share_url: shareUrl,
     } as CreateShareResponse);
-
   } catch (error) {
     console.error('[Avatar Share API] Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

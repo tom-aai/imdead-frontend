@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { CheckCircle, CircleNotch, Gear, Lightning, Trash, Warning } from '@phosphor-icons/react';
 import { HamburgerMenu } from '@/components/hamburger-menu';
-import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,8 +15,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { getSupabaseClient, signOut } from '@/lib/supabase';
-import { CircleNotch, Lightning, CheckCircle, Gear, Trash, Warning } from '@phosphor-icons/react';
 
 interface BillingInfo {
   used_seconds: number;
@@ -41,13 +41,13 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  
+
   // Billing state
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const [billingMessage, setBillingMessage] = useState<string | null>(null);
-  
+
   // Account deletion state
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -70,7 +70,9 @@ export default function SettingsPage() {
     const fetchPreferences = async () => {
       try {
         const supabase = getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
         if (!session) {
           router.push('/login');
@@ -80,7 +82,7 @@ export default function SettingsPage() {
         // Fetch preferences
         const response = await fetch('/api/user/preferences', {
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
         });
 
@@ -90,12 +92,12 @@ export default function SettingsPage() {
 
         const data = await response.json();
         setEmailNotificationsEnabled(data.email_notifications_enabled ?? true);
-        
+
         // Fetch billing info
         try {
           const billingResponse = await fetch('/api/billing/usage', {
             headers: {
-              'Authorization': `Bearer ${session.access_token}`,
+              Authorization: `Bearer ${session.access_token}`,
             },
           });
           if (billingResponse.ok) {
@@ -123,7 +125,9 @@ export default function SettingsPage() {
 
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         router.push('/login');
@@ -133,7 +137,7 @@ export default function SettingsPage() {
       const response = await fetch('/api/user/preferences', {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -159,10 +163,12 @@ export default function SettingsPage() {
   const handleUpgrade = async () => {
     setIsUpgrading(true);
     setBillingMessage(null);
-    
+
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         router.push('/login');
@@ -172,7 +178,7 @@ export default function SettingsPage() {
       const response = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -200,10 +206,12 @@ export default function SettingsPage() {
   const handleManageSubscription = async () => {
     setIsManagingSubscription(true);
     setBillingMessage(null);
-    
+
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         router.push('/login');
@@ -213,7 +221,7 @@ export default function SettingsPage() {
       const response = await fetch('/api/billing/portal', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -232,7 +240,9 @@ export default function SettingsPage() {
       }
     } catch (err) {
       console.error('Error opening subscription portal:', err);
-      setBillingMessage(err instanceof Error ? err.message : 'Failed to open subscription management');
+      setBillingMessage(
+        err instanceof Error ? err.message : 'Failed to open subscription management'
+      );
     } finally {
       setIsManagingSubscription(false);
     }
@@ -241,10 +251,12 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     setDeleteError(null);
-    
+
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         router.push('/login');
@@ -254,7 +266,7 @@ export default function SettingsPage() {
       const response = await fetch('/api/user/delete', {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -276,8 +288,8 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-background min-h-screen flex items-center justify-center">
-        <CircleNotch size={32} className="animate-spin text-muted-foreground" />
+      <div className="bg-background flex min-h-screen items-center justify-center">
+        <CircleNotch size={32} className="text-muted-foreground animate-spin" />
       </div>
     );
   }
@@ -285,14 +297,14 @@ export default function SettingsPage() {
   return (
     <div className="bg-background min-h-screen">
       <HamburgerMenu />
-      
-      <div className="max-w-xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8">Settings</h1>
+
+      <div className="mx-auto max-w-xl px-4 py-12">
+        <h1 className="mb-8 text-3xl font-bold">Settings</h1>
 
         {/* Email Notifications Section */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+        <div className="bg-card border-border space-y-4 rounded-lg border p-6">
           <h2 className="text-xl font-semibold">Email Notifications</h2>
-          
+
           <p className="text-muted-foreground">
             Receive email notifications when students send you messages through your avatar.
           </p>
@@ -319,19 +331,11 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          {error && (
-            <p className="text-destructive text-sm">{error}</p>
-          )}
+          {error && <p className="text-destructive text-sm">{error}</p>}
 
-          {successMessage && (
-            <p className="text-green-600 text-sm">{successMessage}</p>
-          )}
+          {successMessage && <p className="text-sm text-green-600">{successMessage}</p>}
 
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="w-full"
-          >
+          <Button onClick={handleSave} disabled={isSaving} className="w-full">
             {isSaving ? (
               <>
                 <CircleNotch size={16} className="mr-2 animate-spin" />
@@ -344,9 +348,9 @@ export default function SettingsPage() {
         </div>
 
         {/* Usage & Billing Section */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4 mt-6">
+        <div className="bg-card border-border mt-6 space-y-4 rounded-lg border p-6">
           <h2 className="text-xl font-semibold">Usage & Billing</h2>
-          
+
           {billingInfo ? (
             <>
               {billingInfo.is_admin ? (
@@ -387,20 +391,20 @@ export default function SettingsPage() {
                   <p className="text-muted-foreground">
                     Your Expert Avatar includes 60 free minutes of chat sessions per month.
                   </p>
-                  
+
                   {/* Usage Progress Bar */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>{Math.round(billingInfo.used_minutes)} min used</span>
                       <span>{Math.round(billingInfo.free_tier_minutes)} min total</span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                      <div 
+                    <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
+                      <div
                         className={`h-full rounded-full transition-all ${
-                          billingInfo.is_exceeded 
-                            ? 'bg-destructive' 
-                            : billingInfo.is_warning 
-                              ? 'bg-yellow-500' 
+                          billingInfo.is_exceeded
+                            ? 'bg-destructive'
+                            : billingInfo.is_warning
+                              ? 'bg-yellow-500'
                               : 'bg-primary'
                         }`}
                         style={{ width: `${Math.min(billingInfo.usage_percentage, 100)}%` }}
@@ -411,7 +415,7 @@ export default function SettingsPage() {
                         Free tier exhausted. Upgrade to continue sharing your avatar.
                       </p>
                     ) : billingInfo.is_warning ? (
-                      <p className="text-yellow-600 text-sm">
+                      <p className="text-sm text-yellow-600">
                         {Math.round(billingInfo.remaining_minutes)} minutes remaining this month.
                       </p>
                     ) : (
@@ -420,12 +424,12 @@ export default function SettingsPage() {
                       </p>
                     )}
                   </div>
-                  
+
                   {/* Upgrade Button */}
                   <Button
                     onClick={handleUpgrade}
                     disabled={isUpgrading}
-                    variant={billingInfo.is_exceeded ? "default" : "outline"}
+                    variant={billingInfo.is_exceeded ? 'default' : 'outline'}
                     className="w-full"
                   >
                     {isUpgrading ? (
@@ -442,40 +446,36 @@ export default function SettingsPage() {
                   </Button>
                 </div>
               )}
-              
+
               {billingMessage && (
-                <p className={`text-sm ${billingMessage.includes('Success') ? 'text-green-600' : 'text-muted-foreground'}`}>
+                <p
+                  className={`text-sm ${billingMessage.includes('Success') ? 'text-green-600' : 'text-muted-foreground'}`}
+                >
                   {billingMessage}
                 </p>
               )}
             </>
           ) : (
             <div className="flex items-center justify-center py-4">
-              <CircleNotch size={24} className="animate-spin text-muted-foreground" />
+              <CircleNotch size={24} className="text-muted-foreground animate-spin" />
             </div>
           )}
         </div>
 
         {/* Delete Account Section */}
-        <div className="bg-card border border-destructive/30 rounded-lg p-6 space-y-4 mt-6">
+        <div className="bg-card border-destructive/30 mt-6 space-y-4 rounded-lg border p-6">
           <h2 className="text-xl font-semibold text-white">Danger Zone</h2>
-          
+
           <p className="text-muted-foreground text-sm">
-            Once you delete your account, there is no going back. All your data, avatars, 
-            and chat history will be permanently deleted. Any active subscription will be cancelled.
+            Once you delete your account, there is no going back. All your data, avatars, and chat
+            history will be permanently deleted. Any active subscription will be cancelled.
           </p>
 
-          {deleteError && (
-            <p className="text-destructive text-sm">{deleteError}</p>
-          )}
+          {deleteError && <p className="text-destructive text-sm">{deleteError}</p>}
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                className="w-full"
-                disabled={isDeleting}
-              >
+              <Button variant="destructive" className="w-full" disabled={isDeleting}>
                 {isDeleting ? (
                   <>
                     <CircleNotch size={16} className="mr-2 animate-spin" />
@@ -496,8 +496,8 @@ export default function SettingsPage() {
                   Delete your account?
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. All your data, avatars, and chat history 
-                  will be permanently deleted. Any active subscription will be cancelled immediately.
+                  This action cannot be undone. All your data, avatars, and chat history will be
+                  permanently deleted. Any active subscription will be cancelled immediately.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -524,4 +524,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

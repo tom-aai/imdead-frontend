@@ -6,9 +6,9 @@ export const revalidate = 0; // Don't cache the results
 export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get('authorization');
-    
+
     console.log('[Sessions API] Request received, auth header present:', !!authHeader);
-    
+
     if (!authHeader) {
       console.log('[Sessions API] No authorization header');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,9 +22,10 @@ export async function GET(req: Request) {
     );
 
     // Verify user authentication (this gives us the auth user ID)
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       console.error('[Sessions API] Auth error:', authError?.message || 'No user');
@@ -43,7 +44,8 @@ export async function GET(req: Request) {
     // interview_call_analysis is the source of truth for both hedra_avatar_id and cartoon_id
     const { data: sessions, error: sessionsError } = await supabase
       .from('interview_call_analysis')
-      .select(`
+      .select(
+        `
         session_id, 
         user_id, 
         created_at,
@@ -52,12 +54,13 @@ export async function GET(req: Request) {
         hot_take_1,
         hot_take_video_1,
         cartoon_id
-      `)
+      `
+      )
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     // Fetch share tokens separately (to avoid complex join issues)
-    const sessionIds = sessions?.map(s => s.session_id) || [];
+    const sessionIds = sessions?.map((s) => s.session_id) || [];
     const { data: shareTokens } = await supabase
       .from('avatar_share_tokens')
       .select('session_id, share_token')
@@ -67,7 +70,7 @@ export async function GET(req: Request) {
 
     // Create a map for quick lookup
     const shareTokenMap = new Map<string, string>();
-    shareTokens?.forEach(token => {
+    shareTokens?.forEach((token) => {
       shareTokenMap.set(token.session_id, token.share_token);
     });
 
@@ -80,7 +83,7 @@ export async function GET(req: Request) {
 
     // Create a map for unread message counts
     const unreadCountMap = new Map<string, number>();
-    messageCounts?.forEach(msg => {
+    messageCounts?.forEach((msg) => {
       const currentCount = unreadCountMap.get(msg.source_session_id) || 0;
       unreadCountMap.set(msg.source_session_id, currentCount + 1);
     });
@@ -94,7 +97,7 @@ export async function GET(req: Request) {
 
     // Create a map for total chat duration per session
     const chatDurationMap = new Map<string, number>();
-    chatDurations?.forEach(chat => {
+    chatDurations?.forEach((chat) => {
       const sourceSessionId = chat.source_session_id;
       const sttDuration = chat.usage?.stt_audio_duration || 0;
       const currentTotal = chatDurationMap.get(sourceSessionId) || 0;
@@ -103,7 +106,10 @@ export async function GET(req: Request) {
 
     if (sessionsError) {
       console.error('[Sessions API] Error fetching sessions:', sessionsError);
-      return NextResponse.json({ error: 'Failed to fetch sessions', details: sessionsError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to fetch sessions', details: sessionsError.message },
+        { status: 500 }
+      );
     }
 
     console.log(`[Sessions API] Found ${sessions?.length || 0} sessions for user_id ${userId}`);
@@ -123,10 +129,9 @@ export async function GET(req: Request) {
     }
     console.log(`[Sessions API] Found ${pendingCalls?.length || 0} total interview_calls for user`);
 
-    const analysisSessionIds = new Set(sessions?.map(s => s.session_id) || []);
-    const processingSessionIds = pendingCalls?.filter(
-      call => !analysisSessionIds.has(call.session_id)
-    ) || [];
+    const analysisSessionIds = new Set(sessions?.map((s) => s.session_id) || []);
+    const processingSessionIds =
+      pendingCalls?.filter((call) => !analysisSessionIds.has(call.session_id)) || [];
     const hasProcessingSessions = processingSessionIds.length > 0;
 
     console.log(`[Sessions API] Found ${processingSessionIds.length} sessions still processing`);
@@ -134,7 +139,7 @@ export async function GET(req: Request) {
     // Check for skipped sessions: completed post_call jobs with result.status = 'skipped'.
     // Query using ALL interview_calls for this user (not just pending ones), because
     // the job may complete so fast that the session never appears in processingSessionIds.
-    const allUserCallSessionIds = (pendingCalls || []).map(c => c.session_id);
+    const allUserCallSessionIds = (pendingCalls || []).map((c) => c.session_id);
     let skippedSessionIds: string[] = [];
     if (allUserCallSessionIds.length > 0) {
       const { data: completedJobs } = await supabase
@@ -145,19 +150,24 @@ export async function GET(req: Request) {
         .eq('status', 'completed');
 
       skippedSessionIds = (completedJobs || [])
-        .filter(job => (job.result as Record<string, unknown>)?.status === 'skipped')
-        .map(job => job.session_id)
+        .filter((job) => (job.result as Record<string, unknown>)?.status === 'skipped')
+        .map((job) => job.session_id)
         // Only include sessions that don't already have analysis (not in sessions list)
-        .filter(sid => !analysisSessionIds.has(sid));
+        .filter((sid) => !analysisSessionIds.has(sid));
 
       if (skippedSessionIds.length > 0) {
-        console.log(`[Sessions API] Found ${skippedSessionIds.length} skipped sessions (not enough data): ${skippedSessionIds.join(', ')}`);
+        console.log(
+          `[Sessions API] Found ${skippedSessionIds.length} skipped sessions (not enough data): ${skippedSessionIds.join(', ')}`
+        );
       }
 
       // Ensure skipped sessions also appear in processingSessionIds so they render as cards
       for (const sid of skippedSessionIds) {
-        if (!processingSessionIds.some(p => p.session_id === sid)) {
-          processingSessionIds.push({ session_id: sid, call_type: 'skipped' } as typeof processingSessionIds[0]);
+        if (!processingSessionIds.some((p) => p.session_id === sid)) {
+          processingSessionIds.push({
+            session_id: sid,
+            call_type: 'skipped',
+          } as (typeof processingSessionIds)[0]);
         }
       }
     }
@@ -173,7 +183,9 @@ export async function GET(req: Request) {
 
     const hasPendingAvatarUpdates = (pendingAvatarJobs?.length || 0) > 0;
 
-    console.log(`[Sessions API] Found ${pendingAvatarJobs?.length || 0} pending avatar update jobs`);
+    console.log(
+      `[Sessions API] Found ${pendingAvatarJobs?.length || 0} pending avatar update jobs`
+    );
 
     // Check if there are any pending hot_take video generation jobs for the user's sessions
     const { data: pendingHotTakeJobs } = await supabase
@@ -184,27 +196,31 @@ export async function GET(req: Request) {
       .in('status', ['pending', 'processing']);
 
     const hasPendingHotTakeVideos = (pendingHotTakeJobs?.length || 0) > 0;
-    const pendingHotTakeSessionIds = new Set((pendingHotTakeJobs || []).map(j => j.session_id));
+    const pendingHotTakeSessionIds = new Set((pendingHotTakeJobs || []).map((j) => j.session_id));
 
-    console.log(`[Sessions API] Found ${pendingHotTakeJobs?.length || 0} pending hot take video jobs`);
+    console.log(
+      `[Sessions API] Found ${pendingHotTakeJobs?.length || 0} pending hot take video jobs`
+    );
 
     // For each session, generate signed URLs for avatar images and videos
     // cartoon_id is now stored directly on interview_call_analysis (source of truth)
     const sessionsWithImages = await Promise.all(
       (sessions || []).map(async (session) => {
         console.log(`[Sessions API] Processing session ${session.session_id}`);
-        
+
         let avatar_image_url = null;
-        
+
         // Use cartoon_id directly from interview_call_analysis (source of truth)
         if (session.cartoon_id) {
-          console.log(`[Sessions API] Found cartoon_id for session ${session.session_id}: ${session.cartoon_id}`);
+          console.log(
+            `[Sessions API] Found cartoon_id for session ${session.session_id}: ${session.cartoon_id}`
+          );
           // Generate a signed URL (valid for 1 hour) since the bucket has RLS policies
           // Note: cartoon_id should already include the file extension (e.g., "uuid_cartoon.png")
           const { data: urlData, error: urlError } = await supabase.storage
             .from('avatar-images-bucket')
             .createSignedUrl(session.cartoon_id, 3600); // 3600 seconds = 1 hour
-          
+
           if (urlError) {
             console.error(`[Sessions API] Error creating signed URL for avatar:`, urlError);
           } else {
@@ -219,11 +235,13 @@ export async function GET(req: Request) {
         let hot_take_video_1_url = null;
 
         if (session.hot_take_video_1) {
-          console.log(`[Sessions API] Found hot_take_video_1 for session ${session.session_id}: ${session.hot_take_video_1}`);
+          console.log(
+            `[Sessions API] Found hot_take_video_1 for session ${session.session_id}: ${session.hot_take_video_1}`
+          );
           const { data: video1Data, error: video1Error } = await supabase.storage
             .from('interview-hot-take-videos')
             .createSignedUrl(session.hot_take_video_1, 3600); // 3600 seconds = 1 hour
-          
+
           if (video1Error) {
             console.error(`[Sessions API] Error creating signed URL for video 1:`, video1Error);
           } else {
@@ -247,11 +265,13 @@ export async function GET(req: Request) {
     // Recalculate hasProcessingSessions after potentially adding skipped sessions
     const finalHasProcessingSessions = processingSessionIds.length > 0;
 
-    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${finalHasProcessingSessions}, skippedSessionIds: ${skippedSessionIds.length}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}, hasPendingHotTakeVideos: ${hasPendingHotTakeVideos}`);
-    return NextResponse.json({ 
+    console.log(
+      `[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${finalHasProcessingSessions}, skippedSessionIds: ${skippedSessionIds.length}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}, hasPendingHotTakeVideos: ${hasPendingHotTakeVideos}`
+    );
+    return NextResponse.json({
       sessions: sessionsWithImages,
       hasProcessingSessions: finalHasProcessingSessions,
-      processingSessionIds: processingSessionIds.map(c => c.session_id),
+      processingSessionIds: processingSessionIds.map((c) => c.session_id),
       skippedSessionIds,
       hasPendingAvatarUpdates,
       hasPendingHotTakeVideos,
@@ -261,4 +281,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

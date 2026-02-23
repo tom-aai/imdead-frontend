@@ -1,9 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+import {
+  ArrowClockwise,
+  Check,
+  CircleNotch,
+  Copy,
+  DownloadSimple,
+  Envelope,
+  PencilSimple,
+  Trash,
+  VideoCamera,
+  X,
+} from '@phosphor-icons/react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import type { Session } from '@/hooks/useSessions';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -33,8 +44,12 @@ interface GenerationState {
   error: string | null;
 }
 
-
-export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFreeTierExceeded = false }: SessionCardProps) => {
+export const SessionCard = ({
+  session,
+  onSessionUpdated,
+  onResumeSession,
+  isFreeTierExceeded = false,
+}: SessionCardProps) => {
   const router = useRouter();
   const [isCreatingShare, setIsCreatingShare] = useState(false);
   const [justCopiedPost, setJustCopiedPost] = useState(false);
@@ -63,7 +78,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
     }
     return baseText;
   };
-  const [socialPostText, setSocialPostText] = useState(generateSocialPostText(session.main_topic, session.share_token));
+  const [socialPostText, setSocialPostText] = useState(
+    generateSocialPostText(session.main_topic, session.share_token)
+  );
 
   // Generation state for hot take
   // Initialize from session's pending status (handles page refresh while video is generating)
@@ -84,18 +101,30 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
   // Auto-clear generation state when video URL appears (from dashboard polling)
   // or sync with backend pending status on refresh
   useEffect(() => {
-    if (session.hot_take_video_1_url && (generation.status === 'polling' || generation.status === 'generating')) {
+    if (
+      session.hot_take_video_1_url &&
+      (generation.status === 'polling' || generation.status === 'generating')
+    ) {
       // Video is ready — clear the "processing" state
       setGeneration({ status: 'completed', jobId: null, error: null });
     } else if (session.is_hot_take_pending && generation.status === 'idle') {
       // Backend reports a pending job but our local state is idle (e.g. page refresh)
       setGeneration({ status: 'polling', jobId: null, error: null });
-    } else if (!session.is_hot_take_pending && generation.status === 'polling' && !generation.jobId) {
+    } else if (
+      !session.is_hot_take_pending &&
+      generation.status === 'polling' &&
+      !generation.jobId
+    ) {
       // Backend no longer reports pending, and we have no local jobId tracking —
       // the job must have completed or failed. Refresh to pick up the result.
       setGeneration({ status: 'idle', jobId: null, error: null });
     }
-  }, [session.hot_take_video_1_url, session.is_hot_take_pending, generation.status, generation.jobId]);
+  }, [
+    session.hot_take_video_1_url,
+    session.is_hot_take_pending,
+    generation.status,
+    generation.jobId,
+  ]);
 
   // Auto-generate share token on mount if it doesn't exist
   const hasAttemptedAutoCreate = useRef(false);
@@ -106,7 +135,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
         setIsCreatingShare(true);
         try {
           const supabase = getSupabaseClient();
-          const { data: { session: authSession } } = await supabase.auth.getSession();
+          const {
+            data: { session: authSession },
+          } = await supabase.auth.getSession();
 
           if (!authSession) {
             console.error('Not authenticated');
@@ -116,7 +147,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
           const response = await fetch('/api/avatar-share/create', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${authSession.access_token}`,
+              Authorization: `Bearer ${authSession.access_token}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ session_id: session.session_id }),
@@ -216,7 +247,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
     setIsCreatingShare(true);
     try {
       const supabase = getSupabaseClient();
-      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
 
       if (!authSession) {
         console.error('Not authenticated');
@@ -226,7 +259,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
       const response = await fetch('/api/avatar-share/create', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
+          Authorization: `Bearer ${authSession.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ session_id: session.session_id }),
@@ -289,7 +322,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
             setGeneration({
               status: 'failed',
               jobId: null,
-              error: ((payload.new as Record<string, unknown>).error as string) || 'Video generation failed',
+              error:
+                ((payload.new as Record<string, unknown>).error as string) ||
+                'Video generation failed',
             });
           }
         }
@@ -302,11 +337,13 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
 
           // One-time status check in case job completed before subscription was established
           try {
-            const { data: { session: authSession } } = await supabase.auth.getSession();
+            const {
+              data: { session: authSession },
+            } = await supabase.auth.getSession();
             if (!authSession || cancelled) return;
 
             const response = await fetch(`/api/hot-take/status/${jobId}`, {
-              headers: { 'Authorization': `Bearer ${authSession.access_token}` },
+              headers: { Authorization: `Bearer ${authSession.access_token}` },
             });
 
             if (!response.ok || cancelled) return;
@@ -332,11 +369,13 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
           const fallbackPoll = async () => {
             if (cancelled) return;
             try {
-              const { data: { session: authSession } } = await supabase.auth.getSession();
+              const {
+                data: { session: authSession },
+              } = await supabase.auth.getSession();
               if (!authSession || cancelled) return;
 
               const response = await fetch(`/api/hot-take/status/${jobId}`, {
-                headers: { 'Authorization': `Bearer ${authSession.access_token}` },
+                headers: { Authorization: `Bearer ${authSession.access_token}` },
               });
 
               if (!response.ok || cancelled) return;
@@ -389,7 +428,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
 
     try {
       const supabase = getSupabaseClient();
-      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
 
       if (!authSession) {
         setGeneration({
@@ -403,7 +444,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
       const response = await fetch('/api/hot-take/generate', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
+          Authorization: `Bearer ${authSession.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -443,7 +484,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
     setIsDeleting(true);
     try {
       const supabase = getSupabaseClient();
-      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
 
       if (!authSession) {
         console.error('Not authenticated');
@@ -453,7 +496,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
       const response = await fetch(`/api/sessions/${session.session_id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
+          Authorization: `Bearer ${authSession.access_token}`,
         },
       });
 
@@ -478,7 +521,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
   // Handle title save
   const handleSaveTitle = async () => {
     const trimmedTitle = editedTitle.trim();
-    
+
     if (!trimmedTitle) {
       setTitleError('Title cannot be empty');
       return;
@@ -496,7 +539,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
 
     try {
       const supabase = getSupabaseClient();
-      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
 
       if (!authSession) {
         setTitleError('Not authenticated');
@@ -506,7 +551,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
       const response = await fetch(`/api/sessions/${session.session_id}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
+          Authorization: `Bearer ${authSession.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ main_topic: trimmedTitle }),
@@ -539,24 +584,20 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
 
   const renderHotTakeSection = () => {
     const isGenerating = generation.status === 'generating' || generation.status === 'polling';
-    
+
     return (
       <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">
-          Social Media Video
-        </label>
+        <label className="text-muted-foreground text-sm font-medium">Social Media Video</label>
         <textarea
           value={hotTakeText}
           onChange={(e) => setHotTakeText(e.target.value)}
           disabled={isGenerating}
-          className="w-full min-h-[80px] p-2 text-sm border border-border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          className="border-border bg-background focus:ring-ring min-h-[80px] w-full resize-y rounded-md border p-2 text-sm focus:ring-2 focus:outline-none disabled:opacity-50"
           placeholder="Enter social media video text..."
         />
-        
-        {generation.error && (
-          <p className="text-xs text-destructive">{generation.error}</p>
-        )}
-        
+
+        {generation.error && <p className="text-destructive text-xs">{generation.error}</p>}
+
         <div className="flex gap-2">
           <Button
             variant="secondary"
@@ -577,7 +618,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
               </>
             )}
           </Button>
-          
+
           {session.hot_take_video_1_url && (
             <Button
               variant="outline"
@@ -598,30 +639,24 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
   };
 
   return (
-    <div className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="group bg-card border-border overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md">
       {/* Avatar Image with Delete Button */}
-      <div className="relative aspect-square bg-muted flex items-center justify-center">
+      <div className="bg-muted relative flex aspect-square items-center justify-center">
         {session.avatar_image_url ? (
-          <img
-            src={session.avatar_image_url}
-            alt="Avatar"
-            className="w-full h-full object-cover"
-          />
+          <img src={session.avatar_image_url} alt="Avatar" className="h-full w-full object-cover" />
         ) : (
-          <div className="text-center space-y-3 px-4">
-            <CircleNotch size={40} className="animate-spin text-muted-foreground mx-auto" />
-            <p className="text-muted-foreground font-medium text-sm">Generating avatar...</p>
-            <p className="text-xs text-muted-foreground">
-              This usually takes a few minutes.
-            </p>
+          <div className="space-y-3 px-4 text-center">
+            <CircleNotch size={40} className="text-muted-foreground mx-auto animate-spin" />
+            <p className="text-muted-foreground text-sm font-medium">Generating avatar...</p>
+            <p className="text-muted-foreground text-xs">This usually takes a few minutes.</p>
           </div>
         )}
-        
+
         {/* Edit Button */}
         <Button
           variant="secondary"
           size="icon"
-          className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+          className="absolute top-2 left-2 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100"
           onClick={() => router.push(`/edit-avatar/${session.session_id}`)}
           title="Create new avatar image"
         >
@@ -634,9 +669,11 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
             <Button
               variant="destructive"
               size="icon"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100"
               disabled={!canDelete}
-              title={!canDelete ? 'Cannot delete while operations are in progress' : 'Delete session'}
+              title={
+                !canDelete ? 'Cannot delete while operations are in progress' : 'Delete session'
+              }
             >
               <Trash size={16} />
             </Button>
@@ -645,7 +682,8 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Session?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. The session data and all chat sessions using this avatar will be permanently deleted.
+                This action cannot be undone. The session data and all chat sessions using this
+                avatar will be permanently deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -670,7 +708,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
       </div>
 
       {/* Card Content */}
-      <div className="p-4 space-y-4">
+      <div className="space-y-4 p-4">
         {/* Main Topic and Date */}
         <div>
           {isEditingTitle ? (
@@ -681,7 +719,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
                 disabled={isSavingTitle}
-                className="w-full p-2 text-lg font-semibold border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                className="border-border bg-background focus:ring-ring w-full rounded-md border p-2 text-lg font-semibold focus:ring-2 focus:outline-none disabled:opacity-50"
                 placeholder="Enter session title..."
                 autoFocus
                 onKeyDown={(e) => {
@@ -692,9 +730,7 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
                   }
                 }}
               />
-              {titleError && (
-                <p className="text-xs text-destructive">{titleError}</p>
-              )}
+              {titleError && <p className="text-destructive text-xs">{titleError}</p>}
               <div className="flex gap-2">
                 <Button
                   variant="secondary"
@@ -728,13 +764,13 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
           ) : (
             // Display mode with hover edit button
             <div className="group/title relative">
-              <h3 className="font-semibold text-lg line-clamp-2 pr-8">
+              <h3 className="line-clamp-2 pr-8 text-lg font-semibold">
                 {session.main_topic || 'Untitled Session'}
               </h3>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-0 right-0 h-6 w-6 opacity-0 group-hover/title:opacity-100 hover:opacity-100 transition-opacity"
+                className="absolute top-0 right-0 h-6 w-6 opacity-0 transition-opacity group-hover/title:opacity-100 hover:opacity-100"
                 onClick={() => setIsEditingTitle(true)}
                 title="Edit title"
               >
@@ -742,13 +778,14 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
               </Button>
             </div>
           )}
-          <div className="font-semibold text-lg text-muted-foreground">
+          <div className="text-muted-foreground text-lg font-semibold">
             {formatDate(session.updated_at || session.created_at)}
           </div>
-          <div className="text-sm text-muted-foreground mt-1">
-            Total Minutes Seekers Spoke To Avatar: {Math.round((session.total_chat_duration_seconds || 0) / 60)}
+          <div className="text-muted-foreground mt-1 text-sm">
+            Total Minutes Seekers Spoke To Avatar:{' '}
+            {Math.round((session.total_chat_duration_seconds || 0) / 60)}
             {isFreeTierExceeded && (
-              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive rounded">
+              <span className="bg-destructive/10 text-destructive ml-2 rounded px-1.5 py-0.5 text-xs font-medium">
                 Limit reached
               </span>
             )}
@@ -760,21 +797,14 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
 
         {/* Social Post */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">
-            Social Media Post
-          </label>
+          <label className="text-muted-foreground text-sm font-medium">Social Media Post</label>
           <textarea
             value={socialPostText}
             onChange={(e) => setSocialPostText(e.target.value)}
-            className="w-full min-h-[80px] p-2 text-sm border border-border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-border bg-background focus:ring-ring min-h-[80px] w-full resize-y rounded-md border p-2 text-sm focus:ring-2 focus:outline-none"
             placeholder="Social media post text..."
           />
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={handleCopyPost}
-          >
+          <Button variant="outline" size="sm" className="w-full" onClick={handleCopyPost}>
             {justCopiedPost ? (
               <>
                 <Check size={16} className="mr-2" />
@@ -800,18 +830,22 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
             <ArrowClockwise size={16} className="mr-2" />
             Resume Session
           </Button>
-          
+
           {/* Message Indicator Button */}
           <Button
-            variant={session.unread_message_count > 0 ? "default" : "outline"}
+            variant={session.unread_message_count > 0 ? 'default' : 'outline'}
             size="sm"
             className="relative"
             onClick={() => onResumeSession?.(session.session_id)}
-            title={session.unread_message_count > 0 ? `${session.unread_message_count} unread message${session.unread_message_count !== 1 ? 's' : ''}` : 'No new messages'}
+            title={
+              session.unread_message_count > 0
+                ? `${session.unread_message_count} unread message${session.unread_message_count !== 1 ? 's' : ''}`
+                : 'No new messages'
+            }
           >
             <Envelope size={16} />
             {session.unread_message_count > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+              <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-xs font-bold">
                 {session.unread_message_count > 99 ? '99+' : session.unread_message_count}
               </span>
             )}

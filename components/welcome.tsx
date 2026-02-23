@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef, useState } from 'react';
 import { HamburgerMenu } from '@/components/hamburger-menu';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { uploadAvatarImage } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 interface WelcomeProps {
   disabled: boolean;
@@ -38,43 +38,45 @@ export const Welcome = ({
   useEffect(() => {
     const wasDisabled = prevDisabledRef.current;
     const isNowEnabled = !disabled;
-    
+
     if (wasDisabled && isNowEnabled) {
-      console.log('Welcome component transitioned from disabled to enabled - resetting picture state');
+      console.log(
+        'Welcome component transitioned from disabled to enabled - resetting picture state'
+      );
       setHasTakenPicture(false);
       setPictureId(null);
     }
-    
+
     prevDisabledRef.current = disabled;
   }, [disabled]);
 
   useEffect(() => {
     const enableCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
             width: { ideal: 512 },
             height: { ideal: 512 },
-            facingMode: 'user'
+            facingMode: 'user',
           },
-          audio: false
+          audio: false,
         });
-        
+
         streamRef.current = stream;
-        
+
         const waitForVideoElement = () => {
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
-            
+
             videoRef.current.onloadedmetadata = () => {
               setCameraEnabled(true);
               setCameraError(null);
             };
-            
+
             videoRef.current.oncanplay = () => {
               // Video ready
             };
-            
+
             videoRef.current.onerror = (error) => {
               console.error('Video error:', error);
               setCameraError('Video failed to load');
@@ -84,11 +86,11 @@ export const Welcome = ({
             setTimeout(waitForVideoElement, 50);
           }
         };
-        
+
         waitForVideoElement();
       } catch (error) {
         console.error('Error accessing camera:', error);
-        
+
         if (error instanceof Error) {
           if (error.name === 'NotAllowedError') {
             setCameraError('Camera access denied. Please allow camera permission and refresh.');
@@ -109,11 +111,11 @@ export const Welcome = ({
     const timer = setTimeout(() => {
       enableCamera();
     }, 200);
-    
+
     return () => {
       clearTimeout(timer);
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => {
+        streamRef.current.getTracks().forEach((track) => {
           track.stop();
         });
         streamRef.current = null;
@@ -126,47 +128,47 @@ export const Welcome = ({
       const video = videoRef.current;
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
-      
+
       if (context && video.videoWidth > 0 && video.videoHeight > 0) {
         // Generate a unique ID for this picture
         const newPictureId = crypto.randomUUID();
         console.log('Generated new picture ID:', newPictureId);
         setPictureId(newPictureId);
-        
+
         // Set canvas to 512x512 for the output image
         const targetSize = 512;
         canvas.width = targetSize;
         canvas.height = targetSize;
-        
+
         // Calculate center crop from the video
         const videoWidth = video.videoWidth;
         const videoHeight = video.videoHeight;
         const minDimension = Math.min(videoWidth, videoHeight);
         const sx = (videoWidth - minDimension) / 2;
         const sy = (videoHeight - minDimension) / 2;
-        
+
         // Draw center-cropped square from video, scaled to 512x512
         context.drawImage(video, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
-        
+
         canvas.toBlob(async (blob) => {
           if (blob) {
             try {
               // Upload to Supabase Storage
               console.log('Uploading picture:', newPictureId);
               await uploadAvatarImage(newPictureId, blob);
-              
+
               // Stop camera stream after taking picture - we don't need it during the call
               if (streamRef.current) {
                 console.log('Stopping camera stream after picture taken');
-                streamRef.current.getTracks().forEach(track => {
+                streamRef.current.getTracks().forEach((track) => {
                   track.stop();
                 });
                 streamRef.current = null;
               }
-              
+
               setHasTakenPicture(true);
               setCameraEnabled(false);
-              
+
               // Automatically start the call after uploading the picture
               console.log('Calling onStartCall with picture ID:', newPictureId);
               onStartCall(newPictureId);
@@ -205,30 +207,25 @@ export const Welcome = ({
       {!disabled && <HamburgerMenu />}
 
       {/* Video preview - 512x512 pixel square tile */}
-      <div className="mb-6 relative">
-        <div className="relative w-[512px] h-[512px]">
+      <div className="relative mb-6">
+        <div className="relative h-[512px] w-[512px]">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-[512px] h-[512px] bg-gray-200 rounded-lg object-cover -scale-x-100"
+            className="h-[512px] w-[512px] -scale-x-100 rounded-lg bg-gray-200 object-cover"
             style={{ display: cameraEnabled ? 'block' : 'none' }}
           />
-          <canvas
-            ref={canvasRef}
-            className="hidden"
-          />
+          <canvas ref={canvasRef} className="hidden" />
           {!cameraEnabled && (
-            <div className="absolute inset-0 w-[512px] h-[512px] bg-gray-200 rounded-lg flex items-center justify-center">
+            <div className="absolute inset-0 flex h-[512px] w-[512px] items-center justify-center rounded-lg bg-gray-200">
               <div className="text-center">
-                <p className="text-gray-500 mb-2">
-                  {cameraError || 'Loading camera...'}
-                </p>
+                <p className="mb-2 text-gray-500">{cameraError || 'Loading camera...'}</p>
                 {cameraError && (
-                  <button 
-                    onClick={() => window.location.reload()} 
-                    className="text-blue-500 hover:text-blue-700 underline text-sm"
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-sm text-blue-500 underline hover:text-blue-700"
                   >
                     Retry
                   </button>
@@ -241,15 +238,15 @@ export const Welcome = ({
 
       {!hasTakenPicture && (
         <p className="text-fg1 max-w-prose pt-1 leading-6 font-medium">
-          We'll use your picture to create your avatar.
+          We&apos;ll use your picture to create your avatar.
           <br />
-          Make sure your camera is enabled, then click 'Take Picture'.
+          Make sure your camera is enabled, then click &apos;Take Picture&apos;.
         </p>
       )}
-      <Button 
-        variant="primary" 
-        size="lg" 
-        onClick={handleButtonClick} 
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleButtonClick}
         className="mt-6 w-64 font-mono"
         disabled={!cameraEnabled}
       >

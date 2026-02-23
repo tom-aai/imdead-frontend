@@ -12,10 +12,7 @@ export const VideoTile = ({
 }: React.ComponentProps<'div'> & React.ComponentProps<typeof VideoTrack>) => {
   return (
     <div ref={ref} className={cn('bg-muted overflow-hidden rounded-md', className)}>
-      <MotionVideoTrack
-        trackRef={trackRef}
-        className={cn('h-full w-full object-cover')}
-      />
+      <MotionVideoTrack trackRef={trackRef} className={cn('h-full w-full object-cover')} />
     </div>
   );
 };

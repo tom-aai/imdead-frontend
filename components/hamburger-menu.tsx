@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut } from '@/lib/supabase';
 import { List } from '@phosphor-icons/react';
+import { signOut } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 interface HamburgerMenuProps {
@@ -55,17 +55,11 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
   };
 
   return (
-    <div
-      ref={menuRef}
-      className={cn(
-        'z-50',
-        inline ? 'relative' : 'fixed top-4 right-4'
-      )}
-    >
+    <div ref={menuRef} className={cn('z-50', inline ? 'relative' : 'fixed top-4 right-4')}>
       {/* Hamburger circle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors shadow-lg cursor-pointer"
+        className="bg-muted hover:bg-muted/80 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full shadow-lg transition-colors"
         aria-label="Open menu"
       >
         <List size={24} weight="bold" className="text-foreground" />
@@ -73,35 +67,35 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute top-14 right-0 bg-primary rounded-lg shadow-xl overflow-hidden min-w-[160px]">
+        <div className="bg-primary absolute top-14 right-0 min-w-[160px] overflow-hidden rounded-lg shadow-xl">
           <button
             onClick={handleDashboard}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+            className="text-primary-foreground hover:bg-primary/80 w-full cursor-pointer px-4 py-3 text-left text-sm font-medium transition-colors"
           >
             Dashboard
           </button>
           <button
             onClick={handleRecloneVoice}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+            className="text-primary-foreground hover:bg-primary/80 w-full cursor-pointer px-4 py-3 text-left text-sm font-medium transition-colors"
           >
             Re-Clone Voice
           </button>
           <button
             onClick={handleSettings}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+            className="text-primary-foreground hover:bg-primary/80 w-full cursor-pointer px-4 py-3 text-left text-sm font-medium transition-colors"
           >
             Settings
           </button>
           <a
             href="mailto:support@melochora.com"
             onClick={() => setIsOpen(false)}
-            className="block w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+            className="text-primary-foreground hover:bg-primary/80 block w-full cursor-pointer px-4 py-3 text-left text-sm font-medium transition-colors"
           >
             Support
           </a>
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-3 text-left text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors cursor-pointer"
+            className="text-primary-foreground hover:bg-primary/80 w-full cursor-pointer px-4 py-3 text-left text-sm font-medium transition-colors"
           >
             Logout
           </button>
@@ -110,4 +104,3 @@ export function HamburgerMenu({ inline = false }: HamburgerMenuProps) {
     </div>
   );
 }
-

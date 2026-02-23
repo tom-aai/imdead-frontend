@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { VoiceRecorder } from '@/components/voice-recorder';
-import { HamburgerMenu } from '@/components/hamburger-menu';
-import { Button } from '@/components/ui/button';
-import { ProtectedRoute } from '@/components/protected-route';
-import { VoiceConsentModal } from '@/components/voice-consent-modal';
-import { getSupabaseClient } from '@/lib/supabase';
 import { CheckCircle, CircleNotch, Warning } from '@phosphor-icons/react';
+import { HamburgerMenu } from '@/components/hamburger-menu';
+import { ProtectedRoute } from '@/components/protected-route';
+import { Button } from '@/components/ui/button';
+import { VoiceConsentModal } from '@/components/voice-consent-modal';
+import { VoiceRecorder } from '@/components/voice-recorder';
+import { getSupabaseClient } from '@/lib/supabase';
 
 type SubmissionState = 'idle' | 'submitting' | 'processing' | 'success' | 'error';
 
@@ -45,7 +45,7 @@ export default function RecloneVoicePage() {
     try {
       const response = await fetch(`/api/reclone-voice/status/${jobId}`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -91,7 +91,9 @@ export default function RecloneVoicePage() {
 
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         throw new Error('You must be logged in to re-clone your voice');
@@ -103,7 +105,7 @@ export default function RecloneVoicePage() {
       const response = await fetch('/api/reclone-voice', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: formData,
       });
@@ -125,7 +127,6 @@ export default function RecloneVoicePage() {
 
       // Also poll immediately
       pollJobStatus(data.job_id, session.access_token);
-
     } catch (error) {
       console.error('Failed to submit recording:', error);
       setSubmissionState('error');
@@ -150,18 +151,18 @@ export default function RecloneVoicePage() {
     <ProtectedRoute>
       <div className="bg-background min-h-screen">
         {/* Header */}
-        <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
-          <div className="container mx-auto px-8 py-6 flex justify-between items-center">
+        <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-border sticky top-0 z-10 border-b backdrop-blur">
+          <div className="container mx-auto flex items-center justify-between px-8 py-6">
             <h1 className="text-2xl font-semibold">Re-Clone Voice</h1>
             <HamburgerMenu inline />
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-8 py-12 max-w-2xl">
+        <div className="container mx-auto max-w-2xl px-8 py-12">
           {submissionState === 'success' ? (
             // Success state
-            <div className="text-center space-y-6">
+            <div className="space-y-6 text-center">
               <div className="flex justify-center">
                 <CheckCircle size={64} weight="fill" className="text-green-500" />
               </div>
@@ -182,40 +183,48 @@ export default function RecloneVoicePage() {
             // Recording state
             <div className="space-y-8">
               {/* Guidelines */}
-              <div className="bg-muted/30 rounded-lg p-6 space-y-4">
+              <div className="bg-muted/30 space-y-4 rounded-lg p-6">
                 <h2 className="text-lg font-semibold">Best Practices for Voice Cloning</h2>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
                     <span className="text-primary font-bold">•</span>
-                    <span><strong>Avoid background noise</strong></span>
+                    <span>
+                      <strong>Avoid background noise</strong>
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary font-bold">•</span>
-                    <span><strong>Record for about 10 seconds</strong></span>
+                    <span>
+                      <strong>Record for about 10 seconds</strong>
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary font-bold">•</span>
-                    <span><strong>Speak clearly</strong></span>
+                    <span>
+                      <strong>Speak clearly</strong>
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary font-bold">•</span>
-                    <span><strong>Avoid long pauses</strong></span>
+                    <span>
+                      <strong>Avoid long pauses</strong>
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary font-bold">•</span>
-                    <span><strong>Speak at your natural speed</strong></span>
+                    <span>
+                      <strong>Speak at your natural speed</strong>
+                    </span>
                   </li>
                 </ul>
               </div>
 
               {/* Sample Script */}
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 space-y-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">
+              <div className="bg-primary/5 border-primary/20 space-y-3 rounded-lg border p-6">
+                <h3 className="text-primary text-sm font-semibold tracking-wide uppercase">
                   Unsure What To Say? Use This Script.
                 </h3>
-                <p className="text-lg leading-relaxed italic">
-                  "{SAMPLE_SCRIPT}"
-                </p>
+                <p className="text-lg leading-relaxed italic">&ldquo;{SAMPLE_SCRIPT}&rdquo;</p>
               </div>
 
               {/* Voice Recorder */}
@@ -226,22 +235,26 @@ export default function RecloneVoicePage() {
                     disabled={isProcessing}
                   />
                 ) : (
-                  <div className="text-center space-y-6">
+                  <div className="space-y-6 text-center">
                     {submissionState === 'processing' ? (
                       // Processing state
-                      <div className="bg-primary/10 border border-primary/30 rounded-lg p-6">
+                      <div className="bg-primary/10 border-primary/30 rounded-lg border p-6">
                         <CircleNotch size={48} className="text-primary mx-auto mb-3 animate-spin" />
                         <p className="font-medium">Cloning your voice...</p>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-muted-foreground mt-1 text-sm">
                           This may take a minute or two
                         </p>
                       </div>
                     ) : (
                       // Recording complete, ready to submit
-                      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-6">
-                        <CheckCircle size={48} weight="fill" className="text-green-500 mx-auto mb-3" />
+                      <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-6">
+                        <CheckCircle
+                          size={48}
+                          weight="fill"
+                          className="mx-auto mb-3 text-green-500"
+                        />
                         <p className="font-medium">Recording Complete!</p>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-muted-foreground mt-1 text-sm">
                           {(recordedBlob.size / 1024).toFixed(1)} KB recorded
                         </p>
                       </div>
@@ -249,7 +262,7 @@ export default function RecloneVoicePage() {
 
                     {/* Error message */}
                     {submissionState === 'error' && errorMessage && (
-                      <div className="flex items-center gap-2 text-destructive text-sm">
+                      <div className="text-destructive flex items-center gap-2 text-sm">
                         <Warning size={16} weight="fill" />
                         {errorMessage}
                       </div>
@@ -257,7 +270,7 @@ export default function RecloneVoicePage() {
 
                     {/* Action buttons */}
                     {submissionState !== 'processing' && (
-                      <div className="flex gap-4 justify-center">
+                      <div className="flex justify-center gap-4">
                         <Button
                           variant="outline"
                           onClick={handleRecordAgain}

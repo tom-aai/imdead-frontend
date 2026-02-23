@@ -81,11 +81,11 @@ export default function AuthCallback() {
   if (error) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <div className="text-center max-w-md px-6">
-          <div className="font-mono text-sm text-red-500 mb-4">{error}</div>
+        <div className="max-w-md px-6 text-center">
+          <div className="mb-4 font-mono text-sm text-red-500">{error}</div>
           <button
             onClick={() => router.push('/login')}
-            className="font-mono text-sm text-primary underline hover:no-underline"
+            className="text-primary font-mono text-sm underline hover:no-underline"
           >
             Back to login
           </button>

@@ -28,9 +28,10 @@ export async function DELETE(req: Request, { params }: RouteParams) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       console.error('[Delete Session API] Auth error:', authError?.message || 'No user');
@@ -76,9 +77,9 @@ export async function DELETE(req: Request, { params }: RouteParams) {
     // Try with deleted_at first (if column exists), fall back to just is_active
     let { error: shareTokenError } = await supabase
       .from('avatar_share_tokens')
-      .update({ 
+      .update({
         is_active: false,
-        deleted_at: new Date().toISOString()
+        deleted_at: new Date().toISOString(),
       })
       .eq('session_id', session_id);
 
@@ -93,7 +94,10 @@ export async function DELETE(req: Request, { params }: RouteParams) {
     }
 
     if (shareTokenError) {
-      console.error('[Delete Session API] Error updating avatar_share_tokens:', shareTokenError.message);
+      console.error(
+        '[Delete Session API] Error updating avatar_share_tokens:',
+        shareTokenError.message
+      );
       // Continue - share tokens might not exist for this session
     } else {
       console.log('[Delete Session API] Marked avatar_share_tokens as inactive');
@@ -106,7 +110,10 @@ export async function DELETE(req: Request, { params }: RouteParams) {
       .eq('session_id', session_id);
 
     if (analysisError) {
-      console.error('[Delete Session API] Error deleting interview_call_analysis:', analysisError.message);
+      console.error(
+        '[Delete Session API] Error deleting interview_call_analysis:',
+        analysisError.message
+      );
       // Continue - analysis might not exist
     } else {
       console.log('[Delete Session API] Deleted interview_call_analysis');
@@ -126,7 +133,6 @@ export async function DELETE(req: Request, { params }: RouteParams) {
     console.log('[Delete Session API] Successfully deleted session:', session_id);
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error('[Delete Session API] Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -167,9 +173,10 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       console.error('[Update Session API] Auth error:', authError?.message || 'No user');
@@ -209,10 +216,8 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     console.log('[Update Session API] Successfully updated session:', session_id);
 
     return NextResponse.json({ success: true, main_topic: trimmedTopic });
-
   } catch (error) {
     console.error('[Update Session API] Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

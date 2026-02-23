@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { HamburgerMenu } from '@/components/hamburger-menu';
-import { uploadAvatarImage, getSupabaseClient, checkIsAdmin } from '@/lib/supabase';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { CircleNotch } from '@phosphor-icons/react';
+import { HamburgerMenu } from '@/components/hamburger-menu';
+import { Button } from '@/components/ui/button';
+import { checkIsAdmin, getSupabaseClient, uploadAvatarImage } from '@/lib/supabase';
 
 export default function EditAvatarPage() {
   const router = useRouter();
@@ -45,11 +45,11 @@ export default function EditAvatarPage() {
 
     const poll = async (): Promise<boolean> => {
       attempts++;
-      
+
       try {
         const response = await fetch(`/api/jobs/${jobId}`, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         });
 
@@ -69,8 +69,10 @@ export default function EditAvatarPage() {
           throw new Error('Avatar image update timed out. Please try again.');
         } else {
           // Still processing, update status and poll again
-          setProcessingStatus(`Processing your new avatar image... (${Math.floor(attempts * 5 / 60)}m ${(attempts * 5) % 60}s)`);
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          setProcessingStatus(
+            `Processing your new avatar image... (${Math.floor((attempts * 5) / 60)}m ${(attempts * 5) % 60}s)`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 5000));
           return poll();
         }
       } catch (err) {
@@ -153,71 +155,79 @@ export default function EditAvatarPage() {
   }, []);
 
   // Common function to process and submit an image blob
-  const processAndSubmitImage = useCallback(async (blob: Blob) => {
-    setIsProcessing(true);
-    setError(null);
+  const processAndSubmitImage = useCallback(
+    async (blob: Blob) => {
+      setIsProcessing(true);
+      setError(null);
 
-    try {
-      // Generate a unique ID for this picture
-      const pictureId = crypto.randomUUID();
-      console.log('Generated new picture ID:', pictureId);
+      try {
+        // Generate a unique ID for this picture
+        const pictureId = crypto.randomUUID();
+        console.log('Generated new picture ID:', pictureId);
 
-      // Upload to Supabase Storage
-      console.log('Uploading picture:', pictureId);
-      await uploadAvatarImage(pictureId, blob);
+        // Upload to Supabase Storage
+        console.log('Uploading picture:', pictureId);
+        await uploadAvatarImage(pictureId, blob);
 
-      // Get auth session for API call
-      const supabase = getSupabaseClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        // Get auth session for API call
+        const supabase = getSupabaseClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (!session) {
-        throw new Error('Not authenticated');
+        if (!session) {
+          throw new Error('Not authenticated');
+        }
+
+        // Call the update-avatar API
+        // The picture_id needs to include the full path as stored in Supabase: {userId}/{uuid}.png
+        const userId = session.user.id;
+        const fullPictureId = `${userId}/${pictureId}.png`;
+
+        setProcessingStatus('Starting avatar image update...');
+
+        console.log(
+          'Calling update-avatar API for session:',
+          sessionId,
+          'with picture:',
+          fullPictureId
+        );
+        const response = await fetch('/api/update-avatar', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            picture_id: fullPictureId,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update avatar image');
+        }
+
+        console.log('Avatar update initiated:', data);
+
+        // Poll for job completion if job_id is returned
+        if (data.job_id) {
+          setProcessingStatus('Processing your new avatar image...');
+          await pollJobStatus(data.job_id, session.access_token);
+        }
+
+        // Navigate back to dashboard after job completes
+        router.push('/dashboard');
+      } catch (err) {
+        console.error('Error updating avatar:', err);
+        setError(err instanceof Error ? err.message : 'Failed to update avatar image');
+        setIsProcessing(false);
       }
-
-      // Call the update-avatar API
-      // The picture_id needs to include the full path as stored in Supabase: {userId}/{uuid}.png
-      const userId = session.user.id;
-      const fullPictureId = `${userId}/${pictureId}.png`;
-      
-      setProcessingStatus('Starting avatar image update...');
-      
-      console.log('Calling update-avatar API for session:', sessionId, 'with picture:', fullPictureId);
-      const response = await fetch('/api/update-avatar', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          picture_id: fullPictureId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update avatar image');
-      }
-
-      console.log('Avatar update initiated:', data);
-
-      // Poll for job completion if job_id is returned
-      if (data.job_id) {
-        setProcessingStatus('Processing your new avatar image...');
-        await pollJobStatus(data.job_id, session.access_token);
-      }
-
-      // Navigate back to dashboard after job completes
-      router.push('/dashboard');
-    } catch (err) {
-      console.error('Error updating avatar:', err);
-      setError(err instanceof Error ? err.message : 'Failed to update avatar image');
-      setIsProcessing(false);
-    }
-  }, [sessionId, pollJobStatus, router]);
+    },
+    [sessionId, pollJobStatus, router]
+  );
 
   const takePictureAndSubmit = async () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -279,7 +289,7 @@ export default function EditAvatarPage() {
       // Load the image file
       const image = new Image();
       const imageUrl = URL.createObjectURL(file);
-      
+
       await new Promise<void>((resolve, reject) => {
         image.onload = () => {
           URL.revokeObjectURL(imageUrl);
@@ -340,28 +350,28 @@ export default function EditAvatarPage() {
     <section className="bg-background fixed inset-0 mx-auto flex h-svh flex-col items-center justify-center text-center">
       <HamburgerMenu />
 
-      <h1 className="text-2xl font-semibold mb-4">Update Avatar Image</h1>
+      <h1 className="mb-4 text-2xl font-semibold">Update Avatar Image</h1>
 
       {/* Video preview - 512x512 pixel square tile */}
-      <div className="mb-6 relative">
-        <div className="relative w-[512px] h-[512px]">
+      <div className="relative mb-6">
+        <div className="relative h-[512px] w-[512px]">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-[512px] h-[512px] bg-gray-200 rounded-lg object-cover -scale-x-100"
+            className="h-[512px] w-[512px] -scale-x-100 rounded-lg bg-gray-200 object-cover"
             style={{ display: cameraEnabled && !isProcessing ? 'block' : 'none' }}
           />
           <canvas ref={canvasRef} className="hidden" />
           {!cameraEnabled && !isProcessing && (
-            <div className="absolute inset-0 w-[512px] h-[512px] bg-gray-200 rounded-lg flex items-center justify-center">
+            <div className="absolute inset-0 flex h-[512px] w-[512px] items-center justify-center rounded-lg bg-gray-200">
               <div className="text-center">
-                <p className="text-gray-500 mb-2">{cameraError || 'Loading camera...'}</p>
+                <p className="mb-2 text-gray-500">{cameraError || 'Loading camera...'}</p>
                 {cameraError && (
                   <button
                     onClick={() => window.location.reload()}
-                    className="text-blue-500 hover:text-blue-700 underline text-sm"
+                    className="text-sm text-blue-500 underline hover:text-blue-700"
                   >
                     Retry
                   </button>
@@ -370,11 +380,16 @@ export default function EditAvatarPage() {
             </div>
           )}
           {isProcessing && (
-            <div className="absolute inset-0 w-[512px] h-[512px] bg-gray-200 rounded-lg flex items-center justify-center">
+            <div className="absolute inset-0 flex h-[512px] w-[512px] items-center justify-center rounded-lg bg-gray-200">
               <div className="text-center">
-                <CircleNotch size={48} className="animate-spin text-muted-foreground mx-auto mb-4" />
-                <p className="text-gray-500">{processingStatus || 'Processing your new avatar image...'}</p>
-                <p className="text-sm text-muted-foreground mt-2">This may take a few minutes</p>
+                <CircleNotch
+                  size={48}
+                  className="text-muted-foreground mx-auto mb-4 animate-spin"
+                />
+                <p className="text-gray-500">
+                  {processingStatus || 'Processing your new avatar image...'}
+                </p>
+                <p className="text-muted-foreground mt-2 text-sm">This may take a few minutes</p>
               </div>
             </div>
           )}
@@ -391,7 +406,7 @@ export default function EditAvatarPage() {
         </p>
       )}
 
-      <div className="mt-6 flex flex-col gap-4 items-center">
+      <div className="mt-6 flex flex-col items-center gap-4">
         <Button
           variant="primary"
           size="lg"
@@ -434,4 +449,3 @@ export default function EditAvatarPage() {
     </section>
   );
 }
-

@@ -34,10 +34,12 @@ export async function GET(req: Request, { params }: RouteParams) {
     // Check if token is active and public
     const isPublic = shareData.is_active && shareData.is_public === true;
 
-    return NextResponse.json({ isPublic }, {
-      headers: { 'Cache-Control': 'no-store' },
-    });
-
+    return NextResponse.json(
+      { isPublic },
+      {
+        headers: { 'Cache-Control': 'no-store' },
+      }
+    );
   } catch (error) {
     console.error('[Public Check API] Unexpected error:', error);
     return NextResponse.json({ isPublic: false }, { status: 200 });

@@ -17,9 +17,10 @@ export async function GET(req: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -37,7 +38,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Failed to check consent' }, { status: 500 });
     }
 
-    const hasConsent = !!(profile?.voice_id_consent);
+    const hasConsent = !!profile?.voice_id_consent;
 
     return NextResponse.json({ hasConsent });
   } catch (error) {
@@ -60,9 +61,10 @@ export async function POST(req: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -75,14 +77,15 @@ export async function POST(req: Request) {
     };
 
     // Upsert the consent record
-    const { error: upsertError } = await supabase
-      .from('user_profiles')
-      .upsert({
+    const { error: upsertError } = await supabase.from('user_profiles').upsert(
+      {
         user_id: user.id,
         voice_id_consent: consentRecord,
-      }, {
+      },
+      {
         onConflict: 'user_id',
-      });
+      }
+    );
 
     if (upsertError) {
       console.error('[Voice Consent API] Error updating profile:', upsertError);

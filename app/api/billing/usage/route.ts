@@ -9,7 +9,7 @@ const BACKEND_API_KEY = process.env.BACKEND_API_KEY;
 export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get('authorization');
-    
+
     if (!authHeader) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -21,9 +21,10 @@ export async function GET(req: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -49,7 +50,6 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('[Billing Usage API] Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { decodeJwt } from 'jose';
 import { ConnectionDetails } from '@/app/api/connection-details/route';
-import { AppConfig } from '@/lib/types';
 import { getSupabaseClient } from '@/lib/supabase';
+import { AppConfig } from '@/lib/types';
 
 const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
@@ -12,7 +12,7 @@ export interface ResumeSessionData {
 }
 
 export default function useConnectionDetails(
-  appConfig: AppConfig, 
+  appConfig: AppConfig,
   pictureId: string | null,
   resumeSessionData?: ResumeSessionData | null
 ) {
@@ -27,7 +27,9 @@ export default function useConnectionDetails(
 
   const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | null>(null);
   const [connectionDetailsPictureId, setConnectionDetailsPictureId] = useState<string | null>(null);
-  const [connectionDetailsOriginalSessionId, setConnectionDetailsOriginalSessionId] = useState<string | null>(null);
+  const [connectionDetailsOriginalSessionId, setConnectionDetailsOriginalSessionId] = useState<
+    string | null
+  >(null);
 
   const fetchConnectionDetails = useCallback(async () => {
     setConnectionDetails(null);
@@ -40,8 +42,10 @@ export default function useConnectionDetails(
     try {
       // Get Supabase session for authentication
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       const requestBody: Record<string, unknown> = {
         room_config: appConfig.agentName
           ? {
@@ -50,23 +54,23 @@ export default function useConnectionDetails(
           : undefined,
         pictureId: pictureId,
       };
-      
+
       // Add resume session data if resuming
       if (resumeSessionData) {
         requestBody.originalSessionId = resumeSessionData.originalSessionId;
         requestBody.conversationSummary = resumeSessionData.conversationSummary;
       }
-      
+
       // Include authorization header with session token
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         'X-Sandbox-Id': appConfig.sandboxId ?? '',
       };
-      
+
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
-      
+
       const res = await fetch(url.toString(), {
         method: 'POST',
         headers,
@@ -110,26 +114,40 @@ export default function useConnectionDetails(
     // 3. Picture ID has changed (important for multi-session use!)
     // 4. Original session ID has changed (for resume mode)
     const pictureIdChanged = connectionDetailsPictureId !== pictureId;
-    const originalSessionIdChanged = connectionDetailsOriginalSessionId !== (resumeSessionData?.originalSessionId ?? null);
-    
-    if (isConnectionDetailsExpired() || !connectionDetails || pictureIdChanged || originalSessionIdChanged) {
+    const originalSessionIdChanged =
+      connectionDetailsOriginalSessionId !== (resumeSessionData?.originalSessionId ?? null);
+
+    if (
+      isConnectionDetailsExpired() ||
+      !connectionDetails ||
+      pictureIdChanged ||
+      originalSessionIdChanged
+    ) {
       if (pictureIdChanged) {
         console.log('Picture ID changed, fetching new connection details', {
           old: connectionDetailsPictureId,
-          new: pictureId
+          new: pictureId,
         });
       }
       if (originalSessionIdChanged) {
         console.log('Original session ID changed, fetching new connection details (resume mode)', {
           old: connectionDetailsOriginalSessionId,
-          new: resumeSessionData?.originalSessionId
+          new: resumeSessionData?.originalSessionId,
         });
       }
       return fetchConnectionDetails();
     } else {
       return connectionDetails;
     }
-  }, [connectionDetails, connectionDetailsPictureId, connectionDetailsOriginalSessionId, pictureId, resumeSessionData, fetchConnectionDetails, isConnectionDetailsExpired]);
+  }, [
+    connectionDetails,
+    connectionDetailsPictureId,
+    connectionDetailsOriginalSessionId,
+    pictureId,
+    resumeSessionData,
+    fetchConnectionDetails,
+    isConnectionDetailsExpired,
+  ]);
 
   return {
     connectionDetails,

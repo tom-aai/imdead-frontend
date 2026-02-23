@@ -1,16 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, use } from 'react';
+import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Room, RoomEvent } from 'livekit-client';
 import { AnimatePresence, motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
+import type { ChatConnectionDetails } from '@/app/api/chat-session/[share_token]/connection/route';
 import { toastAlert } from '@/components/alert-toast';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { ChatConnectionDetails } from '@/app/api/chat-session/[share_token]/connection/route';
 
 const MotionSessionView = motion.create(SessionView);
 
@@ -80,7 +80,9 @@ export default function ChatPage({ params }: ChatPageProps) {
     const checkAuth = async () => {
       try {
         const supabase = getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
         if (!session) {
           // Redirect to login with return URL
@@ -113,7 +115,9 @@ export default function ChatPage({ params }: ChatPageProps) {
 
         if (!isPublic) {
           const supabase = getSupabaseClient();
-          const { data: { session } } = await supabase.auth.getSession();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
 
           if (!session) {
             setError('Not authenticated');
@@ -130,13 +134,13 @@ export default function ChatPage({ params }: ChatPageProps) {
 
         if (!response.ok) {
           const data = await response.json();
-          
+
           // Check if expert has no credits (402 Payment Required)
           if (data.code === 'NO_CREDITS' || response.status === 402) {
             setIsNoCredits(true);
             return;
           }
-          
+
           // Check if the avatar/session is no longer available
           // This includes: deleted sessions, revoked links, missing source session,
           // invalid tokens (deleted or never existed), or explicit deletion flag
@@ -279,9 +283,7 @@ export default function ChatPage({ params }: ChatPageProps) {
 
   // Loading state - show blank screen while checking public status or authentication
   if (isPublic === null || isAuthenticated === null) {
-    return (
-      <div className="bg-background fixed inset-0" />
-    );
+    return <div className="bg-background fixed inset-0" />;
   }
 
   // Avatar unavailable state - matches post-session style
@@ -293,13 +295,13 @@ export default function ChatPage({ params }: ChatPageProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center max-w-lg px-4"
+          className="max-w-lg px-4 text-center"
         >
-          <h1 className="text-3xl font-bold mb-8">Avatar is no longer available</h1>
-          
+          <h1 className="mb-8 text-3xl font-bold">Avatar is no longer available</h1>
+
           <button
             onClick={() => router.push('/')}
-            className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-lg"
+            className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
           >
             CREATE +
           </button>
@@ -318,17 +320,17 @@ export default function ChatPage({ params }: ChatPageProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center max-w-lg px-4"
+          className="max-w-lg px-4 text-center"
         >
-          <h1 className="text-3xl font-bold mb-4">Avatar temporarily unavailable</h1>
+          <h1 className="mb-4 text-3xl font-bold">Avatar temporarily unavailable</h1>
           <p className="text-muted-foreground mb-8">
-            This expert has reached their free usage limit for the month. 
-            They&apos;ve been notified and may upgrade soon.
+            This expert has reached their free usage limit for the month. They&apos;ve been notified
+            and may upgrade soon.
           </p>
-          
+
           <button
             onClick={() => router.push('/')}
-            className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-lg"
+            className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
           >
             CREATE +
           </button>
@@ -342,12 +344,12 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (error) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <h1 className="text-2xl font-bold mb-4">Unable to Load Chat</h1>
+        <div className="max-w-md px-4 text-center">
+          <h1 className="mb-4 text-2xl font-bold">Unable to Load Chat</h1>
           <p className="text-muted-foreground mb-6">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
+            className="bg-primary text-primary-foreground rounded-md px-4 py-2 transition-opacity hover:opacity-90"
           >
             Go Home
           </button>
@@ -365,13 +367,15 @@ export default function ChatPage({ params }: ChatPageProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center max-w-lg px-4"
+          className="max-w-lg px-4 text-center"
         >
-          <h1 className="text-3xl font-bold mb-8 whitespace-nowrap">Ready to create your expert avatar?</h1>
-          
+          <h1 className="mb-8 text-3xl font-bold whitespace-nowrap">
+            Ready to create your expert avatar?
+          </h1>
+
           <button
             onClick={() => router.push('/')}
-            className="px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-lg"
+            className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
           >
             CREATE +
           </button>
@@ -383,9 +387,7 @@ export default function ChatPage({ params }: ChatPageProps) {
 
   // Loading connection details - show blank screen for seamless transition
   if (!connectionDetails) {
-    return (
-      <div className="bg-background fixed inset-0" />
-    );
+    return <div className="bg-background fixed inset-0" />;
   }
 
   // Format seconds as M:SS
@@ -440,4 +442,3 @@ export default function ChatPage({ params }: ChatPageProps) {
     </main>
   );
 }
-

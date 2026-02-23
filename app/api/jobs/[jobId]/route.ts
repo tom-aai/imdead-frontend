@@ -6,10 +6,7 @@ export const revalidate = 0;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5001';
 const BACKEND_API_KEY = process.env.BACKEND_API_KEY;
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ jobId: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ jobId: string }> }) {
   try {
     const authHeader = req.headers.get('authorization');
 
@@ -23,9 +20,10 @@ export async function GET(
       process.env.SUPABASE_SERVICE_KEY!
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -57,4 +55,3 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

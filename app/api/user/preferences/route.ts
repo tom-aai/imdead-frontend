@@ -17,9 +17,10 @@ export async function GET(req: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -61,9 +62,10 @@ export async function PATCH(req: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -74,18 +76,22 @@ export async function PATCH(req: Request) {
     const { email_notifications_enabled } = body;
 
     if (typeof email_notifications_enabled !== 'boolean') {
-      return NextResponse.json({ error: 'Invalid email_notifications_enabled value' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid email_notifications_enabled value' },
+        { status: 400 }
+      );
     }
 
     // Upsert the preference
-    const { error: upsertError } = await supabase
-      .from('user_profiles')
-      .upsert({
+    const { error: upsertError } = await supabase.from('user_profiles').upsert(
+      {
         user_id: user.id,
         email_notifications_enabled,
-      }, {
+      },
+      {
         onConflict: 'user_id',
-      });
+      }
+    );
 
     if (upsertError) {
       console.error('[Preferences API] Error updating profile:', upsertError);
@@ -101,4 +107,3 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

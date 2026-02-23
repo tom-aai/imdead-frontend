@@ -16,7 +16,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const checkAuth = async () => {
       try {
         const supabase = getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
         if (!session) {
           router.push('/login');
@@ -47,4 +49,3 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Show children only if authenticated
   return isAuthenticated ? <>{children}</> : null;
 }
-

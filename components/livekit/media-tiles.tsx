@@ -92,7 +92,8 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
   };
   const agentLayoutTransition = transition;
   const avatarLayoutTransition = transition;
-  const isAvatar = agentState === 'listening' || agentState === 'thinking' || agentState === 'speaking';
+  const isAvatar =
+    agentState === 'listening' || agentState === 'thinking' || agentState === 'speaking';
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-8 bottom-32 z-50 md:top-12 md:bottom-40">

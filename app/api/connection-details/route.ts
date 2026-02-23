@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
     const pictureId: string | undefined = body?.pictureId;
-    
+
     // Resume session data (optional - for resuming existing sessions)
     const originalSessionId: string | undefined = body?.originalSessionId;
     const conversationSummary: string | undefined = body?.conversationSummary;
@@ -50,18 +50,19 @@ export async function POST(req: Request) {
     // Get user data from Supabase session
     let userData: UserData | null = null;
     const authHeader = req.headers.get('authorization');
-    
+
     if (authHeader) {
       try {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
-        
-        const { data: { user }, error } = await supabase.auth.getUser(
-          authHeader.replace('Bearer ', '')
-        );
-        
+
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+
         if (!error && user) {
           userData = {
             userId: user.id,
@@ -126,14 +127,14 @@ function createParticipantToken(
     ...userInfo,
     ttl: '15m',
   };
-  
+
   // Build metadata object with all user info
   const metadata: Record<string, unknown> = {};
-  
+
   if (pictureId) {
     metadata.pictureId = pictureId;
   }
-  
+
   if (userData) {
     metadata.user = {
       userId: userData.userId,
@@ -143,21 +144,21 @@ function createParticipantToken(
       lastName: userData.lastName,
     };
   }
-  
+
   // Add resume session data if provided
   if (originalSessionId) {
     metadata.originalSessionId = originalSessionId;
     metadata.conversationSummary = conversationSummary || '';
     metadata.isResumeSession = true;
   }
-  
+
   // Add metadata to token if we have any
   if (Object.keys(metadata).length > 0) {
     tokenOptions.metadata = JSON.stringify(metadata);
   }
-  
+
   const at = new AccessToken(API_KEY, API_SECRET, tokenOptions);
-  
+
   const grant: VideoGrant = {
     room: roomName,
     roomJoin: true,

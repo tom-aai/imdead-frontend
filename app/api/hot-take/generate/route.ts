@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const response = await fetch(`${BACKEND_URL}/generate-hot-take-video`, {
       method: 'POST',
       headers: {
-        'Authorization': authHeader,
+        Authorization: authHeader,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -48,4 +48,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

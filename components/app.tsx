@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Room, RoomEvent } from 'livekit-client';
 import { motion } from 'motion/react';
@@ -8,10 +8,10 @@ import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-
 import { toastAlert } from '@/components/alert-toast';
 import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';
-import { Welcome } from '@/components/welcome';
 import { VoiceConsentModal } from '@/components/voice-consent-modal';
-import { getSupabaseClient } from '@/lib/supabase';
+import { Welcome } from '@/components/welcome';
 import useConnectionDetails, { ResumeSessionData } from '@/hooks/useConnectionDetails';
+import { getSupabaseClient } from '@/lib/supabase';
 import type { AppConfig } from '@/lib/types';
 
 const MotionWelcome = motion.create(Welcome);
@@ -35,8 +35,11 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
   const [pendingPictureId, setPendingPictureId] = useState<string | null>(null);
   const [welcomeKey, setWelcomeKey] = useState(0);
   const [hasExistingConsent, setHasExistingConsent] = useState<boolean | null>(null);
-  const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
-    useConnectionDetails(appConfig, pictureId, resumeSessionData);
+  const { refreshConnectionDetails, existingOrRefreshConnectionDetails } = useConnectionDetails(
+    appConfig,
+    pictureId,
+    resumeSessionData
+  );
 
   // Track whether the current session is a resume (ref so disconnect handler can read it)
   const isResumeSessionRef = useRef(false);
@@ -49,12 +52,14 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
     const checkConsent = async () => {
       try {
         const supabase = getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session) return;
 
         const response = await fetch('/api/user/voice-consent', {
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
         });
 
@@ -115,17 +120,17 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
         }
 
         // Request camera permission early for avatar creation (512x512 square)
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
             width: { ideal: 512 },
             height: { ideal: 512 },
-            facingMode: 'user'
+            facingMode: 'user',
           },
-          audio: false
+          audio: false,
         });
-        
+
         // Stop the stream immediately since we just needed permission
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       } catch (error) {
         console.error('Error requesting camera for avatar creation:', error);
       }
@@ -181,13 +186,15 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
 
   const handleResumeSession = async (sessionId: string) => {
     console.log('Resuming session:', sessionId);
-    
+
     try {
       // Fetch the session's conversation_summary from the API
       const { getSupabaseClient } = await import('@/lib/supabase');
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         console.error('Not authenticated');
         return;
@@ -195,7 +202,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
 
       const response = await fetch(`/api/sessions/${sessionId}/narrative`, {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
@@ -204,7 +211,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       }
 
       const data = await response.json();
-      
+
       // Set resume session data and start session immediately (skip welcome/picture)
       setResumeSessionData({
         originalSessionId: sessionId,

@@ -9,10 +9,7 @@ export async function POST(req: Request) {
     // Validate backend configuration
     if (!BACKEND_URL || !BACKEND_API_KEY) {
       console.error('[Upload Avatar] Missing backend configuration');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
     // Verify user is authenticated
@@ -26,9 +23,10 @@ export async function POST(req: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       console.error('[Upload Avatar] Auth error:', authError?.message);
@@ -72,13 +70,8 @@ export async function POST(req: Request) {
 
     console.log(`[Upload Avatar] Success for user ${user.id}`);
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('[Upload Avatar] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

@@ -145,7 +145,7 @@ export const SessionView = ({
                 )}
               >
                 <p className="animate-text-shimmer inline-block !bg-clip-text text-sm font-semibold text-transparent">
-                  We're starting your session. Please hold on...
+                  We&apos;re starting your session. Please hold on...
                 </p>
               </motion.div>
             )}

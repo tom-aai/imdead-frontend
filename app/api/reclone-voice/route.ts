@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const response = await fetch(`${BACKEND_URL}/reclone-voice`, {
       method: 'POST',
       headers: {
-        'Authorization': authHeader,
+        Authorization: authHeader,
         // Don't set Content-Type - let fetch set it with the boundary for multipart
       },
       body: backendFormData,
@@ -43,7 +43,6 @@ export async function POST(req: Request) {
 
     console.log('[Reclone Voice API] Job enqueued:', data.job_id);
     return NextResponse.json(data, { status: response.status });
-
   } catch (error) {
     console.error('[Reclone Voice API] Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,12 +1,12 @@
 'use client';
 
-import { Dashboard } from '@/components/dashboard';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Dashboard } from '@/components/dashboard';
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Check if we just came from a finished session
   const justFinishedSession = searchParams.get('from_session') === 'true';
 

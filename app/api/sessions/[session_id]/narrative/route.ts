@@ -28,9 +28,10 @@ export async function GET(req: Request, { params }: RouteParams) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
     if (authError || !user) {
       console.error('[Get Session Narrative API] Auth error:', authError?.message || 'No user');
@@ -57,16 +58,17 @@ export async function GET(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    console.log('[Get Session Narrative API] Successfully retrieved narrative for session:', session_id);
+    console.log(
+      '[Get Session Narrative API] Successfully retrieved narrative for session:',
+      session_id
+    );
 
     return NextResponse.json({
       session_id: sessionData.session_id,
       conversation_summary: sessionData.conversation_summary || '',
     });
-
   } catch (error) {
     console.error('[Get Session Narrative API] Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

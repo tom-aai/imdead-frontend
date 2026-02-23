@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { CircleNotch } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -8,10 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
 import { getSupabaseClient } from '@/lib/supabase';
-import { CircleNotch } from '@phosphor-icons/react';
 
 interface VoiceConsentModalProps {
   open: boolean;
@@ -35,7 +35,9 @@ export function VoiceConsentModal({
     setIsSubmitting(true);
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         throw new Error('You must be logged in to provide consent');
@@ -45,7 +47,7 @@ export function VoiceConsentModal({
       const response = await fetch('/api/user/voice-consent', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -86,7 +88,7 @@ export function VoiceConsentModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Voice Cloning Consent</DialogTitle>
         </DialogHeader>
@@ -94,13 +96,19 @@ export function VoiceConsentModal({
         <div className="space-y-6 py-4">
           <div className="space-y-4 text-sm leading-relaxed">
             <p>
-              I consent to Expert Avatar using my voice recording and voiceprint (collectively, voice data) to create my Cloned Voice for my Expert avatar. I understand that:
+              I consent to Expert Avatar using my voice recording and voiceprint (collectively,
+              voice data) to create my Cloned Voice for my Expert avatar. I understand that:
             </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
+            <ul className="ml-4 list-inside list-disc space-y-2">
               <li>My Cloned Voice will generate AI responses I did not personally speak.</li>
               <li>My voice data will be retained while my account is active.</li>
-              <li>My voice data will be shared with third-party voice cloning services who create my Cloned Voice and who may use my voice data to analyze and improve their services.</li>
-              <li>I can revoke consent and delete my voice data by deleting my Expert Avatar account.</li>
+              <li>
+                My voice data will be shared with third-party voice cloning services who create my
+                Cloned Voice and who may use my voice data to analyze and improve their services.
+              </li>
+              <li>
+                I can revoke consent and delete my voice data by deleting my Expert Avatar account.
+              </li>
             </ul>
             <p>
               I have read and agree to the{' '}
@@ -108,7 +116,7 @@ export function VoiceConsentModal({
                 href="https://expertavatar.com/terms"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary underline hover:text-primary-hover"
+                className="text-primary hover:text-primary-hover underline"
               >
                 Terms of Service
               </a>
@@ -117,7 +125,7 @@ export function VoiceConsentModal({
                 href="https://expertavatar.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary underline hover:text-primary-hover"
+                className="text-primary hover:text-primary-hover underline"
               >
                 Privacy Policy
               </a>
@@ -126,7 +134,7 @@ export function VoiceConsentModal({
                 href="https://expertavatar.com/biometric-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary underline hover:text-primary-hover"
+                className="text-primary hover:text-primary-hover underline"
               >
                 Biometric Information Retention & Destruction Policy
               </a>
@@ -143,19 +151,15 @@ export function VoiceConsentModal({
             />
             <label
               htmlFor="consent-checkbox"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               I consent to the above terms and conditions
             </label>
           </div>
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-          >
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2">
+          <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button

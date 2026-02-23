@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export interface Session {
@@ -47,18 +47,20 @@ export default function useSessions(shouldFetch: boolean = true) {
   const fetchSessions = useCallback(async () => {
     // Capture whether this is the initial load before we potentially change it
     const isInitialLoad = !hasFetchedOnce.current;
-    
+
     try {
       // Only show loading spinner on initial load, not during background refreshes
       if (isInitialLoad) {
         setLoading(true);
       }
-      
+
       // Get the user's session token
       const supabase = getSupabaseClient();
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         console.log('No session found - user may not be authenticated');
         setError('Not authenticated');
@@ -73,7 +75,7 @@ export default function useSessions(shouldFetch: boolean = true) {
       // Fetch sessions from API
       const response = await fetch('/api/sessions', {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
@@ -84,21 +86,28 @@ export default function useSessions(shouldFetch: boolean = true) {
       }
 
       const data = await response.json();
-      console.log('Sessions fetched:', data.sessions?.length || 0, 'sessions, hasProcessingSessions:', data.hasProcessingSessions, 'hasPendingAvatarUpdates:', data.hasPendingAvatarUpdates);
+      console.log(
+        'Sessions fetched:',
+        data.sessions?.length || 0,
+        'sessions, hasProcessingSessions:',
+        data.hasProcessingSessions,
+        'hasPendingAvatarUpdates:',
+        data.hasPendingAvatarUpdates
+      );
       setSessions(data.sessions || []);
       setHasProcessingSessions(data.hasProcessingSessions || false);
       setProcessingSessionIds(data.processingSessionIds || []);
       setSkippedSessionIds(data.skippedSessionIds || []);
       setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
       setHasPendingHotTakeVideos(data.hasPendingHotTakeVideos || false);
-      
+
       // Fetch billing info in the background (don't block UI)
       // Only fetch billing info once on initial load (it's slow-changing data)
       if (!hasFetchedBilling.current) {
         hasFetchedBilling.current = true; // Set immediately to prevent multiple fetches
         fetch('/api/billing/usage', {
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
         })
           .then(async (billingResponse) => {
@@ -111,7 +120,7 @@ export default function useSessions(shouldFetch: boolean = true) {
             console.warn('Could not fetch billing info:', billingErr);
           });
       }
-      
+
       setError(null);
       hasFetchedOnce.current = true;
     } catch (err) {
@@ -131,6 +140,16 @@ export default function useSessions(shouldFetch: boolean = true) {
     }
   }, [shouldFetch, fetchSessions]);
 
-  return { sessions, loading, error, hasProcessingSessions, processingSessionIds, skippedSessionIds, hasPendingAvatarUpdates, hasPendingHotTakeVideos, billingInfo, refetch: fetchSessions };
+  return {
+    sessions,
+    loading,
+    error,
+    hasProcessingSessions,
+    processingSessionIds,
+    skippedSessionIds,
+    hasPendingAvatarUpdates,
+    hasPendingHotTakeVideos,
+    billingInfo,
+    refetch: fetchSessions,
+  };
 }
-
