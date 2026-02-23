@@ -300,7 +300,7 @@ export default function ChatPage({ params }: ChatPageProps) {
           <h1 className="mb-8 text-3xl font-bold">Avatar is no longer available</h1>
 
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/login?autoLogin=true')}
             className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
           >
             CREATE +
@@ -329,7 +329,7 @@ export default function ChatPage({ params }: ChatPageProps) {
           </p>
 
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/login?autoLogin=true')}
             className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
           >
             CREATE +
@@ -374,7 +374,7 @@ export default function ChatPage({ params }: ChatPageProps) {
           </h1>
 
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/login?autoLogin=true')}
             className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
           >
             CREATE +

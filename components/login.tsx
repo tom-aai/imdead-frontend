@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoLogin = searchParams.get('autoLogin') === 'true';
+  const hasAutoLoginTriggered = useRef(false);
 
   // Check if already logged in
   useEffect(() => {
@@ -21,11 +24,18 @@ export const LoginPage = () => {
 
       if (session) {
         router.push('/');
+        return;
+      }
+
+      // If autoLogin param is set and user is not authenticated, trigger login automatically
+      if (autoLogin && !hasAutoLoginTriggered.current) {
+        hasAutoLoginTriggered.current = true;
+        handleLogin();
       }
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, autoLogin]);
 
   const handleLogin = async () => {
     setIsLoading(true);
