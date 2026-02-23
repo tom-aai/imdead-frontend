@@ -290,7 +290,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (isUnavailable) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <HamburgerMenu />
+        {!isPublic && <HamburgerMenu />}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -315,7 +315,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (isNoCredits) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <HamburgerMenu />
+        {!isPublic && <HamburgerMenu />}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -362,7 +362,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (!sessionStarted && connectionDetails) {
     return (
       <div className="bg-background fixed inset-0 flex items-center justify-center">
-        <HamburgerMenu />
+        {!isPublic && <HamburgerMenu />}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
