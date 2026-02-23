@@ -77,7 +77,7 @@ export async function POST(req: Request, { params }: RouteParams) {
       }
 
       // Verify user authentication
-      const { data: authUser, error: authError } = await supabase.auth.getUser(
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(
         authHeader.replace('Bearer ', '')
       );
 
