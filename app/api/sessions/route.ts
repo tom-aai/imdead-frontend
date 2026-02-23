@@ -175,6 +175,19 @@ export async function GET(req: Request) {
 
     console.log(`[Sessions API] Found ${pendingAvatarJobs?.length || 0} pending avatar update jobs`);
 
+    // Check if there are any pending hot_take video generation jobs for the user's sessions
+    const { data: pendingHotTakeJobs } = await supabase
+      .from('post_call_jobs')
+      .select('session_id')
+      .in('session_id', sessionIds)
+      .eq('job_type', 'hot_take')
+      .in('status', ['pending', 'processing']);
+
+    const hasPendingHotTakeVideos = (pendingHotTakeJobs?.length || 0) > 0;
+    const pendingHotTakeSessionIds = new Set((pendingHotTakeJobs || []).map(j => j.session_id));
+
+    console.log(`[Sessions API] Found ${pendingHotTakeJobs?.length || 0} pending hot take video jobs`);
+
     // For each session, generate signed URLs for avatar images and videos
     // cartoon_id is now stored directly on interview_call_analysis (source of truth)
     const sessionsWithImages = await Promise.all(
@@ -226,6 +239,7 @@ export async function GET(req: Request) {
           share_token: shareTokenMap.get(session.session_id) || null,
           unread_message_count: unreadCountMap.get(session.session_id) || 0,
           total_chat_duration_seconds: chatDurationMap.get(session.session_id) || 0,
+          is_hot_take_pending: pendingHotTakeSessionIds.has(session.session_id),
         };
       })
     );
@@ -233,13 +247,14 @@ export async function GET(req: Request) {
     // Recalculate hasProcessingSessions after potentially adding skipped sessions
     const finalHasProcessingSessions = processingSessionIds.length > 0;
 
-    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${finalHasProcessingSessions}, skippedSessionIds: ${skippedSessionIds.length}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}`);
+    console.log(`[Sessions API] Returning ${sessionsWithImages.length} sessions with images, hasProcessingSessions: ${finalHasProcessingSessions}, skippedSessionIds: ${skippedSessionIds.length}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}, hasPendingHotTakeVideos: ${hasPendingHotTakeVideos}`);
     return NextResponse.json({ 
       sessions: sessionsWithImages,
       hasProcessingSessions: finalHasProcessingSessions,
       processingSessionIds: processingSessionIds.map(c => c.session_id),
       skippedSessionIds,
       hasPendingAvatarUpdates,
+      hasPendingHotTakeVideos,
     });
   } catch (error) {
     console.error('[Sessions API] Unexpected error:', error);

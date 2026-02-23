@@ -13,6 +13,7 @@ export interface Session {
   share_token: string | null;
   unread_message_count: number;
   total_chat_duration_seconds: number;
+  is_hot_take_pending: boolean;
 }
 
 export interface BillingInfo {
@@ -38,6 +39,7 @@ export default function useSessions(shouldFetch: boolean = true) {
   const [processingSessionIds, setProcessingSessionIds] = useState<string[]>([]);
   const [skippedSessionIds, setSkippedSessionIds] = useState<string[]>([]);
   const [hasPendingAvatarUpdates, setHasPendingAvatarUpdates] = useState(false);
+  const [hasPendingHotTakeVideos, setHasPendingHotTakeVideos] = useState(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const hasFetchedOnce = useRef(false);
   const hasFetchedBilling = useRef(false);
@@ -88,6 +90,7 @@ export default function useSessions(shouldFetch: boolean = true) {
       setProcessingSessionIds(data.processingSessionIds || []);
       setSkippedSessionIds(data.skippedSessionIds || []);
       setHasPendingAvatarUpdates(data.hasPendingAvatarUpdates || false);
+      setHasPendingHotTakeVideos(data.hasPendingHotTakeVideos || false);
       
       // Fetch billing info in the background (don't block UI)
       // Only fetch billing info once on initial load (it's slow-changing data)
@@ -128,6 +131,6 @@ export default function useSessions(shouldFetch: boolean = true) {
     }
   }, [shouldFetch, fetchSessions]);
 
-  return { sessions, loading, error, hasProcessingSessions, processingSessionIds, skippedSessionIds, hasPendingAvatarUpdates, billingInfo, refetch: fetchSessions };
+  return { sessions, loading, error, hasProcessingSessions, processingSessionIds, skippedSessionIds, hasPendingAvatarUpdates, hasPendingHotTakeVideos, billingInfo, refetch: fetchSessions };
 }
 

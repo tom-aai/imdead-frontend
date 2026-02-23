@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { DownloadSimple, User, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
+import { DownloadSimple, Copy, Check, VideoCamera, CircleNotch, Trash, PencilSimple, X, ArrowClockwise, Envelope } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -66,8 +66,9 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
   const [socialPostText, setSocialPostText] = useState(generateSocialPostText(session.main_topic, session.share_token));
 
   // Generation state for hot take
+  // Initialize from session's pending status (handles page refresh while video is generating)
   const [generation, setGeneration] = useState<GenerationState>({
-    status: 'idle',
+    status: session.is_hot_take_pending ? 'polling' : 'idle',
     jobId: null,
     error: null,
   });
@@ -79,6 +80,22 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
     setEditedTitle(session.main_topic || '');
     setSocialPostText(generateSocialPostText(session.main_topic, session.share_token));
   }, [session.hot_take_1, session.main_topic, session.share_token]);
+
+  // Auto-clear generation state when video URL appears (from dashboard polling)
+  // or sync with backend pending status on refresh
+  useEffect(() => {
+    if (session.hot_take_video_1_url && (generation.status === 'polling' || generation.status === 'generating')) {
+      // Video is ready — clear the "processing" state
+      setGeneration({ status: 'completed', jobId: null, error: null });
+    } else if (session.is_hot_take_pending && generation.status === 'idle') {
+      // Backend reports a pending job but our local state is idle (e.g. page refresh)
+      setGeneration({ status: 'polling', jobId: null, error: null });
+    } else if (!session.is_hot_take_pending && generation.status === 'polling' && !generation.jobId) {
+      // Backend no longer reports pending, and we have no local jobId tracking —
+      // the job must have completed or failed. Refresh to pick up the result.
+      setGeneration({ status: 'idle', jobId: null, error: null });
+    }
+  }, [session.hot_take_video_1_url, session.is_hot_take_pending, generation.status, generation.jobId]);
 
   // Auto-generate share token on mount if it doesn't exist
   const hasAttemptedAutoCreate = useRef(false);
@@ -591,7 +608,13 @@ export const SessionCard = ({ session, onSessionUpdated, onResumeSession, isFree
             className="w-full h-full object-cover"
           />
         ) : (
-          <User size={64} className="text-muted-foreground" />
+          <div className="text-center space-y-3 px-4">
+            <CircleNotch size={40} className="animate-spin text-muted-foreground mx-auto" />
+            <p className="text-muted-foreground font-medium text-sm">Generating avatar...</p>
+            <p className="text-xs text-muted-foreground">
+              This usually takes a few minutes.
+            </p>
+          </div>
         )}
         
         {/* Edit Button */}

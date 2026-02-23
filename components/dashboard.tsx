@@ -34,7 +34,7 @@ export const Dashboard = ({
   justFinishedSession = false,
   ref,
 }: React.ComponentProps<'div'> & DashboardProps) => {
-  const { sessions, loading, error, hasProcessingSessions, processingSessionIds, skippedSessionIds, hasPendingAvatarUpdates, billingInfo, refetch } = useSessions(!disabled);
+  const { sessions, loading, error, hasProcessingSessions, processingSessionIds, skippedSessionIds, hasPendingAvatarUpdates, hasPendingHotTakeVideos, billingInfo, refetch } = useSessions(!disabled);
   
   // Delete state for processing sessions
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
@@ -108,9 +108,9 @@ export const Dashboard = ({
   // Log session count for debugging
   useEffect(() => {
     if (!loading && sessions) {
-      console.log(`[Dashboard] Displaying ${sessions.length} sessions, hasProcessingSessions: ${hasProcessingSessions}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}`);
+      console.log(`[Dashboard] Displaying ${sessions.length} sessions, hasProcessingSessions: ${hasProcessingSessions}, hasPendingAvatarUpdates: ${hasPendingAvatarUpdates}, hasPendingHotTakeVideos: ${hasPendingHotTakeVideos}`);
     }
-  }, [sessions, loading, hasProcessingSessions, hasPendingAvatarUpdates]);
+  }, [sessions, loading, hasProcessingSessions, hasPendingAvatarUpdates, hasPendingHotTakeVideos]);
 
   // Auto-poll when there are processing sessions, pending avatar updates, sessions without avatar images,
   // or we're waiting for a session to appear after just finishing one
@@ -120,13 +120,13 @@ export const Dashboard = ({
     // Check if any session is missing an avatar image
     const hasMissingAvatars = sessions.some(s => !s.avatar_image_url);
     
-    // Poll if there are processing sessions, pending avatar updates, sessions with missing avatars,
-    // or we're waiting for a session to appear (handles race condition after finishing a session)
-    const shouldPoll = hasProcessingSessions || hasPendingAvatarUpdates || hasMissingAvatars || isWaitingForSession;
+    // Poll if there are processing sessions, pending avatar updates, pending hot take videos,
+    // sessions with missing avatars, or we're waiting for a session to appear
+    const shouldPoll = hasProcessingSessions || hasPendingAvatarUpdates || hasPendingHotTakeVideos || hasMissingAvatars || isWaitingForSession;
     
     if (!shouldPoll) return;
 
-    console.log('[Dashboard] Starting auto-poll for processing sessions, avatar updates, missing avatars, or waiting for session');
+    console.log('[Dashboard] Starting auto-poll for processing sessions, avatar updates, hot take videos, missing avatars, or waiting for session');
     
     const pollInterval = setInterval(() => {
       console.log('[Dashboard] Auto-polling for updates...');
@@ -137,7 +137,7 @@ export const Dashboard = ({
       console.log('[Dashboard] Stopping auto-poll');
       clearInterval(pollInterval);
     };
-  }, [disabled, loading, hasProcessingSessions, hasPendingAvatarUpdates, sessions, isWaitingForSession, refetch]);
+  }, [disabled, loading, hasProcessingSessions, hasPendingAvatarUpdates, hasPendingHotTakeVideos, sessions, isWaitingForSession, refetch]);
 
   // Handle deletion of a processing session
   const handleDeleteProcessingSession = async (sessionId: string) => {
