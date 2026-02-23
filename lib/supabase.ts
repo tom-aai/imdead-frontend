@@ -112,7 +112,7 @@ export async function checkIsAdmin(): Promise<boolean> {
     .from('user_profiles')
     .select('is_admin')
     .eq('user_id', session.user.id)
-    .single();
+    .single() as { data: { is_admin: boolean } | null; error: unknown };
   
   if (error) {
     console.error('Failed to check admin status:', error);
