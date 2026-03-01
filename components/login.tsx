@@ -75,7 +75,7 @@ export const LoginPage = () => {
           disabled={isLoading}
           className="font-mono"
         >
-          {isLoading ? 'loading...' : 'login'}
+          {isLoading ? 'loading...' : 'CREATE +'}
         </Button>
       </div>
 
