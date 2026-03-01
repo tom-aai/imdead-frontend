@@ -3,7 +3,7 @@ import type { AppConfig } from './lib/types';
 export const APP_CONFIG_DEFAULTS: AppConfig = {
   companyName: 'Expert Avatar',
   pageTitle: 'Expert Avatar',
-  pageDescription: 'A voice agent built with LiveKit',
+  pageDescription: 'Train your avatar on your expertise. Scale your reach.',
 
   supportsChatInput: true,
   supportsVideoInput: true,
