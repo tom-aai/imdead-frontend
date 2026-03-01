@@ -58,7 +58,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     .join('\n');
 
   return (
-    <html lang="en" className="scroll-smooth dark">
+    <html lang="en" className="dark scroll-smooth">
       <head>
         {styles && <style>{styles}</style>}
         <title>{pageTitle}</title>
