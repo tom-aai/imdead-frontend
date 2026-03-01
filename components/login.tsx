@@ -106,9 +106,18 @@ export const LoginPage = () => {
         {/* Feature Steps */}
         <div className="mb-12 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { title: 'Train', description: 'Train your avatar on your image, voice, and expertise.' },
-            { title: 'Share', description: 'Share your avatar with your network.' },
-            { title: 'Engage', description: 'Users talk to your avatar and send you messages.' },
+            {
+              title: 'Train',
+              description: 'Train your avatar on your image, voice, and expertise.',
+            },
+            {
+              title: 'Share',
+              description: 'Share your avatar with your network.',
+            },
+            {
+              title: 'Engage',
+              description: 'Users talk to your avatar and send you messages.',
+            },
             {
               title: 'Scale',
               description: (

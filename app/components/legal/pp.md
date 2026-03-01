@@ -17,33 +17,39 @@ We collect information about you in the following ways:
 When you use the Services, you may provide us with:
 
 **Account Information**
+
 - Name
 - Email address
 - Password
 - Profile information
 
 **Voice Recordings**
+
 - Audio recordings of your voice during interviews
 - Voice samples used to create your Cloned Voice
 - Any audio messages you send through the Services
 
 **Images and Photographs**
+
 - Photographs you upload for avatar creation
 - Profile pictures
 - Any other images you submit
 
 **Interview and Chat Content**
+
 - Transcripts of your interview sessions
 - Responses and information you share during interviews
 - Chat messages between Seekers and Expert avatars
 - Messages sent between Experts and Seekers
 
 **Payment Information**
+
 - Billing name and address
 - Payment card information (processed by our payment processors)
 - Transaction history
 
 **Communications**
+
 - Emails or messages you send to us
 - Customer support inquiries
 - Feedback and suggestions
@@ -53,6 +59,7 @@ When you use the Services, you may provide us with:
 When you use the Services, we automatically collect:
 
 **Device and Usage Information**
+
 - Device type, operating system, and browser type
 - IP address
 - Unique device identifiers
@@ -62,16 +69,19 @@ When you use the Services, we automatically collect:
 - Date and time of access
 
 **Usage Metrics**
+
 - Session duration and frequency
 - Chat usage minutes
 - Avatar interaction data
 
 **Location Information**
+
 - General location based on IP address (city, state, country)
 
 ### 1.3 Information from Third Parties
 
 We may receive information about you from:
+
 - Authentication providers when you sign in using third-party accounts (e.g., Google)
 - Payment processors regarding transaction status
 - Analytics providers
@@ -137,6 +147,7 @@ We use the information we collect to:
 **Expert Avatar does not train or develop its own artificial intelligence or machine learning models using your voice recordings, interview transcripts, chat content, or other personal information.**
 
 Your data is used solely to:
+
 - Create and operate your personal Expert avatar
 - Provide the Services as described in our Terms of Service
 - Improve the technical operation of the Services (e.g., bug fixes, performance)
@@ -169,6 +180,7 @@ These service providers are contractually obligated to use your information only
 ### 4.2 Other Users
 
 Certain information is shared with other users as part of the Services:
+
 - **Experts:** Your avatar, including your Avatar Image and Cloned Voice, is made available to Seekers
 - **Seekers:** Your messages and questions may be shared with the Expert whose avatar you interact with
 
@@ -177,6 +189,7 @@ Certain information is shared with other users as part of the Services:
 ### 4.3 Legal Requirements
 
 We may disclose your information if required to do so by law or in good faith belief that such disclosure is necessary to:
+
 - Comply with legal process, such as a court order or subpoena
 - Respond to requests from government authorities
 - Enforce our Terms of Service
@@ -218,6 +231,7 @@ The Services are operated from and intended for users located in the United Stat
 ### 6.1 Retention Period
 
 We retain your information for as long as your account is active or as needed to provide the Services. We may also retain information as necessary to:
+
 - Comply with legal obligations
 - Resolve disputes
 - Enforce our agreements
@@ -226,6 +240,7 @@ We retain your information for as long as your account is active or as needed to
 ### 6.2 Account Deletion
 
 When you delete your account, we delete your personal information from our active systems, including:
+
 - Your account information and profile data
 - Your voice recordings and Cloned Voice
 - Your photographs and Avatar Images
@@ -235,6 +250,7 @@ When you delete your account, we delete your personal information from our activ
 Upon deletion of an Expert account, the associated avatar will be immediately deactivated and will no longer be accessible to Seekers. Any license granted to Expert Avatar to use your voice, image, or avatar will terminate following the backup retention period described below. See the Avatar IP Licensing and Termination section below for more information.
 
 **Residual Data:** Following account deletion, residual copies of your data may persist for up to thirty (30) days in:
+
 - Encrypted backup systems
 - Disaster recovery systems
 - System logs
@@ -242,6 +258,7 @@ Upon deletion of an Expert account, the associated avatar will be immediately de
 These residual copies are access-restricted, automatically overwritten or deleted within thirty (30) days, and are not used for any purpose other than backup integrity and system recovery. We do not restore deleted accounts from backup data. The licenses you granted to Expert Avatar survive during this backup retention period solely for the purpose of maintaining backup integrity and legal compliance.
 
 **Exceptions:** We may retain certain information as necessary to:
+
 - Comply with legal obligations (such as tax and financial records)
 - Resolve disputes and enforce our agreements
 - Prevent fraud and abuse
@@ -261,6 +278,7 @@ Upon account deletion, Expert Avatar deletes all personal data associated with y
 ### 6.5 Avatar IP Licensing and Termination
 
 Any license granted to Expert Avatar to use an Expert's voice, image, or avatar exists while the Expert's account is active and survives for up to thirty (30) days following account deletion solely to the extent required for backup retention and legal compliance. Upon account deletion:
+
 - Your avatar will be immediately deactivated and will no longer be accessible to Seekers
 - All associated data, including voice recordings, Cloned Voice, photographs, and avatar images, are deleted from active systems immediately and from backup systems within thirty (30) days as described in this section
 - All licenses terminate upon completion of the backup retention period
@@ -272,6 +290,7 @@ For detailed information about intellectual property rights and licenses, please
 ## 7. Security
 
 We implement reasonable technical and organizational security measures to protect your information from unauthorized access, disclosure, alteration, or destruction. These measures include:
+
 - Encryption of data in transit and at rest
 - Access controls and authentication
 - Regular security assessments
@@ -314,6 +333,7 @@ Most web browsers allow you to control cookies through their settings. Please no
 ### 10.4 Data Requests
 
 Depending on your jurisdiction, you may have the right to:
+
 - Request access to your personal information
 - Request correction of inaccurate information
 - Request deletion of your information
@@ -321,6 +341,7 @@ Depending on your jurisdiction, you may have the right to:
 - Object to or restrict certain processing of your information
 
 **Data Portability:** Upon request, we can provide your personal data in the following formats:
+
 - **Profile and text data:** JSON format
 - **Audio recordings:** wav audio files
 
@@ -334,27 +355,29 @@ If you are a California resident, the California Consumer Privacy Act ("CCPA") a
 
 **Categories of Personal Information We Collect:**
 
-| Category | Examples | Collected |
-|----------|----------|-----------|
-| Identifiers | Name, email address, account name, IP address | Yes |
-| California Customer Records | Name, address, telephone number, payment information | Yes |
-| Protected Classifications | Age (to verify 18+) | Yes |
-| Commercial Information | Transaction history, products/services purchased | Yes |
-| Biometric Information | Voice recordings, voiceprints for voice cloning | Yes |
-| Internet/Network Activity | Browsing history, interaction with Services, device information | Yes |
-| Geolocation Data | General location based on IP address | Yes |
-| Audio/Visual Information | Voice recordings, photographs, avatar images | Yes |
-| Professional Information | Interview content, expertise, professional background | Yes |
-| Inferences | Preferences, characteristics, behavior derived from above | Yes |
-| Sensitive Personal Information | Account login credentials; contents of communications | Yes |
+| Category                       | Examples                                                        | Collected |
+| ------------------------------ | --------------------------------------------------------------- | --------- |
+| Identifiers                    | Name, email address, account name, IP address                   | Yes       |
+| California Customer Records    | Name, address, telephone number, payment information            | Yes       |
+| Protected Classifications      | Age (to verify 18+)                                             | Yes       |
+| Commercial Information         | Transaction history, products/services purchased                | Yes       |
+| Biometric Information          | Voice recordings, voiceprints for voice cloning                 | Yes       |
+| Internet/Network Activity      | Browsing history, interaction with Services, device information | Yes       |
+| Geolocation Data               | General location based on IP address                            | Yes       |
+| Audio/Visual Information       | Voice recordings, photographs, avatar images                    | Yes       |
+| Professional Information       | Interview content, expertise, professional background           | Yes       |
+| Inferences                     | Preferences, characteristics, behavior derived from above       | Yes       |
+| Sensitive Personal Information | Account login credentials; contents of communications           | Yes       |
 
 **Sources of Personal Information:**
+
 - Directly from you when you register, participate in interviews, or use the Services
 - Automatically when you use the Services (device data, usage data)
 - From third-party authentication providers (Google, etc.)
 - From payment processors
 
 **Purposes for Collection:**
+
 - Providing and operating the Services, including creating your avatar and cloned voice
 - Processing payments and managing your account
 - Communicating with you about the Services
@@ -363,6 +386,7 @@ If you are a California resident, the California Consumer Privacy Act ("CCPA") a
 - Complying with legal obligations
 
 **Categories Disclosed to Service Providers:**
+
 - Identifiers: to cloud hosting, email, and customer support providers
 - Biometric Information: to voice synthesis providers
 - Audio/Visual Information: to avatar generation and AI providers
@@ -370,6 +394,7 @@ If you are a California resident, the California Consumer Privacy Act ("CCPA") a
 - Internet/Network Activity: to analytics providers
 
 **Your California Rights:**
+
 - **Right to Know:** Request information about the personal information we collect, use, and disclose about you
 - **Right to Access:** Request a copy of the personal information we have collected about you
 - **Right to Delete:** Request deletion of your personal information, subject to certain exceptions
@@ -398,6 +423,7 @@ If you are a resident of Colorado, Connecticut, Utah, or Virginia, similar state
 **Colorado Privacy Act (CPA), Connecticut Data Privacy Act (CTDPA), Utah Consumer Privacy Act (UCPA), and Virginia Consumer Data Protection Act (VCDPA):**
 
 These laws generally provide residents with rights to:
+
 - **Access:** Request access to the personal data we have collected about you
 - **Correction:** Request correction of inaccurate personal data
 - **Deletion:** Request deletion of your personal data
@@ -431,6 +457,7 @@ In the event of a conflict between this Privacy Policy and the Terms of Service 
 ## 13. Changes to This Privacy Policy
 
 We may update this Privacy Policy from time to time. If we make material changes, we will notify you at least seven (7) days before the changes take effect by:
+
 - Posting the updated Privacy Policy on the Services with a new effective date
 - Sending you an email notification (for material changes)
 
@@ -462,11 +489,11 @@ Some browsers include a "Do Not Track" (DNT) feature that signals to websites th
 
 We use the following types of cookies and similar technologies:
 
-| Type | Purpose |
-|------|---------|
-| **Essential Cookies** | Required for the Services to function properly |
-| **Analytics Cookies** | Help us understand how users interact with the Services |
-| **Functional Cookies** | Remember your preferences and settings |
+| Type                   | Purpose                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| **Essential Cookies**  | Required for the Services to function properly          |
+| **Analytics Cookies**  | Help us understand how users interact with the Services |
+| **Functional Cookies** | Remember your preferences and settings                  |
 
 ### 15.3 Data Protection Contact
 
@@ -482,6 +509,7 @@ You can control cookies through the following methods:
 **Browser Settings:** Most web browsers allow you to manage cookies through browser settings. You can set your browser to refuse cookies or delete certain cookies. Please note that disabling cookies may affect the functionality of the Services.
 
 **Opt-Out Tools:** You can opt out of interest-based advertising from participating companies through:
+
 - Network Advertising Initiative (NAI): [https://optout.networkadvertising.org/](https://optout.networkadvertising.org/)
 - Digital Advertising Alliance (DAA): [https://optout.aboutads.info/](https://optout.aboutads.info/)
 - Google Ads Settings: [https://adssettings.google.com/](https://adssettings.google.com/)

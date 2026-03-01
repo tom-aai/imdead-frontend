@@ -15,6 +15,7 @@ These Terms of Service ("Terms") govern your access to and use of the Expert Ava
 Expert Avatar is a platform that enables users ("Experts") to create AI-powered avatars of themselves by participating in voice interviews. These avatars capture an Expert's knowledge, expertise, and personality. Other users ("Seekers") can interact with these avatars to learn from the Expert's knowledge. Seekers may also send messages to the real Expert through the avatar.
 
 The Services involve:
+
 - Voice interviews that are recorded and transcribed
 - Voice cloning technology to replicate an Expert's voice
 - Image processing to create cartoon-style avatars from photographs
@@ -46,6 +47,7 @@ You agree to comply with all applicable local, state, national, and internationa
 The Services are designed for, and primarily directed toward, users located in the United States. Data processing, storage, and operations primarily occur in the United States, though some third-party service providers may process data in other locations.
 
 **If you access the Services from outside the United States, you do so at your own risk and are solely responsible for compliance with local laws.** You acknowledge and agree that:
+
 - Your data will be transferred to and primarily processed in the United States
 - U.S. law, not the law of your jurisdiction, governs data handling and privacy
 - You assume all risk of any cross-border data transfer
@@ -78,6 +80,7 @@ Experts participate in voice interviews conducted by our AI interviewer. These i
 ### 4.2 Avatar Creation
 
 Using information from interviews, along with voice recordings and photographs you provide, we create an AI-powered avatar that represents you. This includes:
+
 - A cartoon-style visual representation based on your photograph
 - A cloned voice based on your voice recordings
 - AI-generated responses based on your interview content
@@ -141,22 +144,27 @@ You are solely responsible for all content you submit to the Services and for yo
 You agree NOT to use the Services to:
 
 **(a) Professional Advice**
+
 - Provide, seek, or represent any content as professional medical, legal, financial, tax, or other licensed professional advice
 - Hold yourself out as a licensed professional unless you clearly disclose that the avatar is AI-generated and not a substitute for professional consultation
 
 **(b) Sexual Content**
+
 - Create, share, or solicit sexually explicit, pornographic, or obscene content
 - Engage in sexual harassment or sexually exploit any person
 
 **(c) Harmful Content**
+
 - Create content that promotes, glorifies, or provides instructions for self-harm, suicide, or eating disorders
 - Create content that encourages violence, terrorism, or violent extremism
 - Threaten, harass, bully, stalk, or intimidate any person
 
 **(d) Hate Speech**
+
 - Create content that demeans or promotes discrimination or violence based on race, ethnicity, national origin, religion, gender, gender identity, sexual orientation, age, disability, or any other protected characteristic
 
 **(e) Offensive and Illegal Content**
+
 - Create defamatory, libelous, or fraudulent content
 - Impersonate any person or entity or misrepresent your affiliation
 - Violate any applicable law or regulation
@@ -164,12 +172,14 @@ You agree NOT to use the Services to:
 - Distribute malware, viruses, or other harmful code
 
 **(f) Platform Abuse**
+
 - Interfere with or disrupt the Services or servers
 - Circumvent any access restrictions or security measures
 - Scrape, data mine, or use automated tools to access the Services
 - Use the Services to send spam or unsolicited communications
 
 **(g) Artificial Intelligence and Machine Learning**
+
 - Access, scrape, copy, or otherwise collect any content from the Services for the purpose of training or fine-tuning the weights of any machine learning model, large language model, generative AI system, or similar technology
 - Use any automated tools, bots, or AI agents to interact with the Services except as expressly authorized by Expert Avatar
 - Reproduce, redistribute, or create derivative works from AI-generated content for the purpose of developing competing services
@@ -177,11 +187,13 @@ You agree NOT to use the Services to:
 **Clarification:** Expert Avatar uses your content only for prompting, contextualization, and runtime inference to operate the Services. Expert Avatar does not train or fine-tune its own model weights using your content. However, third-party service providers we use for voice synthesis, avatar generation, and AI-powered conversations may use data processed through their services to improve their own models and services, subject to their respective terms and privacy policies. For more information, see the AI Model Training section of our Privacy Policy at [https://expertavatar.com/privacy](https://expertavatar.com/privacy).
 
 **(h) Recording, Redistribution, and Doxxing**
+
 - Record, capture, scrape, or otherwise preserve avatar conversations or any portion of the Services using any means, including audio recording, video recording, screen recording, or screenshots, except to the extent required by applicable law
 - Publish, redistribute, or broadcast avatar conversations or outputs in a manner that attributes statements to an Expert as if the Expert personally made those statements
 - Dox, harass, or attempt to identify any other user, or publish any other user's personal contact information (including email, phone number, address, or social handles) without their express consent
 
 **(i) Seeker Restrictions on Expert Content**
+
 - Copy, reproduce, download, save, store, or archive any Expert content, including avatar responses, voice outputs, interview content, or any other materials created by or derived from an Expert's participation in the Services
 - Redistribute, republish, share, or transmit Expert content through any medium, including social media, websites, messaging platforms, or any other distribution channel
 - Create derivative works from, modify, adapt, or transform any Expert content
@@ -193,6 +205,7 @@ You agree NOT to use the Services to:
 We reserve the right, but have no obligation, to monitor, review, edit, or remove any content at any time and for any reason, including content that we determine violates these Terms or is otherwise objectionable. We may suspend or terminate your account for violations of these Terms.
 
 **Expert Avatar has no obligation to:**
+
 - Monitor, review, or audit avatar conversations
 - Correct errors in AI-generated responses
 - Intervene in harmful, inaccurate, or offensive discussions
@@ -211,6 +224,7 @@ Any moderation, review, or intervention is entirely discretionary. The absence o
 ### 7.2 License Grant
 
 By submitting Your Content to the Services, you grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
+
 - Copy, store, display, and distribute Your Content
 - Create derivative works from Your Content, including AI-generated avatars and responses
 - Use Your Content to operate and provide the Services
@@ -224,6 +238,7 @@ By submitting Your Content to the Services, you grant Expert Avatar a non-exclus
 ### 7.3 Representations
 
 You represent and warrant that:
+
 - You own all rights to Your Content or have obtained all necessary permissions
 - Your Content does not violate any third party's rights, including intellectual property rights, privacy rights, or publicity rights
 - Your Content complies with these Terms and all applicable laws
@@ -243,6 +258,7 @@ By using the Services and providing voice recordings, you expressly consent to E
 ### 8.2 Use of Cloned Voice
 
 You grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
+
 - Create, store, and use your Cloned Voice
 - Use your Cloned Voice to generate audio responses through your Expert avatar
 - Use your Cloned Voice in connection with the Services
@@ -252,6 +268,7 @@ You grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up,
 ### 8.3 Understanding of Technology
 
 You acknowledge and understand that:
+
 - Your Cloned Voice is a synthetic reproduction and may not perfectly replicate your natural voice
 - Your Cloned Voice will be used to generate AI responses that you did not personally speak
 - Seekers interacting with your avatar will hear your Cloned Voice speaking AI-generated content
@@ -267,12 +284,14 @@ By uploading photographs or images of yourself to the Services, you expressly co
 ### 9.2 License Grant for Likeness
 
 You grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
+
 - Create Avatar Images based on your photographs
 - Display and distribute Avatar Images through the Services
 - Use your likeness in connection with the operation of the Services
 - Use your likeness for promotional purposes limited to marketing the Expert Avatar platform itself
 
 **Exclusions:** This license does not permit Expert Avatar to:
+
 - License, sell, or sublicense your likeness to third parties for advertising unrelated to the Services
 - Use your likeness for standalone commercialization separate from the Services
 
@@ -289,6 +308,7 @@ You waive any claims related to the right of publicity that may arise from Exper
 ### 10.1 Nature of AI Content
 
 You acknowledge and understand that:
+
 - Avatar conversations are generated by artificial intelligence technology
 - AI-generated responses are not personally created, reviewed, or approved by the Expert
 - AI systems are inherently unpredictable and may produce responses that are inaccurate, incomplete, or unexpected
@@ -301,6 +321,7 @@ You acknowledge and understand that:
 ### 10.3 Assumption of Risk
 
 **YOU USE THE SERVICES AT YOUR OWN RISK.** You acknowledge that:
+
 - Interacting with AI systems may produce content that is emotionally affecting, distressing, or triggering
 - You are solely responsible for how you interpret and act upon any information received through the Services
 - Expert Avatar is not responsible for any decisions you make or actions you take based on AI-generated content
@@ -312,6 +333,7 @@ You acknowledge and understand that:
 ### 10.5 Mental Health Resources
 
 If you are in crisis, please contact:
+
 - National Suicide Prevention Lifeline: 988 (US)
 - Crisis Text Line: Text HOME to 741741 (US)
 - International Association for Suicide Prevention: https://www.iasp.info/resources/Crisis_Centres/
@@ -319,12 +341,14 @@ If you are in crisis, please contact:
 ### 10.6 No Attribution; No Endorsement
 
 **Avatar output does not represent the Expert's actual beliefs, opinions, or statements.** You acknowledge and agree that:
+
 - AI-generated avatar responses are synthetic and may differ materially from what the Expert would actually say
 - Avatar responses have not been approved, reviewed, or endorsed by the Expert
 - You must not attribute avatar statements to the Expert as if they were the Expert's factual, real-time statements
 - AI-generated responses may contain errors, misalignment with the Expert's views, tone inconsistencies, or fabrications
 
 **Experts:** By using the Services, you acknowledge that your avatar may produce responses that:
+
 - Do not accurately represent your views
 - Contain errors or omissions
 - Differ in tone or substance from what you would personally communicate
@@ -350,6 +374,7 @@ The Services may facilitate introductions or communications between Experts and 
 ### 11.3 User Responsibility
 
 You acknowledge and agree that:
+
 - Any interactions with other users are solely between you and those users
 - Expert Avatar does not screen, vet, or endorse any users
 - You are solely responsible for evaluating and bearing all risks associated with interactions with other users
@@ -358,6 +383,7 @@ You acknowledge and agree that:
 ### 11.4 No Liability for Relationships
 
 Expert Avatar disclaims all liability for any harm, loss, or damage arising from relationships, communications, meetings, or other interactions that are facilitated or initiated through the Services, including but not limited to:
+
 - Physical, emotional, or financial harm
 - Fraud, misrepresentation, or misconduct by other users
 - Failed business or personal relationships
@@ -397,6 +423,7 @@ If you provide suggestions, ideas, or feedback about the Services ("Feedback"), 
 ### 13.4 Copyright Complaints
 
 If you believe that content on the Services infringes your copyright, please send a notice to support@melochora.com containing:
+
 - Identification of the copyrighted work
 - Identification of the allegedly infringing material
 - Your contact information
@@ -431,6 +458,7 @@ If we receive a valid counter-notice, we will send a copy to the original compla
 ### 13.7 Content Takedown Policy (Non-Copyright)
 
 In addition to our DMCA procedures for copyright claims, we may remove or disable access to content that violates these Terms, including but not limited to content that:
+
 - Constitutes harassment, bullying, or threats
 - Contains hate speech or discrimination
 - Doxxes or publishes personal information without consent
@@ -439,6 +467,7 @@ In addition to our DMCA procedures for copyright claims, we may remove or disabl
 - Otherwise violates Section 6 (User Conduct and Prohibited Uses)
 
 **Reporting Violations:** To report content that violates these Terms (other than copyright infringement), please contact us at support@melochora.com with the subject line "Content Report" and include:
+
 - A description of the content and its location
 - The reason you believe it violates our Terms
 - Your contact information
@@ -452,6 +481,7 @@ In addition to our DMCA procedures for copyright claims, we may remove or disabl
 If you provide a testimonial, review, case study, or endorsement about the Services (collectively, "Testimonials"), you grant Expert Avatar a non-exclusive, worldwide, royalty-free, perpetual license to use, reproduce, modify, and display the Testimonial in connection with marketing and promoting the Services.
 
 You represent and warrant that:
+
 - Your Testimonial reflects your honest opinions, findings, beliefs, or experience
 - You have the right to provide the Testimonial
 - Your Testimonial does not violate any third party's rights
@@ -467,6 +497,7 @@ Expert Avatar's use of Testimonials complies with Federal Trade Commission (FTC)
 **THE SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.**
 
 Expert Avatar does not warrant that:
+
 - The Services will meet your requirements
 - The Services will be uninterrupted, timely, secure, or error-free
 - The results obtained from the Services will be accurate or reliable
@@ -497,6 +528,7 @@ Some jurisdictions do not allow the exclusion or limitation of certain warrantie
 ## 16. Indemnification
 
 You agree to indemnify, defend, and hold harmless Expert Avatar, its affiliates, and their respective officers, directors, employees, and agents from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from or related to:
+
 - Your use of the Services
 - Your Content
 - Your violation of these Terms
@@ -508,13 +540,14 @@ You agree to indemnify, defend, and hold harmless Expert Avatar, its affiliates,
 - **Claims arising from interactions between Seekers and your avatar**
 
 **Experts specifically acknowledge** that they bear responsibility for claims arising from their avatars' responses, including but not limited to claims of:
+
 - Defamation or misattribution
 - Professional malpractice or regulated advice
 - Harm caused by inaccurate, misleading, or fabricated avatar content
 
 **California Residents:** If you are a California resident, you hereby waive California Civil Code Section 1542, which provides:
 
-*"A general release does not extend to claims that the creditor or releasing party does not know or suspect to exist in his or her favor at the time of executing the release and that, if known by him or her, would have materially affected his or her settlement with the debtor or released party."*
+_"A general release does not extend to claims that the creditor or releasing party does not know or suspect to exist in his or her favor at the time of executing the release and that, if known by him or her, would have materially affected his or her settlement with the debtor or released party."_
 
 If you are a resident of another jurisdiction, you waive any comparable statute or doctrine to the maximum extent permitted by law.
 
@@ -543,6 +576,7 @@ You and Expert Avatar agree that any dispute, claim, or controversy arising out 
 ### 17.2 Exceptions
 
 This arbitration agreement does not apply to:
+
 - Claims that may be brought in small claims court
 - Claims for injunctive or equitable relief to protect intellectual property rights
 - **Users who are residents of the European Union, European Economic Area, or United Kingdom** (such users may bring claims in their local courts)
@@ -596,6 +630,7 @@ You may terminate your account at any time by contacting us at support@melochora
 ### 18.2 Termination by Expert Avatar
 
 We may suspend or terminate your account and access to the Services at any time, with or without cause, and with or without notice. Reasons for termination may include, but are not limited to:
+
 - Violation of these Terms
 - Conduct that we determine is harmful to other users or Expert Avatar
 - Extended periods of inactivity (ninety (90) days or more without login or use of the Services)
@@ -603,6 +638,7 @@ We may suspend or terminate your account and access to the Services at any time,
 ### 18.3 Effect of Termination
 
 Upon termination:
+
 - Your right to use the Services will immediately cease
 - We may delete your account and associated data, subject to the Data Deletion Guarantees section below
 - The licenses you granted to Expert Avatar in these Terms will survive termination only to the extent required for backup retention (up to thirty days) and legal compliance as described in the Data Deletion Guarantees section below
@@ -613,22 +649,26 @@ Upon termination:
 Expert Avatar is committed to deleting your data when you or we terminate your account or when you delete content. Upon deletion:
 
 **When an Expert deletes an avatar:**
+
 - All interview recordings associated with that avatar are permanently deleted
 - All Seeker conversations with that avatar are permanently deleted
 - All images and voice data associated with that avatar are permanently deleted
 - The avatar becomes permanently inaccessible
 
 **When an Expert deletes their account:**
+
 - All of the Expert's avatars are deleted as described above
 - All associated recordings, images, voice data, and transcripts are permanently deleted
 - All profile information is permanently deleted
 
 **When a Seeker deletes their account:**
+
 - All conversation history is permanently deleted
 - All messages sent to Experts are deleted from our systems
 - All profile information is permanently deleted
 
 **Exceptions:** Deletion may be delayed or limited only for:
+
 - Legal compliance, including valid legal process, regulatory requirements, or litigation holds
 - Fraud prevention or security investigations
 - Backup retention for up to thirty (30) days following deletion
@@ -695,6 +735,7 @@ You agree that regardless of any statute or law to the contrary, any claim or ca
 **Expert Avatar operates exclusively from the United States and does not represent compliance with the General Data Protection Regulation (GDPR), UK GDPR, EU consumer protection directives, or any other non-U.S. data protection or consumer protection law.**
 
 If you access the Services from the European Union, European Economic Area, United Kingdom, or any other jurisdiction outside the United States:
+
 - You acknowledge that Expert Avatar does not comply with GDPR, UK GDPR, or EU consumer protection laws
 - Your data will be processed in the United States under U.S. legal standards
 - You use the Services at your own risk
@@ -708,6 +749,7 @@ If you access the Services from the European Union, European Economic Area, Unit
 Expert Avatar is committed to making the Services accessible to all users, including individuals with disabilities. We strive to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards and to comply with applicable accessibility laws, including the Americans with Disabilities Act (ADA).
 
 **Our Efforts Include:**
+
 - Designing interfaces with accessibility in mind
 - Providing keyboard navigation support
 - Maintaining sufficient color contrast

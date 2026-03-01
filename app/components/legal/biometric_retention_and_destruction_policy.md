@@ -103,11 +103,10 @@ We may update this Policy from time to time. If we make material changes, we wil
 
 Questions about this Policy can be directed to:
 
-**Email:** support@melochora.com  
+**Email:** support@melochora.com
 
 **Mail:**  
 Melochora LLC  
 2108 N ST #7813  
 Sacramento, CA 95816  
 USA
-
