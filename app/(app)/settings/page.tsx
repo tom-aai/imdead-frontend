@@ -416,11 +416,13 @@ export default function SettingsPage() {
                       </p>
                     ) : billingInfo.is_warning ? (
                       <p className="text-sm text-yellow-600">
-                        {Math.round(billingInfo.remaining_minutes ?? 0)} minutes remaining this month.
+                        {Math.round(billingInfo.remaining_minutes ?? 0)} minutes remaining this
+                        month.
                       </p>
                     ) : (
                       <p className="text-muted-foreground text-sm">
-                        {Math.round(billingInfo.remaining_minutes ?? 0)} minutes remaining this month.
+                        {Math.round(billingInfo.remaining_minutes ?? 0)} minutes remaining this
+                        month.
                       </p>
                     )}
                   </div>
