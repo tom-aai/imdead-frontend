@@ -98,33 +98,25 @@ export const SessionCard = ({
     setSocialPostText(generateSocialPostText(session.main_topic, session.share_token));
   }, [session.hot_take_1, session.main_topic, session.share_token]);
 
-  // Auto-clear generation state when video URL appears (from dashboard polling)
-  // or sync with backend pending status on refresh
+  // Sync generation state with server-side session data.
+  // Priority: is_hot_take_pending (authoritative server state) > local generation state.
   useEffect(() => {
-    if (
-      session.hot_take_video_1_url &&
-      (generation.status === 'polling' || generation.status === 'generating')
-    ) {
-      // Video is ready — clear the "processing" state
-      setGeneration({ status: 'completed', jobId: null, error: null });
-    } else if (session.is_hot_take_pending && generation.status === 'idle') {
-      // Backend reports a pending job but our local state is idle (e.g. page refresh)
-      setGeneration({ status: 'polling', jobId: null, error: null });
-    } else if (
-      !session.is_hot_take_pending &&
-      generation.status === 'polling' &&
-      !generation.jobId
-    ) {
-      // Backend no longer reports pending, and we have no local jobId tracking —
-      // the job must have completed or failed. Refresh to pick up the result.
+    if (session.is_hot_take_pending) {
+      // A job is pending on the server. Ensure local state reflects this.
+      if (generation.status === 'idle' || generation.status === 'completed') {
+        setGeneration((prev) => ({ ...prev, status: 'polling', error: null }));
+      }
+    } else if (generation.status === 'polling' || generation.status === 'generating') {
+      // No pending job on the server, but local state thinks we're still generating.
+      // The job must have completed or failed while we weren't tracking it.
+      if (generation.jobId) {
+        // We have a local jobId — Realtime subscription is handling this, don't interfere.
+        return;
+      }
+      // No local jobId (e.g. after page refresh). Transition out of generating state.
       setGeneration({ status: 'idle', jobId: null, error: null });
     }
-  }, [
-    session.hot_take_video_1_url,
-    session.is_hot_take_pending,
-    generation.status,
-    generation.jobId,
-  ]);
+  }, [session.is_hot_take_pending, generation.status, generation.jobId]);
 
   // Auto-generate share token on mount if it doesn't exist
   const hasAttemptedAutoCreate = useRef(false);
@@ -465,6 +457,11 @@ export const SessionCard = ({
         jobId: data.job_id,
         error: null,
       });
+
+      // Refetch sessions so is_hot_take_pending becomes true in the session data.
+      // This persists the "generating" state across component remounts (e.g. HMR)
+      // and starts the dashboard auto-poll so completion is detected even without Realtime.
+      onSessionUpdated?.();
     } catch (error) {
       console.error('Error generating hot take:', error);
       setGeneration({
@@ -476,7 +473,10 @@ export const SessionCard = ({
   };
 
   // Check if deletion is allowed (not during active operations)
-  const isGeneratingVideo = generation.status === 'generating' || generation.status === 'polling';
+  const isGeneratingVideo =
+    generation.status === 'generating' ||
+    generation.status === 'polling' ||
+    session.is_hot_take_pending;
   const canDelete = !isCreatingShare && !isGeneratingVideo && !isDeleting;
 
   // Handle session deletion
@@ -583,7 +583,10 @@ export const SessionCard = ({
   };
 
   const renderHotTakeSection = () => {
-    const isGenerating = generation.status === 'generating' || generation.status === 'polling';
+    const isGenerating =
+      generation.status === 'generating' ||
+      generation.status === 'polling' ||
+      session.is_hot_take_pending;
 
     return (
       <div className="space-y-2">
@@ -609,7 +612,7 @@ export const SessionCard = ({
             {isGenerating ? (
               <>
                 <CircleNotch size={16} className="mr-2 animate-spin" />
-                {generation.status === 'polling' ? 'Processing...' : 'Starting...'}
+                {generation.status === 'generating' ? 'Starting...' : 'Processing...'}
               </>
             ) : (
               <>
