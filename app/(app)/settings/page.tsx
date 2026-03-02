@@ -389,7 +389,7 @@ export default function SettingsPage() {
               ) : (
                 <div className="space-y-4">
                   <p className="text-muted-foreground">
-                    Your Expert Avatar includes 60 free minutes of chat sessions per month.
+                    Your account includes 60 free minutes of chat sessions with seekers per month.
                   </p>
 
                   {/* Usage Progress Bar */}
@@ -412,7 +412,7 @@ export default function SettingsPage() {
                     </div>
                     {billingInfo.is_exceeded ? (
                       <p className="text-primary text-sm font-medium">
-                        Free tier exhausted. Upgrade to continue sharing your avatar.
+                        Free tier exhausted. Upgrade to continue sharing your avatars.
                       </p>
                     ) : billingInfo.is_warning ? (
                       <p className="text-sm text-yellow-600">
