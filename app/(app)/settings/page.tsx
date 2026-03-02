@@ -21,10 +21,10 @@ import { getSupabaseClient, signOut } from '@/lib/supabase';
 interface BillingInfo {
   used_seconds: number;
   used_minutes: number;
-  free_tier_seconds: number;
-  free_tier_minutes: number;
-  remaining_seconds: number;
-  remaining_minutes: number;
+  free_tier_seconds: number | null;
+  free_tier_minutes: number | null;
+  remaining_seconds: number | null;
+  remaining_minutes: number | null;
   usage_percentage: number;
   is_exceeded: boolean;
   is_warning: boolean;
@@ -396,13 +396,13 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>{Math.round(billingInfo.used_minutes)} min used</span>
-                      <span>{Math.round(billingInfo.free_tier_minutes)} min total</span>
+                      <span>{Math.round(billingInfo.free_tier_minutes ?? 0)} min total</span>
                     </div>
                     <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
                       <div
                         className={`h-full rounded-full transition-all ${
                           billingInfo.is_exceeded
-                            ? 'bg-destructive'
+                            ? 'bg-primary'
                             : billingInfo.is_warning
                               ? 'bg-yellow-500'
                               : 'bg-primary'
@@ -411,16 +411,16 @@ export default function SettingsPage() {
                       />
                     </div>
                     {billingInfo.is_exceeded ? (
-                      <p className="text-destructive text-sm font-medium">
+                      <p className="text-primary text-sm font-medium">
                         Free tier exhausted. Upgrade to continue sharing your avatar.
                       </p>
                     ) : billingInfo.is_warning ? (
                       <p className="text-sm text-yellow-600">
-                        {Math.round(billingInfo.remaining_minutes)} minutes remaining this month.
+                        {Math.round(billingInfo.remaining_minutes ?? 0)} minutes remaining this month.
                       </p>
                     ) : (
                       <p className="text-muted-foreground text-sm">
-                        {Math.round(billingInfo.remaining_minutes)} minutes remaining this month.
+                        {Math.round(billingInfo.remaining_minutes ?? 0)} minutes remaining this month.
                       </p>
                     )}
                   </div>

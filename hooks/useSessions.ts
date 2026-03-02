@@ -19,10 +19,10 @@ export interface Session {
 export interface BillingInfo {
   used_seconds: number;
   used_minutes: number;
-  free_tier_seconds: number;
-  free_tier_minutes: number;
-  remaining_seconds: number;
-  remaining_minutes: number;
+  free_tier_seconds: number | null;
+  free_tier_minutes: number | null;
+  remaining_seconds: number | null;
+  remaining_minutes: number | null;
   usage_percentage: number;
   is_exceeded: boolean;
   is_warning: boolean;
