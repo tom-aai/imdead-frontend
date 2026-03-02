@@ -243,17 +243,23 @@ async function checkExpertCredits(
         reason: data.reason ?? '',
       };
     } else {
-      // On error, allow session to proceed (fail open)
+      // Fail closed: block session when billing cannot be verified
       console.warn(
         '[Chat Session API] Credit check failed with status',
         response.status,
-        '- allowing session'
+        '- blocking session'
       );
-      return { canStart: true, reason: 'Credit check unavailable' };
+      return {
+        canStart: false,
+        reason: 'Unable to verify billing status',
+      };
     }
   } catch (error) {
-    console.warn('[Chat Session API] Error checking credits:', error, '- allowing session');
-    return { canStart: true, reason: 'Credit check unavailable' };
+    console.warn('[Chat Session API] Error checking credits:', error, '- blocking session');
+    return {
+      canStart: false,
+      reason: 'Unable to verify billing status',
+    };
   }
 }
 
