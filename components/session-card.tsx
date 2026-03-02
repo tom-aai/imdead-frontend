@@ -98,25 +98,26 @@ export const SessionCard = ({
     setSocialPostText(generateSocialPostText(session.main_topic, session.share_token));
   }, [session.hot_take_1, session.main_topic, session.share_token]);
 
+  // Track is_hot_take_pending transitions to detect job completion on the server.
+  const prevIsHotTakePending = useRef(session.is_hot_take_pending);
+
   // Sync generation state with server-side session data.
-  // Priority: is_hot_take_pending (authoritative server state) > local generation state.
+  // is_hot_take_pending is the authoritative server state for whether a job is running.
   useEffect(() => {
     if (session.is_hot_take_pending) {
-      // A job is pending on the server. Ensure local state reflects this.
-      if (generation.status === 'idle' || generation.status === 'completed') {
+      prevIsHotTakePending.current = true;
+      // Server says a job is pending. If local state doesn't reflect this, update it.
+      if (generation.status === 'idle') {
         setGeneration((prev) => ({ ...prev, status: 'polling', error: null }));
       }
-    } else if (generation.status === 'polling' || generation.status === 'generating') {
-      // No pending job on the server, but local state thinks we're still generating.
-      // The job must have completed or failed while we weren't tracking it.
-      if (generation.jobId) {
-        // We have a local jobId — Realtime subscription is handling this, don't interfere.
-        return;
+    } else if (prevIsHotTakePending.current) {
+      // is_hot_take_pending went from true → false: job finished on the server.
+      prevIsHotTakePending.current = false;
+      if (generation.status === 'polling' || generation.status === 'generating') {
+        setGeneration({ status: 'idle', jobId: null, error: null });
       }
-      // No local jobId (e.g. after page refresh). Transition out of generating state.
-      setGeneration({ status: 'idle', jobId: null, error: null });
     }
-  }, [session.is_hot_take_pending, generation.status, generation.jobId]);
+  }, [session.is_hot_take_pending, generation.status]);
 
   // Auto-generate share token on mount if it doesn't exist
   const hasAttemptedAutoCreate = useRef(false);
