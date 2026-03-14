@@ -13,6 +13,7 @@ import {
   Trash,
   VideoCamera,
   X,
+  Camera,
 } from '@phosphor-icons/react';
 import {
   AlertDialog,
@@ -64,6 +65,10 @@ export const SessionCard = ({
   const [editedTitle, setEditedTitle] = useState(session.main_topic || '');
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
+
+  // Avatar type toggle (photorealistic vs cartoon)
+  const [isTogglingAvatarType, setIsTogglingAvatarType] = useState(false);
+  const [avatarTypeError, setAvatarTypeError] = useState<string | null>(null);
 
   // Hot take text state
   const [hotTakeText, setHotTakeText] = useState(session.hot_take_1 || '');
@@ -583,6 +588,50 @@ export const SessionCard = ({
     setTitleError(null);
   };
 
+  // Toggle photorealistic vs cartoon avatar for session card and chat/hot take
+  const handleToggleAvatarType = async () => {
+    setAvatarTypeError(null);
+    setIsTogglingAvatarType(true);
+
+    try {
+      const supabase = getSupabaseClient();
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
+
+      if (!authSession) {
+        setAvatarTypeError('Not authenticated');
+        return;
+      }
+
+      const newValue = !session.use_hedra_photo_avatar;
+      const response = await fetch(`/api/sessions/${session.session_id}/avatar-type`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ use_hedra_photo_avatar: newValue }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAvatarTypeError(data.error || 'Failed to update avatar type');
+        return;
+      }
+
+      if (onSessionUpdated) {
+        onSessionUpdated();
+      }
+    } catch (error) {
+      console.error('Error toggling avatar type:', error);
+      setAvatarTypeError(error instanceof Error ? error.message : 'Failed to update avatar type');
+    } finally {
+      setIsTogglingAvatarType(false);
+    }
+  };
+
   const renderHotTakeSection = () => {
     const isGenerating =
       generation.status === 'generating' ||
@@ -666,6 +715,33 @@ export const SessionCard = ({
         >
           <PencilSimple size={16} />
         </Button>
+
+        {/* Photorealistic avatar toggle - only when avatar is ready */}
+        {session.avatar_image_url && (
+          <Button
+            variant={session.use_hedra_photo_avatar ? 'default' : 'secondary'}
+            size="icon"
+            className="absolute top-2 left-12 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100"
+            onClick={handleToggleAvatarType}
+            disabled={isTogglingAvatarType}
+            title={
+              session.use_hedra_photo_avatar
+                ? 'Using photorealistic avatar (click to use cartoon)'
+                : 'Use photorealistic avatar'
+            }
+          >
+            {isTogglingAvatarType ? (
+              <CircleNotch size={16} className="animate-spin" />
+            ) : (
+              <Camera size={16} weight={session.use_hedra_photo_avatar ? 'fill' : 'regular'} />
+            )}
+          </Button>
+        )}
+        {avatarTypeError && (
+          <p className="text-destructive absolute bottom-2 left-2 right-2 text-center text-xs">
+            {avatarTypeError}
+          </p>
+        )}
 
         {/* Delete Button */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

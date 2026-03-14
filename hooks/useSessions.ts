@@ -10,6 +10,7 @@ export interface Session {
   hot_take_1: string | null;
   hot_take_video_1_url: string | null;
   avatar_image_url: string | null;
+  use_hedra_photo_avatar: boolean;
   share_token: string | null;
   unread_message_count: number;
   total_chat_duration_seconds: number;

@@ -53,13 +53,13 @@ export async function GET(req: Request) {
         main_topic, 
         hot_take_1,
         hot_take_video_1,
-        cartoon_id
+        cartoon_id,
+        use_hedra_photo_avatar
       `
       )
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    // Fetch share tokens separately (to avoid complex join issues)
     const sessionIds = sessions?.map((s) => s.session_id) || [];
     const { data: shareTokens } = await supabase
       .from('avatar_share_tokens')
@@ -72,6 +72,18 @@ export async function GET(req: Request) {
     const shareTokenMap = new Map<string, string>();
     shareTokens?.forEach((token) => {
       shareTokenMap.set(token.session_id, token.share_token);
+    });
+
+    // Fetch picture_id (original photo) from interview_calls for avatar URL when use_hedra_photo_avatar is true
+    const { data: interviewCalls } = await supabase
+      .from('interview_calls')
+      .select('session_id, picture_id')
+      .in('session_id', sessionIds);
+    const pictureIdBySessionId = new Map<string, string>();
+    interviewCalls?.forEach((row) => {
+      if (row.picture_id) {
+        pictureIdBySessionId.set(row.session_id, row.picture_id);
+      }
     });
 
     // Fetch unread message counts for each session
@@ -210,16 +222,18 @@ export async function GET(req: Request) {
 
         let avatar_image_url = null;
 
-        // Use cartoon_id directly from interview_call_analysis (source of truth)
-        if (session.cartoon_id) {
+        // Use cartoon_id or original picture_id based on use_hedra_photo_avatar
+        const usePhotoAvatar = session.use_hedra_photo_avatar === true;
+        const pictureId = pictureIdBySessionId.get(session.session_id);
+        const storagePath = usePhotoAvatar && pictureId ? pictureId : session.cartoon_id;
+
+        if (storagePath) {
           console.log(
-            `[Sessions API] Found cartoon_id for session ${session.session_id}: ${session.cartoon_id}`
+            `[Sessions API] Avatar for session ${session.session_id}: ${usePhotoAvatar ? 'photo' : 'cartoon'} (${storagePath})`
           );
-          // Generate a signed URL (valid for 1 hour) since the bucket has RLS policies
-          // Note: cartoon_id should already include the file extension (e.g., "uuid_cartoon.png")
           const { data: urlData, error: urlError } = await supabase.storage
             .from('avatar-images-bucket')
-            .createSignedUrl(session.cartoon_id, 3600); // 3600 seconds = 1 hour
+            .createSignedUrl(storagePath, 3600); // 3600 seconds = 1 hour
 
           if (urlError) {
             console.error(`[Sessions API] Error creating signed URL for avatar:`, urlError);
@@ -228,7 +242,7 @@ export async function GET(req: Request) {
             console.log(`[Sessions API] Avatar signed URL created`);
           }
         } else {
-          console.log(`[Sessions API] No cartoon_id found for session ${session.session_id}`);
+          console.log(`[Sessions API] No avatar image path for session ${session.session_id}`);
         }
 
         // Generate signed URL for hot take video if it exists (valid for 1 hour)
