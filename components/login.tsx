@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -81,16 +80,16 @@ export const LoginPage = () => {
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col items-center px-6 pt-24 pb-8">
-        {/* Hero Image */}
-        <div className="mb-10">
-          <Image
-            src="/expert_avatar_pink.png"
-            alt="Expert Avatar"
-            width={480}
-            height={480}
-            className="rounded-2xl"
-            priority
-          />
+        {/* Demo Video + CTA */}
+        <div className="mb-10 flex flex-col items-center">
+          <video autoPlay loop muted playsInline className="mb-6 w-full max-w-[256px] rounded-2xl">
+            <source src="/demo-video.mp4" type="video/mp4" />
+          </video>
+          <Link href="https://expertavatar.com/chat/9a852267-2ebb-4465-8ab4-96d4879958e0">
+            <Button variant="primary" size="lg" className="font-mono">
+              Talk to Ashley
+            </Button>
+          </Link>
         </div>
 
         {/* Main Title */}
@@ -140,21 +139,6 @@ export const LoginPage = () => {
               <p className="text-fg3 text-sm">{step.description}</p>
             </div>
           ))}
-        </div>
-
-        {/* Demo Section */}
-        <div className="mb-12 flex w-full max-w-2xl flex-col items-center">
-          <video autoPlay loop muted playsInline className="mb-6 w-full max-w-[256px] rounded-2xl">
-            <source src="/demo-video.mp4" type="video/mp4" />
-          </video>
-          <p className="text-fgAccent mb-4 text-center text-xl font-semibold">
-            Curious about Expert Avatar? Talk to Ashley, an expert in Expert Avatar!
-          </p>
-          <Link href="https://expertavatar.com/chat/9a852267-2ebb-4465-8ab4-96d4879958e0">
-            <Button variant="primary" size="lg" className="font-mono">
-              Talk to Ashley
-            </Button>
-          </Link>
         </div>
 
         {/* Pricing Card */}
