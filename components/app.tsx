@@ -35,7 +35,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
   const [pendingPictureId, setPendingPictureId] = useState<string | null>(null);
   const [welcomeKey, setWelcomeKey] = useState(0);
   const [hasExistingConsent, setHasExistingConsent] = useState<boolean | null>(null);
-  const { refreshConnectionDetails, existingOrRefreshConnectionDetails } = useConnectionDetails(
+  const { existingOrRefreshConnectionDetails } = useConnectionDetails(
     appConfig,
     pictureId,
     resumeSessionData
@@ -113,7 +113,7 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
                 settings.inputs.video.enabled = true;
                 window.localStorage.setItem('livekit-settings', JSON.stringify(settings));
               }
-            } catch (e) {
+            } catch {
               // Error parsing saved settings
             }
           }
@@ -180,7 +180,13 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       aborted = true;
       room.disconnect();
     };
-  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled, pictureId]);
+  }, [
+    room,
+    sessionStarted,
+    appConfig.isPreConnectBufferEnabled,
+    pictureId,
+    existingOrRefreshConnectionDetails,
+  ]);
 
   const { startButtonText } = appConfig;
 

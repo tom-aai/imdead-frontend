@@ -50,11 +50,8 @@ export function AgentControlBar({
   const {
     micTrackRef,
     visibleControls,
-    cameraToggle,
     microphoneToggle,
-    screenShareToggle,
     handleAudioDeviceChange,
-    handleVideoDeviceChange,
     handleDisconnect,
   } = useAgentControlBar({
     controls,
@@ -87,13 +84,6 @@ export function AgentControlBar({
     },
     [onDeviceError]
   );
-  const onCameraDeviceSelectError = useCallback(
-    (error: Error) => {
-      onDeviceError?.({ source: Track.Source.Camera, error });
-    },
-    [onDeviceError]
-  );
-
   return (
     <div
       aria-label="Voice assistant controls"

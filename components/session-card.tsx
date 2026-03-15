@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowClockwise,
+  Camera,
   Check,
   CircleNotch,
   Copy,
@@ -64,6 +65,10 @@ export const SessionCard = ({
   const [editedTitle, setEditedTitle] = useState(session.main_topic || '');
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
+
+  // Avatar type toggle (photorealistic vs cartoon)
+  const [isTogglingAvatarType, setIsTogglingAvatarType] = useState(false);
+  const [avatarTypeError, setAvatarTypeError] = useState<string | null>(null);
 
   // Hot take text state
   const [hotTakeText, setHotTakeText] = useState(session.hot_take_1 || '');
@@ -160,7 +165,7 @@ export const SessionCard = ({
       }
     };
     createShareIfNeeded();
-  }, [session.share_token, session.session_id]);
+  }, [session.share_token, session.session_id, isCreatingShare]);
 
   // Update social post text when share token changes
   useEffect(() => {
@@ -194,80 +199,6 @@ export const SessionCard = ({
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Error downloading file:', error);
-    }
-  };
-
-  const handleViewText = (text: string, title: string) => {
-    // Open text in a new window for viewing/copying
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${title}</title>
-            <style>
-              body {
-                font-family: system-ui, -apple-system, sans-serif;
-                max-width: 800px;
-                margin: 40px auto;
-                padding: 20px;
-                line-height: 1.6;
-              }
-              h1 {
-                font-size: 24px;
-                margin-bottom: 20px;
-              }
-              .content {
-                white-space: pre-wrap;
-                background: #f5f5f5;
-                padding: 20px;
-                border-radius: 8px;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>${title}</h1>
-            <div class="content">${text}</div>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    }
-  };
-
-  const handleCreateShare = async () => {
-    setIsCreatingShare(true);
-    try {
-      const supabase = getSupabaseClient();
-      const {
-        data: { session: authSession },
-      } = await supabase.auth.getSession();
-
-      if (!authSession) {
-        console.error('Not authenticated');
-        return;
-      }
-
-      const response = await fetch('/api/avatar-share/create', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authSession.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ session_id: session.session_id }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create share link');
-      }
-
-      const data = await response.json();
-      setLocalShareToken(data.share_token);
-    } catch (error) {
-      console.error('Error creating share:', error);
-    } finally {
-      setIsCreatingShare(false);
     }
   };
 
@@ -583,6 +514,50 @@ export const SessionCard = ({
     setTitleError(null);
   };
 
+  // Toggle photorealistic vs cartoon avatar for session card and chat/hot take
+  const handleToggleAvatarType = async () => {
+    setAvatarTypeError(null);
+    setIsTogglingAvatarType(true);
+
+    try {
+      const supabase = getSupabaseClient();
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
+
+      if (!authSession) {
+        setAvatarTypeError('Not authenticated');
+        return;
+      }
+
+      const newValue = !session.use_hedra_photo_avatar;
+      const response = await fetch(`/api/sessions/${session.session_id}/avatar-type`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ use_hedra_photo_avatar: newValue }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAvatarTypeError(data.error || 'Failed to update avatar type');
+        return;
+      }
+
+      if (onSessionUpdated) {
+        onSessionUpdated();
+      }
+    } catch (error) {
+      console.error('Error toggling avatar type:', error);
+      setAvatarTypeError(error instanceof Error ? error.message : 'Failed to update avatar type');
+    } finally {
+      setIsTogglingAvatarType(false);
+    }
+  };
+
   const renderHotTakeSection = () => {
     const isGenerating =
       generation.status === 'generating' ||
@@ -647,6 +622,7 @@ export const SessionCard = ({
       {/* Avatar Image with Delete Button */}
       <div className="bg-muted relative flex aspect-square items-center justify-center">
         {session.avatar_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={session.avatar_image_url} alt="Avatar" className="h-full w-full object-cover" />
         ) : (
           <div className="space-y-3 px-4 text-center">
@@ -666,6 +642,33 @@ export const SessionCard = ({
         >
           <PencilSimple size={16} />
         </Button>
+
+        {/* Photorealistic avatar toggle - only when avatar is ready */}
+        {session.avatar_image_url && (
+          <Button
+            variant={session.use_hedra_photo_avatar ? 'default' : 'secondary'}
+            size="icon"
+            className="absolute top-2 left-12 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100"
+            onClick={handleToggleAvatarType}
+            disabled={isTogglingAvatarType}
+            title={
+              session.use_hedra_photo_avatar
+                ? 'Using photorealistic avatar (click to use cartoon)'
+                : 'Use photorealistic avatar'
+            }
+          >
+            {isTogglingAvatarType ? (
+              <CircleNotch size={16} className="animate-spin" />
+            ) : (
+              <Camera size={16} weight={session.use_hedra_photo_avatar ? 'fill' : 'regular'} />
+            )}
+          </Button>
+        )}
+        {avatarTypeError && (
+          <p className="text-destructive absolute right-2 bottom-2 left-2 text-center text-xs">
+            {avatarTypeError}
+          </p>
+        )}
 
         {/* Delete Button */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

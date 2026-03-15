@@ -12,7 +12,6 @@ interface WelcomeProps {
 
 export const Welcome = ({
   disabled,
-  startButtonText,
   onStartCall,
   ref,
 }: React.ComponentProps<'div'> & WelcomeProps) => {

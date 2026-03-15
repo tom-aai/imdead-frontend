@@ -71,9 +71,9 @@ export function MediaTiles({ chatOpen }: MediaTilesProps) {
     videoTrack: agentVideoTrack,
   } = useVoiceAssistant();
   const [screenShareTrack] = useTracks([Track.Source.ScreenShare]);
-  const cameraTrack: TrackReference | undefined = useLocalTrackRef(Track.Source.Camera);
+  // Keep hook call for potential side-effects; value is currently unused
+  useLocalTrackRef(Track.Source.Camera);
 
-  const isCameraEnabled = cameraTrack && !cameraTrack.publication.isMuted;
   const isScreenShareEnabled = screenShareTrack && !screenShareTrack.publication.isMuted;
   const hasSecondTile = isScreenShareEnabled;
 
