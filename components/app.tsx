@@ -180,13 +180,8 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       aborted = true;
       room.disconnect();
     };
-  }, [
-    room,
-    sessionStarted,
-    appConfig.isPreConnectBufferEnabled,
-    pictureId,
-    existingOrRefreshConnectionDetails,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled, pictureId]);
 
   const { startButtonText } = appConfig;
 
