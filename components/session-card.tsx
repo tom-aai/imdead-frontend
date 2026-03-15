@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowClockwise,
+  Camera,
   Check,
   CircleNotch,
   Copy,
@@ -13,7 +14,6 @@ import {
   Trash,
   VideoCamera,
   X,
-  Camera,
 } from '@phosphor-icons/react';
 import {
   AlertDialog,
@@ -165,7 +165,7 @@ export const SessionCard = ({
       }
     };
     createShareIfNeeded();
-  }, [session.share_token, session.session_id]);
+  }, [session.share_token, session.session_id, isCreatingShare]);
 
   // Update social post text when share token changes
   useEffect(() => {
@@ -199,80 +199,6 @@ export const SessionCard = ({
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Error downloading file:', error);
-    }
-  };
-
-  const handleViewText = (text: string, title: string) => {
-    // Open text in a new window for viewing/copying
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${title}</title>
-            <style>
-              body {
-                font-family: system-ui, -apple-system, sans-serif;
-                max-width: 800px;
-                margin: 40px auto;
-                padding: 20px;
-                line-height: 1.6;
-              }
-              h1 {
-                font-size: 24px;
-                margin-bottom: 20px;
-              }
-              .content {
-                white-space: pre-wrap;
-                background: #f5f5f5;
-                padding: 20px;
-                border-radius: 8px;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>${title}</h1>
-            <div class="content">${text}</div>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    }
-  };
-
-  const handleCreateShare = async () => {
-    setIsCreatingShare(true);
-    try {
-      const supabase = getSupabaseClient();
-      const {
-        data: { session: authSession },
-      } = await supabase.auth.getSession();
-
-      if (!authSession) {
-        console.error('Not authenticated');
-        return;
-      }
-
-      const response = await fetch('/api/avatar-share/create', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authSession.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ session_id: session.session_id }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create share link');
-      }
-
-      const data = await response.json();
-      setLocalShareToken(data.share_token);
-    } catch (error) {
-      console.error('Error creating share:', error);
-    } finally {
-      setIsCreatingShare(false);
     }
   };
 
@@ -696,6 +622,7 @@ export const SessionCard = ({
       {/* Avatar Image with Delete Button */}
       <div className="bg-muted relative flex aspect-square items-center justify-center">
         {session.avatar_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={session.avatar_image_url} alt="Avatar" className="h-full w-full object-cover" />
         ) : (
           <div className="space-y-3 px-4 text-center">
@@ -738,7 +665,7 @@ export const SessionCard = ({
           </Button>
         )}
         {avatarTypeError && (
-          <p className="text-destructive absolute bottom-2 left-2 right-2 text-center text-xs">
+          <p className="text-destructive absolute right-2 bottom-2 left-2 text-center text-xs">
             {avatarTypeError}
           </p>
         )}

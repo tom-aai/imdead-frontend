@@ -21,7 +21,7 @@ export default function RecloneVoicePage() {
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
+  const [, setJobId] = useState<string | null>(null);
   const [showConsentModal, setShowConsentModal] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 

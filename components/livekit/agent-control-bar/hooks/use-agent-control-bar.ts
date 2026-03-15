@@ -105,18 +105,18 @@ export function useAgentControlBar(props: UseAgentControlBarProps = {}): UseAgen
         screenShareToggle.toggle(false);
       }
       await cameraToggle.toggle(enabled);
-      // persist video input enabled preference
       saveVideoInputEnabled(!cameraToggle.enabled);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [cameraToggle.enabled, screenShareToggle.enabled]
   );
 
   const handleToggleMicrophone = React.useCallback(
     async (enabled?: boolean) => {
       await microphoneToggle.toggle(enabled);
-      // persist audio input enabled preference
       saveAudioInputEnabled(!microphoneToggle.enabled);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [microphoneToggle.enabled]
   );
 
@@ -127,6 +127,7 @@ export function useAgentControlBar(props: UseAgentControlBarProps = {}): UseAgen
       }
       await screenShareToggle.toggle(enabled);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [screenShareToggle.enabled, cameraToggle.enabled]
   );
 

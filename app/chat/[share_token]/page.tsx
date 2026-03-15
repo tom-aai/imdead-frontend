@@ -169,7 +169,7 @@ export default function ChatPage({ params }: ChatPageProps) {
     };
 
     fetchConnection();
-  }, [isAuthenticated, share_token]);
+  }, [isAuthenticated, share_token, isPublic]);
 
   // Start the countdown timer (called when agent sends the signal)
   const startCountdown = useCallback((seconds: number) => {

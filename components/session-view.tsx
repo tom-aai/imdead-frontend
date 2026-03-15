@@ -51,11 +51,6 @@ export const SessionView = ({
     if (sessionStarted) {
       const timeout = setTimeout(() => {
         if (!isAgentAvailable(agentState)) {
-          const reason =
-            agentState === 'connecting'
-              ? 'Agent did not join the room. '
-              : 'Agent connected but did not complete initializing. ';
-
           toastAlert({
             title: 'Session ended',
             description: 'Please try again.',

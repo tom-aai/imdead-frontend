@@ -36,7 +36,10 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     }
 
     if (typeof use_hedra_photo_avatar !== 'boolean') {
-      return NextResponse.json({ error: 'use_hedra_photo_avatar must be a boolean' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'use_hedra_photo_avatar must be a boolean' },
+        { status: 400 }
+      );
     }
 
     const response = await fetch(`${BACKEND_URL}/sessions/${session_id}/avatar-type`, {

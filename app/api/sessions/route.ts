@@ -144,7 +144,6 @@ export async function GET(req: Request) {
     const analysisSessionIds = new Set(sessions?.map((s) => s.session_id) || []);
     const processingSessionIds =
       pendingCalls?.filter((call) => !analysisSessionIds.has(call.session_id)) || [];
-    const hasProcessingSessions = processingSessionIds.length > 0;
 
     console.log(`[Sessions API] Found ${processingSessionIds.length} sessions still processing`);
 
