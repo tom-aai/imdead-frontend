@@ -660,7 +660,10 @@ export const SessionCard = ({
             {isTogglingAvatarType ? (
               <CircleNotch size={16} className="animate-spin" />
             ) : (
-              <ArrowsLeftRight size={16} weight={session.use_hedra_photo_avatar ? 'bold' : 'regular'} />
+              <ArrowsLeftRight
+                size={16}
+                weight={session.use_hedra_photo_avatar ? 'bold' : 'regular'}
+              />
             )}
           </Button>
         )}
