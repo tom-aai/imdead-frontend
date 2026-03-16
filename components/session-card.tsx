@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowClockwise,
-  Camera,
+  ArrowsLeftRight,
   Check,
   CircleNotch,
   Copy,
@@ -660,7 +660,7 @@ export const SessionCard = ({
             {isTogglingAvatarType ? (
               <CircleNotch size={16} className="animate-spin" />
             ) : (
-              <Camera size={16} weight={session.use_hedra_photo_avatar ? 'fill' : 'regular'} />
+              <ArrowsLeftRight size={16} weight={session.use_hedra_photo_avatar ? 'bold' : 'regular'} />
             )}
           </Button>
         )}
