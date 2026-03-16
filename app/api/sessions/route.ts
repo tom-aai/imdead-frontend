@@ -223,7 +223,9 @@ export async function GET(req: Request) {
 
         // Use cartoon_id or original picture_id based on use_hedra_photo_avatar
         const usePhotoAvatar = session.use_hedra_photo_avatar === true;
-        const pictureId = pictureIdBySessionId.get(session.session_id);
+        const rawPictureId = pictureIdBySessionId.get(session.session_id);
+        const pictureId =
+          rawPictureId && !rawPictureId.includes('/') ? `${userId}/${rawPictureId}` : rawPictureId;
         const storagePath = usePhotoAvatar && pictureId ? pictureId : session.cartoon_id;
 
         if (storagePath) {
