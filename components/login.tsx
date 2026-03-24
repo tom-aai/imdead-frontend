@@ -82,7 +82,7 @@ export const LoginPage = () => {
       <div className="flex flex-1 flex-col items-center px-6 pt-24 pb-8">
         {/* Demo Video + CTA */}
         <div className="mb-10 flex flex-col items-center">
-          <video autoPlay loop muted playsInline className="mb-6 w-full max-w-[256px] rounded-2xl">
+          <video autoPlay loop muted playsInline className="mb-6 w-full max-w-[512px] rounded-2xl">
             <source src="/demo-video.mp4" type="video/mp4" />
           </video>
           <Link href="https://expertavatar.com/chat/9a852267-2ebb-4465-8ab4-96d4879958e0">
