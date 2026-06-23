@@ -36,6 +36,7 @@ interface BillingInfo {
 export default function SettingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,6 +79,8 @@ export default function SettingsPage() {
           router.push('/login');
           return;
         }
+
+        setUserEmail(session.user.email ?? null);
 
         // Fetch preferences
         const response = await fetch('/api/user/preferences', {
@@ -301,8 +304,18 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-xl px-4 py-12">
         <h1 className="mb-8 text-3xl font-bold">Settings</h1>
 
-        {/* Email Notifications Section */}
+        {/* Account Section */}
         <div className="bg-card border-border space-y-4 rounded-lg border p-6">
+          <h2 className="text-xl font-semibold">Account</h2>
+
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Email</span>
+            <span className="text-muted-foreground">{userEmail ?? 'Unknown'}</span>
+          </div>
+        </div>
+
+        {/* Email Notifications Section */}
+        <div className="bg-card border-border mt-6 space-y-4 rounded-lg border p-6">
           <h2 className="text-xl font-semibold">Email Notifications</h2>
 
           <p className="text-muted-foreground">
