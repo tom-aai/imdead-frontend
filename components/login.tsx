@@ -185,6 +185,21 @@ export const LoginPage = () => {
             </div>
           </div>
         </div>
+        {/* Product Hunt badge */}
+        <a
+          href="https://www.producthunt.com/products/expert-avatar?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-expert-avatar"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-8"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt="Expert Avatar - Train Your Avatar On Your Expertise. Scale Your Reach. | Product Hunt"
+            width={250}
+            height={54}
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1205048&theme=light&t=1784901277445"
+          />
+        </a>
       </div>
 
       {/* Footer with legal links */}
