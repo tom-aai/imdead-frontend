@@ -2,7 +2,8 @@
 
 import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Room, RoomEvent } from 'livekit-client';
+import { Room, RoomEvent, Track } from 'livekit-client';
+import type { RemoteTrack } from 'livekit-client';
 import { AnimatePresence, motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import type { ChatConnectionDetails } from '@/app/api/chat-session/[share_token]/connection/route';
@@ -42,6 +43,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isUnavailable, setIsUnavailable] = useState(false);
   const [isNoCredits, setIsNoCredits] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -250,6 +252,59 @@ export default function ChatPage({ params }: ChatPageProps) {
     };
   }, [room, startCountdown]);
 
+  // Avatar-join watchdog. When the LemonSlice avatar fails to start, its
+  // participant never joins the room, so no agent video track ever arrives and
+  // the screen sits frozen until the session timer expires (~a minute). Detect
+  // that on the client: if no avatar video shows up within the timeout after
+  // connecting, prompt the user to try again instead of leaving a blank screen.
+  useEffect(() => {
+    if (!sessionStarted) return;
+
+    const AVATAR_JOIN_TIMEOUT_MS = 20_000;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
+    const hasAvatarVideo = () =>
+      Array.from(room.remoteParticipants.values()).some((p) =>
+        Array.from(p.videoTrackPublications.values()).some((pub) => pub.isSubscribed)
+      );
+
+    const clearWatchdog = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+    };
+
+    const onTrackSubscribed = (track: RemoteTrack) => {
+      if (track.kind === Track.Kind.Video) {
+        clearWatchdog();
+      }
+    };
+
+    const startWatchdog = () => {
+      if (hasAvatarVideo()) return;
+      timeout = setTimeout(() => {
+        if (!hasAvatarVideo()) {
+          console.error('Avatar video never arrived; prompting user to try again');
+          setAvatarError(true);
+        }
+      }, AVATAR_JOIN_TIMEOUT_MS);
+    };
+
+    room.on(RoomEvent.TrackSubscribed, onTrackSubscribed);
+    if (room.state === 'connected') {
+      startWatchdog();
+    } else {
+      room.on(RoomEvent.Connected, startWatchdog);
+    }
+
+    return () => {
+      clearWatchdog();
+      room.off(RoomEvent.TrackSubscribed, onTrackSubscribed);
+      room.off(RoomEvent.Connected, startWatchdog);
+    };
+  }, [room, sessionStarted]);
+
   // Connect to room when user starts
   useEffect(() => {
     let aborted = false;
@@ -284,6 +339,34 @@ export default function ChatPage({ params }: ChatPageProps) {
   // Loading state - show blank screen while checking public status or authentication
   if (isPublic === null || isAuthenticated === null) {
     return <div className="bg-background fixed inset-0" />;
+  }
+
+  // Avatar failed to start / never joined - shown immediately instead of a
+  // frozen screen that waits out the session timer.
+  if (avatarError) {
+    return (
+      <div className="bg-background fixed inset-0 flex items-center justify-center">
+        {!isPublic && <HamburgerMenu />}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-lg px-4 text-center"
+        >
+          <h1 className="mb-4 text-3xl font-bold">Avatar unavailable</h1>
+          <p className="text-muted-foreground mb-8">
+            The avatar couldn&apos;t start just now. Please try again in a moment.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary text-primary-foreground rounded-lg px-8 py-4 text-lg font-semibold shadow-lg transition-opacity hover:opacity-90"
+          >
+            Try Again
+          </button>
+        </motion.div>
+        <Toaster />
+      </div>
+    );
   }
 
   // Avatar unavailable state - matches post-session style
