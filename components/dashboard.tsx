@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CircleNotch, Trash, WarningCircle } from '@phosphor-icons/react';
+import { CircleNotch, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { BlogUploadModal } from '@/components/blog-upload-modal';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { SessionCard } from '@/components/session-card';
 import {
@@ -49,6 +50,9 @@ export const Dashboard = ({
 
   // Delete state for processing sessions
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+
+  // Blog-upload modal (only offered to experts who already have a profile — D6)
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   // Track if we're still waiting for a session to appear after just finishing one
   // This handles the race condition where interview_calls record hasn't been created yet
@@ -205,6 +209,15 @@ export const Dashboard = ({
     }
   };
 
+  // After a successful blog upload, reuse the same "new session is processing"
+  // waiting state the voice flow uses so a processing card appears immediately.
+  const handleUploadSuccess = () => {
+    initialSessionCount.current = sessions.length;
+    setWaitingTimedOut(false);
+    setIsWaitingForSession(true);
+    refetch();
+  };
+
   return (
     <section
       ref={ref}
@@ -226,6 +239,19 @@ export const Dashboard = ({
             )}
           </div>
           <div className="flex items-center gap-4">
+            {/* Blog-upload entry point — only for experts who already have a
+                profile (i.e. have at least one completed session). D6. */}
+            {!loading && sessions.length > 0 && (
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => setShowUploadModal(true)}
+                className="px-6 py-4 font-mono"
+              >
+                <UploadSimple size={18} className="mr-2" />
+                UPLOAD A POST
+              </Button>
+            )}
             <Button
               variant="primary"
               size="lg"
@@ -447,6 +473,12 @@ export const Dashboard = ({
           </div>
         )}
       </div>
+
+      <BlogUploadModal
+        open={showUploadModal}
+        onOpenChange={setShowUploadModal}
+        onSuccess={handleUploadSuccess}
+      />
     </section>
   );
 };
