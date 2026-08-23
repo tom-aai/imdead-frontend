@@ -73,15 +73,19 @@ export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadMod
       return;
     }
     if (trimmed.length < MIN_CHARS) {
-      setError(`Post is too short — please add at least ${MIN_CHARS - trimmed.length} more character${
-        MIN_CHARS - trimmed.length === 1 ? '' : 's'
-      }.`);
+      setError(
+        `Post is too short — please add at least ${MIN_CHARS - trimmed.length} more character${
+          MIN_CHARS - trimmed.length === 1 ? '' : 's'
+        }.`
+      );
       return;
     }
     if (trimmed.length > MAX_CHARS) {
-      setError(`Post is too long — please remove ${(trimmed.length - MAX_CHARS).toLocaleString()} character${
-        trimmed.length - MAX_CHARS === 1 ? '' : 's'
-      }.`);
+      setError(
+        `Post is too long — please remove ${(trimmed.length - MAX_CHARS).toLocaleString()} character${
+          trimmed.length - MAX_CHARS === 1 ? '' : 's'
+        }.`
+      );
       return;
     }
 
@@ -132,8 +136,8 @@ export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadMod
         <DialogHeader>
           <DialogTitle>Upload a Post</DialogTitle>
           <DialogDescription>
-            Paste a blog post you wrote, or load a .txt/.md file. We&apos;ll analyze it in your
-            own words and fold it into your avatar — no new photo or voice recording needed.
+            Paste a blog post you wrote, or load a .txt/.md file. We&apos;ll analyze it in your own
+            words and fold it into your avatar — no new photo or voice recording needed.
           </DialogDescription>
         </DialogHeader>
 
@@ -172,9 +176,7 @@ export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadMod
 
             <span
               className={
-                tooShort || tooLong
-                  ? 'text-destructive text-xs'
-                  : 'text-muted-foreground text-xs'
+                tooShort || tooLong ? 'text-destructive text-xs' : 'text-muted-foreground text-xs'
               }
             >
               {charCount.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters
