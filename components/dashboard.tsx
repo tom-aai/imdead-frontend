@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { BlogUploadModal } from '@/components/blog-upload-modal';
 import { HamburgerMenu } from '@/components/hamburger-menu';
+import { PictureCaptureModal } from '@/components/picture-capture-modal';
 import { SessionCard } from '@/components/session-card';
 import {
   AlertDialog,
@@ -58,8 +59,12 @@ export const Dashboard = ({
   // Delete state for processing sessions
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
 
-  // Blog-upload modal (only offered to experts who already have a profile — D6)
+  // Blog-upload flow (only offered to experts who already have a profile — D6).
+  // "Upload text" first opens the camera step (D2); a successful capture stashes
+  // the picture id and advances to the text modal.
+  const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadPictureId, setUploadPictureId] = useState<string | null>(null);
 
   // "Create" dropdown menu (Start a call / Upload text). Only shown to experts
   // who have already onboarded (i.e. have at least one session); first-time
@@ -300,7 +305,8 @@ export const Dashboard = ({
                       role="menuitem"
                       onClick={() => {
                         setShowCreateMenu(false);
-                        setShowUploadModal(true);
+                        setUploadPictureId(null);
+                        setShowCaptureModal(true);
                       }}
                       className="text-primary-foreground hover:bg-primary/80 flex w-full cursor-pointer items-center px-4 py-3 text-left text-sm font-medium transition-colors"
                     >
@@ -534,9 +540,26 @@ export const Dashboard = ({
         )}
       </div>
 
+      {/* Camera step gates the text modal (D2): only a successful capture opens
+          BlogUploadModal, threading the captured picture id through. */}
+      <PictureCaptureModal
+        open={showCaptureModal}
+        onOpenChange={setShowCaptureModal}
+        onCaptured={(pictureId) => {
+          setUploadPictureId(pictureId);
+          setShowCaptureModal(false);
+          setShowUploadModal(true);
+        }}
+      />
+
       <BlogUploadModal
         open={showUploadModal}
-        onOpenChange={setShowUploadModal}
+        pictureId={uploadPictureId}
+        onOpenChange={(open) => {
+          setShowUploadModal(open);
+          // Clear the stashed picture on close so a later upload can't reuse it.
+          if (!open) setUploadPictureId(null);
+        }}
         onSuccess={handleUploadSuccess}
       />
     </section>

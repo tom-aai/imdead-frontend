@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     // Parse the incoming JSON body
-    let body: { text?: unknown };
+    let body: { text?: unknown; picture_id?: unknown };
     try {
       body = await req.json();
     } catch {
@@ -46,6 +46,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 });
     }
 
+    // The picture is mandatory (D3): every blog upload captures a fresh webcam
+    // picture first. The backend also enforces this and returns a 400.
+    const pictureId = body.picture_id;
+    if (typeof pictureId !== 'string' || pictureId.trim().length === 0) {
+      return NextResponse.json({ error: 'picture_id is required' }, { status: 400 });
+    }
+
     // Forward request to Flask backend with the verified user_id and API key.
     // The backend enforces the authoritative D5 length bounds and returns 400s
     // (too short / too long) which we surface back to the client below.
@@ -55,7 +62,7 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json',
         'X-API-Key': BACKEND_API_KEY,
       },
-      body: JSON.stringify({ user_id: user.id, text }),
+      body: JSON.stringify({ user_id: user.id, text, picture_id: pictureId }),
     });
 
     const data = await response.json();

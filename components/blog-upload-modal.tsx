@@ -22,9 +22,16 @@ interface BlogUploadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  /** The picture captured in the gating camera step (D2/D3). Sent with the post. */
+  pictureId: string | null;
 }
 
-export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadModalProps) => {
+export const BlogUploadModal = ({
+  open,
+  onOpenChange,
+  onSuccess,
+  pictureId,
+}: BlogUploadModalProps) => {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,6 +96,11 @@ export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadMod
       return;
     }
 
+    if (!pictureId) {
+      setError('No picture was captured. Please close this and try again.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -109,7 +121,7 @@ export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadMod
           Authorization: `Bearer ${authSession.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: trimmed }),
+        body: JSON.stringify({ text: trimmed, picture_id: pictureId }),
       });
 
       const data = await response.json().catch(() => ({}));
