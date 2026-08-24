@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CircleNotch, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import {
+  CaretDown,
+  CircleNotch,
+  FileText,
+  Phone,
+  Trash,
+  WarningCircle,
+} from '@phosphor-icons/react';
 import { BlogUploadModal } from '@/components/blog-upload-modal';
 import { HamburgerMenu } from '@/components/hamburger-menu';
 import { SessionCard } from '@/components/session-card';
@@ -53,6 +60,23 @@ export const Dashboard = ({
 
   // Blog-upload modal (only offered to experts who already have a profile — D6)
   const [showUploadModal, setShowUploadModal] = useState(false);
+
+  // "Create" dropdown menu (Start a call / Upload text). Only shown to experts
+  // who have already onboarded (i.e. have at least one session); first-time
+  // users get a plain Create button that starts a call directly.
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const createMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showCreateMenu) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (createMenuRef.current && !createMenuRef.current.contains(event.target as Node)) {
+        setShowCreateMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCreateMenu]);
 
   // Track if we're still waiting for a session to appear after just finishing one
   // This handles the race condition where interview_calls record hasn't been created yet
@@ -239,27 +263,63 @@ export const Dashboard = ({
             )}
           </div>
           <div className="flex items-center gap-4">
-            {/* Blog-upload entry point — only for experts who already have a
-                profile (i.e. have at least one completed session). D6. */}
-            {!loading && sessions.length > 0 && (
+            {/* Create entry point. Experts who have already onboarded (i.e. have
+                at least one session) get a dropdown to either start a call or
+                upload text — the blog-upload flow is only offered to them (D6).
+                First-time users get a plain button that starts a call. */}
+            {!loading && sessions.length > 0 ? (
+              <div ref={createMenuRef} className="relative">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => setShowCreateMenu((prev) => !prev)}
+                  aria-haspopup="menu"
+                  aria-expanded={showCreateMenu}
+                  className="text-1xl px-6 py-4 font-mono"
+                >
+                  CREATE +
+                  <CaretDown size={16} className="ml-2" />
+                </Button>
+                {showCreateMenu && (
+                  <div
+                    role="menu"
+                    className="bg-primary absolute top-14 right-0 z-50 min-w-[180px] overflow-hidden rounded-lg shadow-xl"
+                  >
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setShowCreateMenu(false);
+                        onCreateNew();
+                      }}
+                      className="text-primary-foreground hover:bg-primary/80 flex w-full cursor-pointer items-center px-4 py-3 text-left text-sm font-medium transition-colors"
+                    >
+                      <Phone size={16} className="mr-2" />
+                      Start a call
+                    </button>
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setShowCreateMenu(false);
+                        setShowUploadModal(true);
+                      }}
+                      className="text-primary-foreground hover:bg-primary/80 flex w-full cursor-pointer items-center px-4 py-3 text-left text-sm font-medium transition-colors"
+                    >
+                      <FileText size={16} className="mr-2" />
+                      Upload text
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
               <Button
-                variant="secondary"
+                variant="primary"
                 size="lg"
-                onClick={() => setShowUploadModal(true)}
-                className="px-6 py-4 font-mono"
+                onClick={onCreateNew}
+                className="text-1xl px-6 py-4 font-mono"
               >
-                <UploadSimple size={18} className="mr-2" />
-                UPLOAD A POST
+                CREATE +
               </Button>
             )}
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={onCreateNew}
-              className="text-1xl px-6 py-4 font-mono"
-            >
-              CREATE +
-            </Button>
             {!disabled && <HamburgerMenu inline />}
           </div>
         </div>

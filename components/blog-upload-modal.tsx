@@ -137,7 +137,7 @@ export const BlogUploadModal = ({ open, onOpenChange, onSuccess }: BlogUploadMod
           <DialogTitle>Upload a Post</DialogTitle>
           <DialogDescription>
             Paste a blog post you wrote, or load a .txt/.md file. We&apos;ll analyze it in your own
-            words and fold it into your avatar — no new photo or voice recording needed.
+            words that powers an avatar session.
           </DialogDescription>
         </DialogHeader>
 
