@@ -67,7 +67,10 @@ export const LoginPage = () => {
     <section className="bg-background fixed inset-0 flex flex-col overflow-y-auto">
       {/* Header with Login button in top-right */}
       <div className="absolute top-8 right-8 z-10 flex items-center gap-6">
-        <Link href="/blog" className="text-fg3 hover:text-foreground font-mono text-sm transition-colors">
+        <Link
+          href="/blog"
+          className="text-fg3 hover:text-foreground font-mono text-sm transition-colors"
+        >
           Blog
         </Link>
         <Button
