@@ -84,13 +84,18 @@ export async function POST(req: Request) {
       } as CreateShareResponse);
     }
 
-    // Create new share token
+    // Create new share token.
+    // is_public: true lets seekers open /chat/<token> without logging in. We
+    // accept that we won't have the seeker's email — the chat agent and backend
+    // email flows already fail safely when there's no seeker_user_id (anonymous),
+    // so no expert-facing email is sent in that case.
     const { data: newToken, error: insertError } = await supabase
       .from('avatar_share_tokens')
       .insert({
         session_id,
         owner_user_id: user.id,
         is_active: true,
+        is_public: true,
       })
       .select('share_token')
       .single();
