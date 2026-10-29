@@ -19,8 +19,8 @@ services:
   - type: web
     name: imdead-frontend
     runtime: node
-    plan: starter            # no disk needed; `free` also works but cold-starts
-    region: oregon           # co-located with the backend for low proxy latency
+    plan: starter # no disk needed; `free` also works but cold-starts
+    region: oregon # co-located with the backend for low proxy latency
     # Pin pnpm to the version in package.json's `packageManager` via corepack,
     # then install from the frozen lockfile and build.
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
@@ -30,11 +30,11 @@ services:
     envVars:
       # Pin the Node major so builds are reproducible (Next 15 needs >= 18.18).
       - key: NODE_VERSION
-        value: "22"
+        value: '22'
       # LiveKit Cloud project — same project the agent joins. Used server-side by
       # /api/connection-details to mint access tokens.
       - key: LIVEKIT_URL
-        sync: false          # wss://<project>.livekit.cloud
+        sync: false # wss://<project>.livekit.cloud
       - key: LIVEKIT_API_KEY
         sync: false
       - key: LIVEKIT_API_SECRET
