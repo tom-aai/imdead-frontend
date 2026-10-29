@@ -2,7 +2,7 @@
 
 **Effective Date: January 20, 2026**
 
-This Privacy Policy describes how Melochora LLC ("Company," "we," "us," or "our") collects, uses, and shares information about you when you use the Expert Avatar platform and our website, mobile applications, and related services (collectively, the "Services").
+This Privacy Policy describes how Melochora LLC ("Company," "we," "us," or "our") collects, uses, and shares information about you when you use the I'm Dead platform and our website, mobile applications, and related services (collectively, the "Services").
 
 **PLEASE READ THIS PRIVACY POLICY CAREFULLY.** By using the Services, you consent to the practices described in this Privacy Policy. If you do not agree with this Privacy Policy, please do not use the Services.
 
@@ -39,7 +39,7 @@ When you use the Services, you may provide us with:
 
 - Transcripts of your interview sessions
 - Responses and information you share during interviews
-- Chat messages between Seekers and Expert avatars
+- Chat messages between Seekers and I'm Deads
 - Messages sent between Experts and Seekers
 
 **Payment Information**
@@ -115,7 +115,7 @@ We use the information we collect to:
 - **Create your Cloned Voice** using voice synthesis technology
 - **Create your Avatar Image** by processing your photographs
 - Generate AI-powered avatar responses based on your interview content
-- Facilitate conversations between Seekers and Expert avatars
+- Facilitate conversations between Seekers and I'm Deads
 - Process payments and manage billing
 - Provide customer support
 
@@ -137,18 +137,18 @@ We use the information we collect to:
 
 - Detect, prevent, and respond to fraud or abuse
 - Enforce our Terms of Service
-- Protect the rights, property, and safety of Expert Avatar, our users, and others
+- Protect the rights, property, and safety of I'm Dead, our users, and others
 - Comply with legal obligations
 
 ---
 
 ## 3. AI Model Training
 
-**Expert Avatar does not train or develop its own artificial intelligence or machine learning models using your voice recordings, interview transcripts, chat content, or other personal information.**
+**I'm Dead does not train or develop its own artificial intelligence or machine learning models using your voice recordings, interview transcripts, chat content, or other personal information.**
 
 Your data is used solely to:
 
-- Create and operate your personal Expert avatar
+- Create and operate your personal I'm Dead
 - Provide the Services as described in our Terms of Service
 - Improve the technical operation of the Services (e.g., bug fixes, performance)
 
@@ -184,7 +184,7 @@ Certain information is shared with other users as part of the Services:
 - **Experts:** Your avatar, including your Avatar Image and Cloned Voice, is made available to Seekers
 - **Seekers:** Your messages and questions may be shared with the Expert whose avatar you interact with
 
-**Seeker Content Handling:** Seeker messages and audio are processed to facilitate conversations with Expert avatars. Seeker audio recordings and transcripts may be retained by Expert Avatar and our service providers for the purpose of providing and improving the Services. Experts may view and reference Seeker messages and questions (text only) and may reuse them outside the Services, including verbatim excerpts, but Experts must not publish a Seeker's contact information, must not doxx or attempt to identify a Seeker without the Seeker's consent, and must comply with applicable law. Experts do not have access to Seeker audio recordings through the Services.
+**Seeker Content Handling:** Seeker messages and audio are processed to facilitate conversations with I'm Deads. Seeker audio recordings and transcripts may be retained by I'm Dead and our service providers for the purpose of providing and improving the Services. Experts may view and reference Seeker messages and questions (text only) and may reuse them outside the Services, including verbatim excerpts, but Experts must not publish a Seeker's contact information, must not doxx or attempt to identify a Seeker without the Seeker's consent, and must comply with applicable law. Experts do not have access to Seeker audio recordings through the Services.
 
 ### 4.3 Legal Requirements
 
@@ -198,7 +198,7 @@ We may disclose your information if required to do so by law or in good faith be
 
 ### 4.4 Business Transfers
 
-If Expert Avatar is involved in a merger, acquisition, sale of assets, or bankruptcy, your information may be transferred as part of that transaction. We will notify you of any such change via email or prominent notice on the Services.
+If I'm Dead is involved in a merger, acquisition, sale of assets, or bankruptcy, your information may be transferred as part of that transaction. We will notify you of any such change via email or prominent notice on the Services.
 
 ### 4.5 With Your Consent
 
@@ -222,7 +222,7 @@ Our third-party service providers may process data outside the United States. Wh
 
 The Services are operated from and intended for users located in the United States. We do not intentionally target or market to users outside the United States, including individuals located in the European Union, European Economic Area, United Kingdom, or Switzerland.
 
-**Expert Avatar does not represent compliance with the General Data Protection Regulation (GDPR), UK GDPR, EU consumer protection directives, or any other non-U.S. data protection or consumer protection law.** If you access the Services from the European Union, European Economic Area, United Kingdom, or any other jurisdiction outside the United States, you do so at your own initiative. Your information may be transferred to and processed in the United States (and potentially other countries where our service providers operate), and you may not have the same rights or protections that you would have under the laws of your jurisdiction.
+**I'm Dead does not represent compliance with the General Data Protection Regulation (GDPR), UK GDPR, EU consumer protection directives, or any other non-U.S. data protection or consumer protection law.** If you access the Services from the European Union, European Economic Area, United Kingdom, or any other jurisdiction outside the United States, you do so at your own initiative. Your information may be transferred to and processed in the United States (and potentially other countries where our service providers operate), and you may not have the same rights or protections that you would have under the laws of your jurisdiction.
 
 ---
 
@@ -247,7 +247,7 @@ When you delete your account, we delete your personal information from our activ
 - Your interview transcripts and chat content
 - Messages between you and other users
 
-Upon deletion of an Expert account, the associated avatar will be immediately deactivated and will no longer be accessible to Seekers. Any license granted to Expert Avatar to use your voice, image, or avatar will terminate following the backup retention period described below. See the Avatar IP Licensing and Termination section below for more information.
+Upon deletion of an Expert account, the associated avatar will be immediately deactivated and will no longer be accessible to Seekers. Any license granted to I'm Dead to use your voice, image, or avatar will terminate following the backup retention period described below. See the Avatar IP Licensing and Termination section below for more information.
 
 **Residual Data:** Following account deletion, residual copies of your data may persist for up to thirty (30) days in:
 
@@ -255,7 +255,7 @@ Upon deletion of an Expert account, the associated avatar will be immediately de
 - Disaster recovery systems
 - System logs
 
-These residual copies are access-restricted, automatically overwritten or deleted within thirty (30) days, and are not used for any purpose other than backup integrity and system recovery. We do not restore deleted accounts from backup data. The licenses you granted to Expert Avatar survive during this backup retention period solely for the purpose of maintaining backup integrity and legal compliance.
+These residual copies are access-restricted, automatically overwritten or deleted within thirty (30) days, and are not used for any purpose other than backup integrity and system recovery. We do not restore deleted accounts from backup data. The licenses you granted to I'm Dead survive during this backup retention period solely for the purpose of maintaining backup integrity and legal compliance.
 
 **Exceptions:** We may retain certain information as necessary to:
 
@@ -273,11 +273,11 @@ You may request deletion of your account and personal information by contacting 
 
 ### 6.4 Complete Deletion Confirmation
 
-Upon account deletion, Expert Avatar deletes all personal data associated with your account from active systems. Only limited residual technical data may remain temporarily in backup and disaster recovery systems as described in the Account Deletion section above, and such data is automatically purged within thirty (30) days.
+Upon account deletion, I'm Dead deletes all personal data associated with your account from active systems. Only limited residual technical data may remain temporarily in backup and disaster recovery systems as described in the Account Deletion section above, and such data is automatically purged within thirty (30) days.
 
 ### 6.5 Avatar IP Licensing and Termination
 
-Any license granted to Expert Avatar to use an Expert's voice, image, or avatar exists while the Expert's account is active and survives for up to thirty (30) days following account deletion solely to the extent required for backup retention and legal compliance. Upon account deletion:
+Any license granted to I'm Dead to use an Expert's voice, image, or avatar exists while the Expert's account is active and survives for up to thirty (30) days following account deletion solely to the extent required for backup retention and legal compliance. Upon account deletion:
 
 - Your avatar will be immediately deactivated and will no longer be accessible to Seekers
 - All associated data, including voice recordings, Cloned Voice, photographs, and avatar images, are deleted from active systems immediately and from backup systems within thirty (30) days as described in this section

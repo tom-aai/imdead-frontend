@@ -1,20 +1,20 @@
 import type { AppConfig } from './lib/types';
 
 export const APP_CONFIG_DEFAULTS: AppConfig = {
-  companyName: 'Expert Avatar',
-  pageTitle: 'Expert Avatar',
-  pageDescription: 'Train your avatar on your expertise. Scale your reach.',
+  companyName: "I'm Dead",
+  pageTitle: "I'm Dead",
+  pageDescription: 'Talk to yourself beyond the grave.',
 
   supportsChatInput: true,
-  supportsVideoInput: true,
-  supportsScreenShare: true,
+  supportsVideoInput: false,
+  supportsScreenShare: false,
   isPreConnectBufferEnabled: true,
 
   logo: '',
-  accent: '#ff10f0',
+  accent: '#7c3aed',
   logoDark: '',
-  accentDark: '#ff10f0',
-  startButtonText: 'Start call',
+  accentDark: '#7c3aed',
+  startButtonText: 'Start',
 
-  agentName: 'interview-agent',
+  agentName: 'imdead-ghost',
 };

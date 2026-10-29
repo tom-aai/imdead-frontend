@@ -2,7 +2,7 @@
 
 **Effective Date: January 20, 2026**
 
-This Biometric Information Retention & Destruction Policy (the "Policy") describes how Melochora LLC ("Company," "we," "us," or "our") retains and destroys biometric information and biometric identifiers that may be collected or derived in connection with the Expert Avatar platform and our Services.
+This Biometric Information Retention & Destruction Policy (the "Policy") describes how Melochora LLC ("Company," "we," "us," or "our") retains and destroys biometric information and biometric identifiers that may be collected or derived in connection with the I'm Dead platform and our Services.
 
 This Policy is intended to satisfy applicable biometric privacy laws, including the Illinois Biometric Information Privacy Act (“BIPA”), and similar laws in other jurisdictions, to the extent they apply.
 

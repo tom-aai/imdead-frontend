@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { uploadAvatarImage } from '@/lib/supabase';
 
 /**
- * Shared webcam-capture logic used by both onboarding (components/welcome.tsx)
- * and the blog-upload flow (components/picture-capture-modal.tsx).
+ * Webcam-capture logic for the "I'm Dead" photo screen.
  *
  * Owns the getUserMedia lifecycle, a hidden canvas for the 512×512 center-crop,
- * upload to `avatar-images-bucket` (via uploadAvatarImage), and camera/upload
- * error state. `capture()` returns the bare picture UUID on success so the
- * caller can thread it onward exactly as onboarding does.
+ * and camera/upload error state. The canvas capture mechanics are copied verbatim
+ * from the original Expert Avatar onboarding; only the transport changed: instead
+ * of uploading straight to Supabase Storage, `capture()` POSTs the PNG to the local
+ * backend (`/api/upload-image`) as multipart (`file` + `session_id`), which stores
+ * the original and runs the Gemini ghost transform inline.
  */
 export interface UsePictureCaptureResult {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -16,8 +16,8 @@ export interface UsePictureCaptureResult {
   cameraEnabled: boolean;
   cameraError: string | null;
   isCapturing: boolean;
-  /** Take + upload a picture. Resolves to the bare picture UUID, or null on failure. */
-  capture: () => Promise<string | null>;
+  /** Take + upload a picture for the given session. Resolves true on success. */
+  capture: (sessionId: string) => Promise<boolean>;
   /** Stop the camera stream (idempotent). */
   stopCamera: () => void;
 }
@@ -118,53 +118,67 @@ export function usePictureCapture(active: boolean): UsePictureCaptureResult {
     };
   }, [active, stopCamera]);
 
-  const capture = useCallback(async (): Promise<string | null> => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return null;
+  const capture = useCallback(
+    async (sessionId: string): Promise<boolean> => {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas) return false;
 
-    const context = canvas.getContext('2d');
-    if (!context || video.videoWidth === 0 || video.videoHeight === 0) return null;
+      const context = canvas.getContext('2d');
+      if (!context || video.videoWidth === 0 || video.videoHeight === 0) return false;
 
-    // Generate a bare UUID for this picture (onboarding convention — see D4).
-    const newPictureId = crypto.randomUUID();
+      // Output image is a 512×512 center-cropped square.
+      const targetSize = 512;
+      canvas.width = targetSize;
+      canvas.height = targetSize;
 
-    // Output image is a 512×512 center-cropped square.
-    const targetSize = 512;
-    canvas.width = targetSize;
-    canvas.height = targetSize;
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      const minDimension = Math.min(videoWidth, videoHeight);
+      const sx = (videoWidth - minDimension) / 2;
+      const sy = (videoHeight - minDimension) / 2;
+      context.drawImage(video, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
 
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-    const minDimension = Math.min(videoWidth, videoHeight);
-    const sx = (videoWidth - minDimension) / 2;
-    const sy = (videoHeight - minDimension) / 2;
-    context.drawImage(video, sx, sy, minDimension, minDimension, 0, 0, targetSize, targetSize);
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png');
+      });
 
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((b) => resolve(b), 'image/png');
-    });
+      if (!blob) {
+        setCameraError('Failed to capture image. Please try again.');
+        return false;
+      }
 
-    if (!blob) {
-      setCameraError('Failed to capture image. Please try again.');
-      return null;
-    }
+      setIsCapturing(true);
+      try {
+        // Mirror the old upload-avatar multipart shape: `file` + `session_id`.
+        const formData = new FormData();
+        formData.append('file', blob, 'photo.png');
+        formData.append('session_id', sessionId);
 
-    setIsCapturing(true);
-    try {
-      await uploadAvatarImage(newPictureId, blob);
-      // We no longer need the camera once the picture is uploaded.
-      stopCamera();
-      setCameraEnabled(false);
-      return newPictureId;
-    } catch (error) {
-      console.error('Failed to upload avatar image:', error);
-      setCameraError('Failed to upload your picture. Please try again.');
-      return null;
-    } finally {
-      setIsCapturing(false);
-    }
-  }, [stopCamera]);
+        const response = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to upload image');
+        }
+
+        // We no longer need the camera once the picture is uploaded.
+        stopCamera();
+        setCameraEnabled(false);
+        return true;
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        setCameraError('Failed to upload your picture. Please try again.');
+        return false;
+      } finally {
+        setIsCapturing(false);
+      }
+    },
+    [stopCamera]
+  );
 
   return {
     videoRef,

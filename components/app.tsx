@@ -1,89 +1,45 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { Room, RoomEvent } from 'livekit-client';
 import { motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
+import { ConsentScreen } from '@/components/screens/consent-screen';
+import { LandingScreen } from '@/components/screens/landing-screen';
+import { PhotoScreen } from '@/components/screens/photo-screen';
+import { VoiceScreen } from '@/components/screens/voice-screen';
+import { WaitScreen } from '@/components/screens/wait-screen';
 import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';
-import { VoiceConsentModal } from '@/components/voice-consent-modal';
-import { Welcome } from '@/components/welcome';
-import useConnectionDetails, { ResumeSessionData } from '@/hooks/useConnectionDetails';
-import { getSupabaseClient } from '@/lib/supabase';
+import useConnectionDetails from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
 
-const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
+
+type Step = 'landing' | 'consent' | 'voice' | 'photo' | 'wait' | 'session';
 
 interface AppProps {
   appConfig: AppConfig;
-  resumeSessionId?: string | null;
 }
 
-export function App({ appConfig, resumeSessionId }: AppProps) {
-  const router = useRouter();
+export function App({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
-  // If resuming, start with session hidden (don't show Welcome)
-  const [isResuming, setIsResuming] = useState(!!resumeSessionId);
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const [pictureId, setPictureId] = useState<string | null>(null);
-  const [resumeSessionData, setResumeSessionData] = useState<ResumeSessionData | null>(null);
-  const [hasHandledResumeParam, setHasHandledResumeParam] = useState(false);
-  const [showConsentModal, setShowConsentModal] = useState(false);
-  const [pendingPictureId, setPendingPictureId] = useState<string | null>(null);
-  const [welcomeKey, setWelcomeKey] = useState(0);
-  const [hasExistingConsent, setHasExistingConsent] = useState<boolean | null>(null);
-  const { existingOrRefreshConnectionDetails } = useConnectionDetails(
-    appConfig,
-    pictureId,
-    resumeSessionData
-  );
+  const [step, setStep] = useState<Step>('landing');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [voiceId, setVoiceId] = useState<string | null>(null);
 
-  // Track whether the current session is a resume (ref so disconnect handler can read it)
-  const isResumeSessionRef = useRef(false);
-  useEffect(() => {
-    isResumeSessionRef.current = resumeSessionData !== null;
-  }, [resumeSessionData]);
+  const { existingOrRefreshConnectionDetails } = useConnectionDetails(voiceId, sessionId);
 
-  // Check if user already has voice consent on mount
-  useEffect(() => {
-    const checkConsent = async () => {
-      try {
-        const supabase = getSupabaseClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (!session) return;
+  const sessionStarted = step === 'session';
 
-        const response = await fetch('/api/user/voice-consent', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setHasExistingConsent(data.hasConsent);
-        }
-      } catch (error) {
-        console.error('Error checking voice consent status:', error);
-      }
-    };
-
-    checkConsent();
-  }, []);
-
+  // When the ghost call ends, return everyone to a clean landing page so the next
+  // guest starts fresh (party-proofing).
   useEffect(() => {
     const onDisconnected = () => {
-      const wasResumeSession = isResumeSessionRef.current;
-      setSessionStarted(false);
-      setResumeSessionData(null);
-      // Navigate to dashboard after call ends
-      // Only pass from_session=true for new sessions so dashboard shows processing indicator
-      // Resume sessions don't create new avatars, so no processing indicator needed
-      router.push(wasResumeSession ? '/dashboard' : '/dashboard?from_session=true');
+      setStep('landing');
+      setSessionId(null);
+      setVoiceId(null);
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
@@ -97,51 +53,15 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
       room.off(RoomEvent.Disconnected, onDisconnected);
       room.off(RoomEvent.MediaDevicesError, onMediaDevicesError);
     };
-  }, [room, router]);
+  }, [room]);
 
-  // Enable camera early for avatar creation (before session starts)
+  // Connect to the LiveKit room once we reach the session step. The token carries
+  // the agent-dispatch config (voiceId + sessionId), so the ghost joins on room
+  // creation.
   useEffect(() => {
-    const enableCameraForAvatar = async () => {
-      try {
-        // Clear any saved "camera disabled" preference so camera always starts enabled
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const savedSettings = window.localStorage.getItem('livekit-settings');
-          if (savedSettings) {
-            try {
-              const settings = JSON.parse(savedSettings);
-              if (settings.inputs?.video?.enabled === false) {
-                settings.inputs.video.enabled = true;
-                window.localStorage.setItem('livekit-settings', JSON.stringify(settings));
-              }
-            } catch {
-              // Error parsing saved settings
-            }
-          }
-        }
-
-        // Request camera permission early for avatar creation (512x512 square)
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 512 },
-            height: { ideal: 512 },
-            facingMode: 'user',
-          },
-          audio: false,
-        });
-
-        // Stop the stream immediately since we just needed permission
-        stream.getTracks().forEach((track) => track.stop());
-      } catch (error) {
-        console.error('Error requesting camera for avatar creation:', error);
-      }
-    };
-
-    enableCameraForAvatar();
-  }, []);
-
-  useEffect(() => {
+    if (!sessionStarted) return;
     let aborted = false;
-    if (sessionStarted && room.state === 'disconnected') {
+    if (room.state === 'disconnected') {
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
@@ -149,147 +69,58 @@ export function App({ appConfig, resumeSessionId }: AppProps) {
         existingOrRefreshConnectionDetails().then((connectionDetails) =>
           room.connect(connectionDetails.serverUrl, connectionDetails.participantToken)
         ),
-      ])
-        .then(async () => {
-          if (aborted) {
-            return;
-          }
-
-          // Camera is NOT enabled during the call - only used for taking the initial picture
-          // This ensures only audio is recorded, not video
-          console.log('Call started - microphone enabled, camera disabled');
-        })
-        .catch((error) => {
-          if (aborted) {
-            // Once the effect has cleaned up after itself, drop any errors
-            //
-            // These errors are likely caused by this effect rerunning rapidly,
-            // resulting in a previous run `disconnect` running in parallel with
-            // a current run `connect`
-            return;
-          }
-
-          console.error('Connection error:', error);
-          toastAlert({
-            title: 'There was an error connecting to the agent',
-            description: `${error.name}: ${error.message}`,
-          });
+      ]).catch((error) => {
+        if (aborted) return;
+        console.error('Connection error:', error);
+        toastAlert({
+          title: 'There was an error connecting to your ghost',
+          description: `${error.name}: ${error.message}`,
         });
+      });
     }
     return () => {
       aborted = true;
       room.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled, pictureId]);
-
-  const { startButtonText } = appConfig;
-
-  const handleResumeSession = async (sessionId: string) => {
-    console.log('Resuming session:', sessionId);
-
-    try {
-      // Fetch the session's conversation_summary from the API
-      const { getSupabaseClient } = await import('@/lib/supabase');
-      const supabase = getSupabaseClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        console.error('Not authenticated');
-        return;
-      }
-
-      const response = await fetch(`/api/sessions/${sessionId}/narrative`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch session summary');
-      }
-
-      const data = await response.json();
-
-      // Set resume session data and start session immediately (skip welcome/picture)
-      setResumeSessionData({
-        originalSessionId: sessionId,
-        conversationSummary: data.conversation_summary || '',
-      });
-      setSessionStarted(true);
-    } catch (error) {
-      console.error('Error resuming session:', error);
-      setIsResuming(false); // Show Welcome on error so user can start fresh
-      toastAlert({
-        title: 'Error resuming session',
-        description: error instanceof Error ? error.message : 'Failed to resume session',
-      });
-    }
-  };
-
-  // Start session directly (bypassing consent modal)
-  const startSessionWithPicture = useCallback((picId: string) => {
-    setPictureId(picId);
-    setSessionStarted(true);
-    setPendingPictureId(null);
-  }, []);
-
-  // Handle resume session from URL parameter
-  useEffect(() => {
-    if (resumeSessionId && !hasHandledResumeParam) {
-      setHasHandledResumeParam(true);
-      console.log('Resuming session from URL param:', resumeSessionId);
-      handleResumeSession(resumeSessionId);
-    }
-  }, [resumeSessionId, hasHandledResumeParam]);
+  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled]);
 
   return (
     <main>
-      {/* Hide Welcome entirely when resuming a session */}
-      {!isResuming && (
-        <MotionWelcome
-          key={welcomeKey}
-          startButtonText={startButtonText}
-          onStartCall={(pictureId: string) => {
-            if (hasExistingConsent) {
-              // User already consented previously, skip the modal
-              startSessionWithPicture(pictureId);
-            } else {
-              // First time — show consent modal
-              setPendingPictureId(pictureId);
-              setShowConsentModal(true);
-            }
+      {step === 'landing' && (
+        <LandingScreen
+          onStart={() => {
+            setSessionId(crypto.randomUUID());
+            setStep('consent');
           }}
-          disabled={sessionStarted}
-          initial={{ opacity: 1 }}
-          animate={{ opacity: sessionStarted ? 0 : 1 }}
-          transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
         />
       )}
 
-      <VoiceConsentModal
-        open={showConsentModal}
-        onOpenChange={setShowConsentModal}
-        onConsent={() => {
-          // User consented, proceed with starting the session
-          setHasExistingConsent(true);
-          if (pendingPictureId) {
-            startSessionWithPicture(pendingPictureId);
-          }
-        }}
-        onCancel={() => {
-          // User cancelled, reset Welcome component so camera restarts
-          setPendingPictureId(null);
-          setWelcomeKey((k) => k + 1);
-        }}
-      />
+      {step === 'consent' && sessionId && (
+        <ConsentScreen sessionId={sessionId} onConsented={() => setStep('voice')} />
+      )}
+
+      {step === 'voice' && sessionId && (
+        <VoiceScreen
+          sessionId={sessionId}
+          onCloned={(id) => {
+            setVoiceId(id);
+            setStep('photo');
+          }}
+        />
+      )}
+
+      {step === 'photo' && sessionId && (
+        <PhotoScreen sessionId={sessionId} onCaptured={() => setStep('wait')} />
+      )}
+
+      {step === 'wait' && sessionId && (
+        <WaitScreen sessionId={sessionId} onReady={() => setStep('session')} />
+      )}
 
       <RoomContext.Provider value={room}>
         <RoomAudioRenderer />
         <StartAudio label="Start Audio" />
-        {/* --- */}
         <MotionSessionView
           key="session-view"
           appConfig={appConfig}

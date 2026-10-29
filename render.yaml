@@ -1,0 +1,49 @@
+# Render Blueprint for the "I'm Dead" frontend (Next.js 15).
+#
+# Deploy: push THIS repo (the frontend only) to GitHub/GitLab, then in Render
+# pick "New +" -> "Blueprint" and point it at the repo. Render reads this file
+# and provisions the web service. On first deploy you'll be prompted to fill in
+# the env vars marked `sync: false` (they are never stored in git).
+#
+# Architecture — three separate repos/deploys:
+#   - this frontend    -> Render web service (Next.js server: SSR + /api routes)
+#   - imdead-backend   -> its own Render web service (Flask, has its own render.yaml)
+#   - imdead-agent     -> deployed on LiveKit (not Render)
+#
+# The Next.js /api routes run server-side: they mint LiveKit tokens (LIVEKIT_*)
+# and proxy clone-voice / upload-image / consent to the backend (BACKEND_URL).
+# The browser never calls the backend directly, so BACKEND_URL points at the
+# backend's public Render URL.
+
+services:
+  - type: web
+    name: imdead-frontend
+    runtime: node
+    plan: starter            # no disk needed; `free` also works but cold-starts
+    region: oregon           # co-located with the backend for low proxy latency
+    # Pin pnpm to the version in package.json's `packageManager` via corepack,
+    # then install from the frozen lockfile and build.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    # `next start` binds to $PORT (Render sets it) automatically.
+    startCommand: pnpm start
+    healthCheckPath: /
+    envVars:
+      # Pin the Node major so builds are reproducible (Next 15 needs >= 18.18).
+      - key: NODE_VERSION
+        value: "22"
+      # LiveKit Cloud project — same project the agent joins. Used server-side by
+      # /api/connection-details to mint access tokens.
+      - key: LIVEKIT_URL
+        sync: false          # wss://<project>.livekit.cloud
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
+      # Public URL of the backend Render service (its own blueprint). The /api
+      # routes proxy to it server-side, e.g. https://imdead-backend.onrender.com
+      - key: BACKEND_URL
+        sync: false
+      # Optional: override the connection-details endpoint. Leave unset to use
+      # the built-in /api/connection-details route.
+      # - key: NEXT_PUBLIC_CONN_DETAILS_ENDPOINT
+      #   value: /api/connection-details

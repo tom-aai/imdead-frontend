@@ -2,24 +2,24 @@
 
 **Effective Date: January 20, 2026**
 
-## 1. Welcome to Expert Avatar
+## 1. Welcome to I'm Dead
 
 ### 1.1 Introduction
 
-These Terms of Service ("Terms") govern your access to and use of the Expert Avatar platform and related products and services provided by Melochora LLC ("Company," "we," "us," or "our"), including our website, mobile applications, and related services (collectively, the "Services"). By accessing or using the Services, you agree to be bound by these Terms.
+These Terms of Service ("Terms") govern your access to and use of the I'm Dead platform and related products and services provided by Melochora LLC ("Company," "we," "us," or "our"), including our website, mobile applications, and related services (collectively, the "Services"). By accessing or using the Services, you agree to be bound by these Terms.
 
 **PLEASE READ THESE TERMS CAREFULLY. THEY CONTAIN IMPORTANT INFORMATION ABOUT YOUR LEGAL RIGHTS, INCLUDING SECTION 17 (BINDING ARBITRATION; CLASS ACTION WAIVER), WHICH AFFECTS HOW DISPUTES BETWEEN US ARE RESOLVED.**
 
 ### 1.2 About the Services
 
-Expert Avatar is a platform that enables users ("Experts") to create AI-powered avatars of themselves by participating in voice interviews. These avatars capture an Expert's knowledge, expertise, and personality. Other users ("Seekers") can interact with these avatars to learn from the Expert's knowledge. Seekers may also send messages to the real Expert through the avatar.
+I'm Dead is a platform that enables users ("Experts") to create AI-powered avatars of themselves by participating in voice interviews. These avatars capture an Expert's knowledge, expertise, and personality. Other users ("Seekers") can interact with these avatars to learn from the Expert's knowledge. Seekers may also send messages to the real Expert through the avatar.
 
 The Services involve:
 
 - Voice interviews that are recorded and transcribed
 - Voice cloning technology to replicate an Expert's voice
 - Image processing to create cartoon-style avatars from photographs
-- AI-powered conversations between Seekers and Expert avatars
+- AI-powered conversations between Seekers and I'm Deads
 - Messaging functionality between Seekers and Experts
 
 ### 1.3 Modifications to Terms
@@ -51,7 +51,7 @@ The Services are designed for, and primarily directed toward, users located in t
 - Your data will be transferred to and primarily processed in the United States
 - U.S. law, not the law of your jurisdiction, governs data handling and privacy
 - You assume all risk of any cross-border data transfer
-- Expert Avatar makes no representations regarding compliance with laws outside the United States
+- I'm Dead makes no representations regarding compliance with laws outside the United States
 
 ---
 
@@ -67,7 +67,7 @@ You are responsible for maintaining the confidentiality of your account credenti
 
 ### 3.3 Account Responsibility
 
-You are solely responsible for all content you submit through your account and for all activities conducted through your account. Expert Avatar will not be liable for any loss or damage arising from your failure to protect your account credentials.
+You are solely responsible for all content you submit through your account and for all activities conducted through your account. I'm Dead will not be liable for any loss or damage arising from your failure to protect your account credentials.
 
 ---
 
@@ -87,7 +87,7 @@ Using information from interviews, along with voice recordings and photographs y
 
 ### 4.3 Seeker Interactions
 
-Seekers can interact with Expert avatars through voice or text conversations. The avatar responds using AI technology, drawing from the Expert's interview content and using the Expert's cloned voice. Seeker audio recordings may be retained by Expert Avatar and our service providers for the purpose of providing and improving the Services.
+Seekers can interact with I'm Deads through voice or text conversations. The avatar responds using AI technology, drawing from the Expert's interview content and using the Expert's cloned voice. Seeker audio recordings may be retained by I'm Dead and our service providers for the purpose of providing and improving the Services.
 
 ### 4.4 Messaging
 
@@ -107,7 +107,7 @@ Each Expert receives sixty (60) minutes of free chat usage per month. Chat usage
 
 ### 5.2 Paid Usage
 
-Usage beyond the free tier is billed per minute at rates published on our website or as specified in a separate agreement between you and Expert Avatar. We reserve the right to change pricing at any time with thirty (30) days' notice.
+Usage beyond the free tier is billed per minute at rates published on our website or as specified in a separate agreement between you and I'm Dead. We reserve the right to change pricing at any time with thirty (30) days' notice.
 
 ### 5.3 Payment Processing
 
@@ -129,7 +129,7 @@ We reserve the right to modify, reduce, or discontinue the free tier, promotiona
 
 ### 5.6 Taxes
 
-You are responsible for all applicable taxes associated with your use of the Services, except for taxes based on Expert Avatar's net income.
+You are responsible for all applicable taxes associated with your use of the Services, except for taxes based on I'm Dead's net income.
 
 ---
 
@@ -181,10 +181,10 @@ You agree NOT to use the Services to:
 **(g) Artificial Intelligence and Machine Learning**
 
 - Access, scrape, copy, or otherwise collect any content from the Services for the purpose of training or fine-tuning the weights of any machine learning model, large language model, generative AI system, or similar technology
-- Use any automated tools, bots, or AI agents to interact with the Services except as expressly authorized by Expert Avatar
+- Use any automated tools, bots, or AI agents to interact with the Services except as expressly authorized by I'm Dead
 - Reproduce, redistribute, or create derivative works from AI-generated content for the purpose of developing competing services
 
-**Clarification:** Expert Avatar uses your content only for prompting, contextualization, and runtime inference to operate the Services. Expert Avatar does not train or fine-tune its own model weights using your content. However, third-party service providers we use for voice synthesis, avatar generation, and AI-powered conversations may use data processed through their services to improve their own models and services, subject to their respective terms and privacy policies. For more information, see the AI Model Training section of our Privacy Policy at [https://expertavatar.com/privacy](https://expertavatar.com/privacy).
+**Clarification:** I'm Dead uses your content only for prompting, contextualization, and runtime inference to operate the Services. I'm Dead does not train or fine-tune its own model weights using your content. However, third-party service providers we use for voice synthesis, avatar generation, and AI-powered conversations may use data processed through their services to improve their own models and services, subject to their respective terms and privacy policies. For more information, see the AI Model Training section of our Privacy Policy at [https://expertavatar.com/privacy](https://expertavatar.com/privacy).
 
 **(h) Recording, Redistribution, and Doxxing**
 
@@ -204,7 +204,7 @@ You agree NOT to use the Services to:
 
 We reserve the right, but have no obligation, to monitor, review, edit, or remove any content at any time and for any reason, including content that we determine violates these Terms or is otherwise objectionable. We may suspend or terminate your account for violations of these Terms.
 
-**Expert Avatar has no obligation to:**
+**I'm Dead has no obligation to:**
 
 - Monitor, review, or audit avatar conversations
 - Correct errors in AI-generated responses
@@ -223,7 +223,7 @@ Any moderation, review, or intervention is entirely discretionary. The absence o
 
 ### 7.2 License Grant
 
-By submitting Your Content to the Services, you grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
+By submitting Your Content to the Services, you grant I'm Dead a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
 
 - Copy, store, display, and distribute Your Content
 - Create derivative works from Your Content, including AI-generated avatars and responses
@@ -231,7 +231,7 @@ By submitting Your Content to the Services, you grant Expert Avatar a non-exclus
 - Make Your Content available to other users as contemplated by the Services (e.g., making your avatar accessible to Seekers)
 - Use Your Content for limited promotional purposes related to the Services
 
-**Clarification:** This license is granted solely for the purposes of operating the Services, providing avatar interactions, and promoting the platform. Expert Avatar does not use Your Content to train or fine-tune its own model weights. Your Content is used only for prompting, contextualization, and runtime inference. However, third-party service providers may use data processed through their services to improve their own models, as described in the AI Model Training section of our Privacy Policy.
+**Clarification:** This license is granted solely for the purposes of operating the Services, providing avatar interactions, and promoting the platform. I'm Dead does not use Your Content to train or fine-tune its own model weights. Your Content is used only for prompting, contextualization, and runtime inference. However, third-party service providers may use data processed through their services to improve their own models, as described in the AI Model Training section of our Privacy Policy.
 
 **Term of License; Survival:** The licenses granted in this section are granted for as long as reasonably necessary to operate and provide the Services to you (including making your avatar available to Seekers as you configure), and will terminate when you delete your account, except that the licenses may continue for a limited period and purpose to the extent necessary for (a) backup retention and technical deletion processes (up to thirty (30) days), (b) legal compliance and valid legal process, (c) fraud prevention, security, and abuse investigations, and (d) establishing, exercising, or defending legal claims. Aggregated or de-identified data that cannot reasonably be linked to you may be retained and used after deletion.
 
@@ -245,7 +245,7 @@ You represent and warrant that:
 
 ### 7.4 Retention of Rights; No Ownership Claim
 
-**As between you and Expert Avatar, you retain all right, title, and interest in and to Your Content. Expert Avatar does not claim ownership of Your Content.** The licenses granted in this Section 7 do not transfer ownership; they grant only the rights necessary for Expert Avatar to operate the Services as described.
+**As between you and I'm Dead, you retain all right, title, and interest in and to Your Content. I'm Dead does not claim ownership of Your Content.** The licenses granted in this Section 7 do not transfer ownership; they grant only the rights necessary for I'm Dead to operate the Services as described.
 
 ---
 
@@ -253,14 +253,14 @@ You represent and warrant that:
 
 ### 8.1 Consent to Voice Cloning
 
-By using the Services and providing voice recordings, you expressly consent to Expert Avatar creating a synthetic clone of your voice ("Cloned Voice") using voice synthesis technology. For additional information about how we collect, use, and protect your voice recordings and biometric information, please see the Biometric Information Notice section of our Privacy Policy.
+By using the Services and providing voice recordings, you expressly consent to I'm Dead creating a synthetic clone of your voice ("Cloned Voice") using voice synthesis technology. For additional information about how we collect, use, and protect your voice recordings and biometric information, please see the Biometric Information Notice section of our Privacy Policy.
 
 ### 8.2 Use of Cloned Voice
 
-You grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
+You grant I'm Dead a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
 
 - Create, store, and use your Cloned Voice
-- Use your Cloned Voice to generate audio responses through your Expert avatar
+- Use your Cloned Voice to generate audio responses through your I'm Dead
 - Use your Cloned Voice in connection with the Services
 
 **Term of License; Survival:** The licenses granted in this section are granted for as long as reasonably necessary to operate and provide the Services to you (including making your avatar available to Seekers as you configure), and will terminate when you delete your account, except that the licenses may continue for a limited period and purpose to the extent necessary for (a) backup retention and technical deletion processes (up to thirty (30) days), (b) legal compliance and valid legal process, (c) fraud prevention, security, and abuse investigations, and (d) establishing, exercising, or defending legal claims. Aggregated or de-identified data that cannot reasonably be linked to you may be retained and used after deletion.
@@ -279,18 +279,18 @@ You acknowledge and understand that:
 
 ### 9.1 Consent to Use Likeness
 
-By uploading photographs or images of yourself to the Services, you expressly consent to Expert Avatar using your likeness to create visual representations of you, including cartoon-style avatars ("Avatar Images").
+By uploading photographs or images of yourself to the Services, you expressly consent to I'm Dead using your likeness to create visual representations of you, including cartoon-style avatars ("Avatar Images").
 
 ### 9.2 License Grant for Likeness
 
-You grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
+You grant I'm Dead a non-exclusive, worldwide, royalty-free, fully paid-up, transferable, sublicensable license to:
 
 - Create Avatar Images based on your photographs
 - Display and distribute Avatar Images through the Services
 - Use your likeness in connection with the operation of the Services
-- Use your likeness for promotional purposes limited to marketing the Expert Avatar platform itself
+- Use your likeness for promotional purposes limited to marketing the I'm Dead platform itself
 
-**Exclusions:** This license does not permit Expert Avatar to:
+**Exclusions:** This license does not permit I'm Dead to:
 
 - License, sell, or sublicense your likeness to third parties for advertising unrelated to the Services
 - Use your likeness for standalone commercialization separate from the Services
@@ -299,7 +299,7 @@ You grant Expert Avatar a non-exclusive, worldwide, royalty-free, fully paid-up,
 
 ### 9.3 Right of Publicity
 
-You waive any claims related to the right of publicity that may arise from Expert Avatar's use of your likeness as permitted by these Terms.
+You waive any claims related to the right of publicity that may arise from I'm Dead's use of your likeness as permitted by these Terms.
 
 ---
 
@@ -324,11 +324,11 @@ You acknowledge and understand that:
 
 - Interacting with AI systems may produce content that is emotionally affecting, distressing, or triggering
 - You are solely responsible for how you interpret and act upon any information received through the Services
-- Expert Avatar is not responsible for any decisions you make or actions you take based on AI-generated content
+- I'm Dead is not responsible for any decisions you make or actions you take based on AI-generated content
 
 ### 10.4 No Liability for Self-Harm
 
-**EXPERT AVATAR IS NOT RESPONSIBLE FOR ANY HARM, INCLUDING SELF-HARM, THAT MAY RESULT FROM YOUR USE OF THE SERVICES OR YOUR RELIANCE ON AI-GENERATED CONTENT.** If you are experiencing thoughts of self-harm or suicide, please contact a mental health professional or crisis helpline immediately.
+**I'M DEAD IS NOT RESPONSIBLE FOR ANY HARM, INCLUDING SELF-HARM, THAT MAY RESULT FROM YOUR USE OF THE SERVICES OR YOUR RELIANCE ON AI-GENERATED CONTENT.** If you are experiencing thoughts of self-harm or suicide, please contact a mental health professional or crisis helpline immediately.
 
 ### 10.5 Mental Health Resources
 
@@ -353,7 +353,7 @@ If you are in crisis, please contact:
 - Contain errors or omissions
 - Differ in tone or substance from what you would personally communicate
 
-You waive claims against Expert Avatar arising from any misalignment, errors, fabrications, or tone issues in your avatar's responses.
+You waive claims against I'm Dead arising from any misalignment, errors, fabrications, or tone issues in your avatar's responses.
 
 ---
 
@@ -361,28 +361,28 @@ You waive claims against Expert Avatar arising from any misalignment, errors, fa
 
 ### 11.1 Seeker Content; Expert Use of Seeker Messages
 
-"Seeker Content" includes questions, messages, prompts, and other materials a Seeker submits through the Services. Seekers grant Expert Avatar the rights necessary to host, process, display, and transmit Seeker Content to operate the Services.
+"Seeker Content" includes questions, messages, prompts, and other materials a Seeker submits through the Services. Seekers grant I'm Dead the rights necessary to host, process, display, and transmit Seeker Content to operate the Services.
 
 Experts may view and reference Seeker messages and questions (text only) and may reuse them outside the Services, including verbatim excerpts, provided that Experts (a) do not publish a Seeker's personal contact information, (b) do not dox, harass, or attempt to identify a Seeker without the Seeker's consent, and (c) comply with applicable law. Experts do not have access to Seeker audio recordings through the Services.
 
-**Seeker Rights to Expert Content.** Seekers are granted a limited, personal, non-transferable, non-sublicensable license to access and view Expert avatars and avatar responses solely through the Services for personal, non-commercial use during an active session. **Seekers acquire no ownership or other rights in any Expert content.** All rights not expressly granted are reserved by the Expert and Expert Avatar. For specific prohibited uses of Expert content, see Section 6.2(i) (Seeker Restrictions on Expert Content).
+**Seeker Rights to Expert Content.** Seekers are granted a limited, personal, non-transferable, non-sublicensable license to access and view I'm Deads and avatar responses solely through the Services for personal, non-commercial use during an active session. **Seekers acquire no ownership or other rights in any Expert content.** All rights not expressly granted are reserved by the Expert and I'm Dead. For specific prohibited uses of Expert content, see Section 6.2(i) (Seeker Restrictions on Expert Content).
 
 ### 11.2 Disclaimer of Responsibility
 
-The Services may facilitate introductions or communications between Experts and Seekers. **EXPERT AVATAR IS NOT RESPONSIBLE FOR ANY INTERACTIONS, RELATIONSHIPS, OR COMMUNICATIONS THAT OCCUR BETWEEN USERS, WHETHER INITIATED THROUGH THE SERVICES OR OTHERWISE.**
+The Services may facilitate introductions or communications between Experts and Seekers. **I'M DEAD IS NOT RESPONSIBLE FOR ANY INTERACTIONS, RELATIONSHIPS, OR COMMUNICATIONS THAT OCCUR BETWEEN USERS, WHETHER INITIATED THROUGH THE SERVICES OR OTHERWISE.**
 
 ### 11.3 User Responsibility
 
 You acknowledge and agree that:
 
 - Any interactions with other users are solely between you and those users
-- Expert Avatar does not screen, vet, or endorse any users
+- I'm Dead does not screen, vet, or endorse any users
 - You are solely responsible for evaluating and bearing all risks associated with interactions with other users
-- Expert Avatar has no obligation to become involved in disputes between users
+- I'm Dead has no obligation to become involved in disputes between users
 
 ### 11.4 No Liability for Relationships
 
-Expert Avatar disclaims all liability for any harm, loss, or damage arising from relationships, communications, meetings, or other interactions that are facilitated or initiated through the Services, including but not limited to:
+I'm Dead disclaims all liability for any harm, loss, or damage arising from relationships, communications, meetings, or other interactions that are facilitated or initiated through the Services, including but not limited to:
 
 - Physical, emotional, or financial harm
 - Fraud, misrepresentation, or misconduct by other users
@@ -390,7 +390,7 @@ Expert Avatar disclaims all liability for any harm, loss, or damage arising from
 
 ---
 
-## 12. Expert Avatar Feedback
+## 12. I'm Dead Feedback
 
 ### 12.1 Seeker Comments
 
@@ -398,7 +398,7 @@ As an Expert, you acknowledge that Seekers may interact with your avatar and may
 
 ### 12.2 No Liability for Seeker Conduct
 
-**EXPERT AVATAR IS NOT RESPONSIBLE FOR ANY HARM OR DISTRESS YOU MAY EXPERIENCE AS A RESULT OF CONTENT SUBMITTED BY SEEKERS TO YOUR AVATAR OR MESSAGES SENT TO YOU THROUGH THE SERVICES.**
+**I'M DEAD IS NOT RESPONSIBLE FOR ANY HARM OR DISTRESS YOU MAY EXPERIENCE AS A RESULT OF CONTENT SUBMITTED BY SEEKERS TO YOUR AVATAR OR MESSAGES SENT TO YOU THROUGH THE SERVICES.**
 
 ### 12.3 Moderation Tools
 
@@ -408,17 +408,17 @@ We may provide tools to help you manage interactions with your avatar, but we do
 
 ## 13. Intellectual Property
 
-### 13.1 Expert Avatar Property
+### 13.1 I'm Dead Property
 
-The Services, including all software, algorithms, designs, text, graphics, and other content provided by Expert Avatar ("Company Content"), are owned by Expert Avatar or its licensors and are protected by intellectual property laws. You may not copy, modify, distribute, sell, or lease any part of the Company Content without our prior written consent.
+The Services, including all software, algorithms, designs, text, graphics, and other content provided by I'm Dead ("Company Content"), are owned by I'm Dead or its licensors and are protected by intellectual property laws. You may not copy, modify, distribute, sell, or lease any part of the Company Content without our prior written consent.
 
 ### 13.2 Trademarks
 
-"Expert Avatar," "Melochora," and related logos are trademarks of Melochora LLC. You may not use these trademarks without our prior written permission.
+"I'm Dead," "Melochora," and related logos are trademarks of Melochora LLC. You may not use these trademarks without our prior written permission.
 
 ### 13.3 Feedback
 
-If you provide suggestions, ideas, or feedback about the Services ("Feedback"), you grant Expert Avatar a non-exclusive, worldwide, royalty-free, perpetual, irrevocable license to use, modify, and incorporate the Feedback into the Services without any obligation to you.
+If you provide suggestions, ideas, or feedback about the Services ("Feedback"), you grant I'm Dead a non-exclusive, worldwide, royalty-free, perpetual, irrevocable license to use, modify, and incorporate the Feedback into the Services without any obligation to you.
 
 ### 13.4 Copyright Complaints
 
@@ -441,7 +441,7 @@ Email: support@melochora.com
 
 ### 13.5 Repeat Infringer Policy
 
-In accordance with the Digital Millennium Copyright Act ("DMCA") and other applicable law, Expert Avatar has adopted a policy of terminating, in appropriate circumstances and at our sole discretion, the accounts of users who are deemed to be repeat infringers. Expert Avatar may also, at its sole discretion, limit access to the Services and/or terminate the accounts of any users who infringe any intellectual property rights of others, whether or not there is any repeat infringement.
+In accordance with the Digital Millennium Copyright Act ("DMCA") and other applicable law, I'm Dead has adopted a policy of terminating, in appropriate circumstances and at our sole discretion, the accounts of users who are deemed to be repeat infringers. I'm Dead may also, at its sole discretion, limit access to the Services and/or terminate the accounts of any users who infringe any intellectual property rights of others, whether or not there is any repeat infringement.
 
 ### 13.6 Counter-Notice
 
@@ -478,7 +478,7 @@ In addition to our DMCA procedures for copyright claims, we may remove or disabl
 
 ### 13.8 Testimonials and Endorsements
 
-If you provide a testimonial, review, case study, or endorsement about the Services (collectively, "Testimonials"), you grant Expert Avatar a non-exclusive, worldwide, royalty-free, perpetual license to use, reproduce, modify, and display the Testimonial in connection with marketing and promoting the Services.
+If you provide a testimonial, review, case study, or endorsement about the Services (collectively, "Testimonials"), you grant I'm Dead a non-exclusive, worldwide, royalty-free, perpetual license to use, reproduce, modify, and display the Testimonial in connection with marketing and promoting the Services.
 
 You represent and warrant that:
 
@@ -486,9 +486,9 @@ You represent and warrant that:
 - You have the right to provide the Testimonial
 - Your Testimonial does not violate any third party's rights
 
-Expert Avatar may use your name, likeness, and general location (city/state) in connection with your Testimonial. If you wish to have your Testimonial removed, please contact us at support@melochora.com.
+I'm Dead may use your name, likeness, and general location (city/state) in connection with your Testimonial. If you wish to have your Testimonial removed, please contact us at support@melochora.com.
 
-Expert Avatar's use of Testimonials complies with Federal Trade Commission (FTC) guidelines on endorsements. We may edit Testimonials for length or clarity, but we will not materially alter the substance of your statement.
+I'm Dead's use of Testimonials complies with Federal Trade Commission (FTC) guidelines on endorsements. We may edit Testimonials for length or clarity, but we will not materially alter the substance of your statement.
 
 ---
 
@@ -496,7 +496,7 @@ Expert Avatar's use of Testimonials complies with Federal Trade Commission (FTC)
 
 **THE SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.**
 
-Expert Avatar does not warrant that:
+I'm Dead does not warrant that:
 
 - The Services will meet your requirements
 - The Services will be uninterrupted, timely, secure, or error-free
@@ -509,15 +509,15 @@ Expert Avatar does not warrant that:
 
 ### 15.1 Exclusion of Damages
 
-**TO THE MAXIMUM EXTENT PERMITTED BY LAW, EXPERT AVATAR WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, OR OTHER INTANGIBLE LOSSES, EVEN IF EXPERT AVATAR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.**
+**TO THE MAXIMUM EXTENT PERMITTED BY LAW, I'M DEAD WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, OR OTHER INTANGIBLE LOSSES, EVEN IF I'M DEAD HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.**
 
 ### 15.2 Cap on Liability
 
-**IN NO EVENT WILL EXPERT AVATAR'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS ARISING FROM OR RELATED TO THE SERVICES EXCEED THE GREATER OF: (A) THE AMOUNTS YOU HAVE PAID TO EXPERT AVATAR IN THE SIX (6) MONTHS PRECEDING THE CLAIM; OR (B) ONE HUNDRED DOLLARS ($100).**
+**IN NO EVENT WILL I'M DEAD'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS ARISING FROM OR RELATED TO THE SERVICES EXCEED THE GREATER OF: (A) THE AMOUNTS YOU HAVE PAID TO I'M DEAD IN THE SIX (6) MONTHS PRECEDING THE CLAIM; OR (B) ONE HUNDRED DOLLARS ($100).**
 
 ### 15.3 Basis of the Bargain
 
-The limitations of liability in this section reflect the allocation of risk between you and Expert Avatar and are an essential basis of the bargain between us.
+The limitations of liability in this section reflect the allocation of risk between you and I'm Dead and are an essential basis of the bargain between us.
 
 ### 15.4 Jurisdictional Limitations
 
@@ -527,7 +527,7 @@ Some jurisdictions do not allow the exclusion or limitation of certain warrantie
 
 ## 16. Indemnification
 
-You agree to indemnify, defend, and hold harmless Expert Avatar, its affiliates, and their respective officers, directors, employees, and agents from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from or related to:
+You agree to indemnify, defend, and hold harmless I'm Dead, its affiliates, and their respective officers, directors, employees, and agents from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from or related to:
 
 - Your use of the Services
 - Your Content
@@ -559,7 +559,7 @@ If you are a resident of another jurisdiction, you waive any comparable statute 
 
 ### 17.0 Informal Dispute Resolution
 
-Before initiating any arbitration or legal proceeding, you and Expert Avatar agree to first attempt to resolve any Dispute informally. To initiate informal resolution, either party must send the other a written notice describing the nature and basis of the Dispute and the relief sought ("Dispute Notice").
+Before initiating any arbitration or legal proceeding, you and I'm Dead agree to first attempt to resolve any Dispute informally. To initiate informal resolution, either party must send the other a written notice describing the nature and basis of the Dispute and the relief sought ("Dispute Notice").
 
 **For Disputes you initiate:** Send your Dispute Notice to support@melochora.com and by mail to Melochora LLC, 2108 N ST #7813, Sacramento, CA 95816. Your notice must include your name, the email address associated with your account, a description of the Dispute, and the specific relief you seek.
 
@@ -569,7 +569,7 @@ The parties agree to negotiate in good faith for at least sixty (60) days after 
 
 ### 17.1 Agreement to Arbitrate
 
-You and Expert Avatar agree that any dispute, claim, or controversy arising out of or relating to these Terms or the Services ("Dispute") will be resolved exclusively through final and binding arbitration, rather than in court, except as otherwise provided below.
+You and I'm Dead agree that any dispute, claim, or controversy arising out of or relating to these Terms or the Services ("Dispute") will be resolved exclusively through final and binding arbitration, rather than in court, except as otherwise provided below.
 
 **This agreement to arbitrate is made pursuant to a transaction involving interstate commerce, and shall be governed by the Federal Arbitration Act (9 U.S.C. §§ 1-16) ("FAA").** The FAA, and not state arbitration law, shall govern the interpretation and enforcement of this arbitration agreement.
 
@@ -583,19 +583,19 @@ This arbitration agreement does not apply to:
 
 ### 17.3 Waiver of Jury Trial
 
-**BY AGREEING TO THESE TERMS, YOU AND EXPERT AVATAR WAIVE THE RIGHT TO A TRIAL BY JURY.**
+**BY AGREEING TO THESE TERMS, YOU AND I'M DEAD WAIVE THE RIGHT TO A TRIAL BY JURY.**
 
 ### 17.4 Waiver of Class Actions
 
-**YOU AND EXPERT AVATAR AGREE THAT ANY ARBITRATION OR LEGAL PROCEEDING WILL BE CONDUCTED ONLY ON AN INDIVIDUAL BASIS AND NOT AS A CLASS, CONSOLIDATED, OR REPRESENTATIVE ACTION.** If this class action waiver is found unenforceable, then the entirety of this arbitration agreement shall be null and void.
+**YOU AND I'M DEAD AGREE THAT ANY ARBITRATION OR LEGAL PROCEEDING WILL BE CONDUCTED ONLY ON AN INDIVIDUAL BASIS AND NOT AS A CLASS, CONSOLIDATED, OR REPRESENTATIVE ACTION.** If this class action waiver is found unenforceable, then the entirety of this arbitration agreement shall be null and void.
 
 ### 17.5 Arbitration Procedures
 
-Arbitration will be administered by JAMS under its Streamlined Arbitration Rules and Procedures. The arbitration will be conducted by a single arbitrator in San Francisco, California, unless you and Expert Avatar agree otherwise. The arbitrator's decision will be final and binding.
+Arbitration will be administered by JAMS under its Streamlined Arbitration Rules and Procedures. The arbitration will be conducted by a single arbitrator in San Francisco, California, unless you and I'm Dead agree otherwise. The arbitrator's decision will be final and binding.
 
 ### 17.6 Costs
 
-Each party will bear its own costs and attorneys' fees. Filing fees and arbitrator compensation will be governed by JAMS rules. If you demonstrate that arbitration costs would be prohibitive compared to litigation, Expert Avatar will pay a reasonable portion of the filing fees.
+Each party will bear its own costs and attorneys' fees. Filing fees and arbitrator compensation will be governed by JAMS rules. If you demonstrate that arbitration costs would be prohibitive compared to litigation, I'm Dead will pay a reasonable portion of the filing fees.
 
 ### 17.7 Opt-Out Right
 
@@ -603,21 +603,21 @@ You may opt out of this arbitration agreement by sending written notice to suppo
 
 ### 17.8 Changes to This Section
 
-If Expert Avatar makes any material changes to this arbitration section, you may reject such changes by providing written notice within thirty (30) days of the change.
+If I'm Dead makes any material changes to this arbitration section, you may reject such changes by providing written notice within thirty (30) days of the change.
 
 ### 17.9 Mass Arbitration Procedures
 
-If twenty-five (25) or more similar arbitration demands are submitted against Expert Avatar by the same law firm or coordinated group of law firms within a ninety (90) day period ("Mass Filing"), the following procedures apply:
+If twenty-five (25) or more similar arbitration demands are submitted against I'm Dead by the same law firm or coordinated group of law firms within a ninety (90) day period ("Mass Filing"), the following procedures apply:
 
 **(a) Batching:** Arbitration demands will be processed in batches of ten (10) demands. Only one batch may be filed, processed, and adjudicated at a time. Subsequent batches may not proceed until the prior batch is resolved.
 
-**(b) Bellwether Process:** The parties will select a total of ten (10) initial cases (five selected by claimants' counsel, five by Expert Avatar) to proceed first as "bellwether" cases. The results of these bellwether cases will inform potential resolution of remaining claims.
+**(b) Bellwether Process:** The parties will select a total of ten (10) initial cases (five selected by claimants' counsel, five by I'm Dead) to proceed first as "bellwether" cases. The results of these bellwether cases will inform potential resolution of remaining claims.
 
-**(c) Mediation:** After the bellwether cases are resolved, the parties will participate in a single mediation of all remaining claims before a mutually agreed-upon mediator. Expert Avatar will pay the mediation fee. If the parties cannot resolve remaining claims within ninety (90) days after mediation, the batching process will continue.
+**(c) Mediation:** After the bellwether cases are resolved, the parties will participate in a single mediation of all remaining claims before a mutually agreed-upon mediator. I'm Dead will pay the mediation fee. If the parties cannot resolve remaining claims within ninety (90) days after mediation, the batching process will continue.
 
 **(d) Fees:** Arbitration fees for claims in a Mass Filing are due only when a demand is included in an active batch.
 
-**(e) Opt-Out of Arbitration:** If the parties cannot agree on resolution after the mediation period, any remaining claimant or Expert Avatar may elect to have remaining claims proceed in court rather than arbitration by providing written notice within sixty (60) days after the close of the mediation period.
+**(e) Opt-Out of Arbitration:** If the parties cannot agree on resolution after the mediation period, any remaining claimant or I'm Dead may elect to have remaining claims proceed in court rather than arbitration by providing written notice within sixty (60) days after the close of the mediation period.
 
 ---
 
@@ -627,12 +627,12 @@ If twenty-five (25) or more similar arbitration demands are submitted against Ex
 
 You may terminate your account at any time by contacting us at support@melochora.com or through the account settings in the Services.
 
-### 18.2 Termination by Expert Avatar
+### 18.2 Termination by I'm Dead
 
 We may suspend or terminate your account and access to the Services at any time, with or without cause, and with or without notice. Reasons for termination may include, but are not limited to:
 
 - Violation of these Terms
-- Conduct that we determine is harmful to other users or Expert Avatar
+- Conduct that we determine is harmful to other users or I'm Dead
 - Extended periods of inactivity (ninety (90) days or more without login or use of the Services)
 
 ### 18.3 Effect of Termination
@@ -641,12 +641,12 @@ Upon termination:
 
 - Your right to use the Services will immediately cease
 - We may delete your account and associated data, subject to the Data Deletion Guarantees section below
-- The licenses you granted to Expert Avatar in these Terms will survive termination only to the extent required for backup retention (up to thirty days) and legal compliance as described in the Data Deletion Guarantees section below
-- The following sections of these Terms will survive termination: Content License Grant, Voice Cloning Consent, Image and Likeness Consent, AI-Generated Content and Disclaimers, Third-Party Interactions and Introductions, Expert Avatar Feedback, Intellectual Property, Disclaimer of Warranties, Limitation of Liability, Indemnification, Binding Arbitration and Class Action Waiver, and General Provisions
+- The licenses you granted to I'm Dead in these Terms will survive termination only to the extent required for backup retention (up to thirty days) and legal compliance as described in the Data Deletion Guarantees section below
+- The following sections of these Terms will survive termination: Content License Grant, Voice Cloning Consent, Image and Likeness Consent, AI-Generated Content and Disclaimers, Third-Party Interactions and Introductions, I'm Dead Feedback, Intellectual Property, Disclaimer of Warranties, Limitation of Liability, Indemnification, Binding Arbitration and Class Action Waiver, and General Provisions
 
 ### 18.4 Data Deletion Guarantees
 
-Expert Avatar is committed to deleting your data when you or we terminate your account or when you delete content. Upon deletion:
+I'm Dead is committed to deleting your data when you or we terminate your account or when you delete content. Upon deletion:
 
 **When an Expert deletes an avatar:**
 
@@ -687,11 +687,11 @@ These Terms are governed by the laws of the State of California, without regard 
 
 ### 19.2 Jurisdiction
 
-For any disputes not subject to arbitration, you and Expert Avatar consent to the exclusive jurisdiction of the state and federal courts located in San Francisco County, California.
+For any disputes not subject to arbitration, you and I'm Dead consent to the exclusive jurisdiction of the state and federal courts located in San Francisco County, California.
 
 ### 19.3 Entire Agreement
 
-These Terms, together with the Privacy Policy, constitute the entire agreement between you and Expert Avatar regarding the Services and supersede all prior agreements.
+These Terms, together with the Privacy Policy, constitute the entire agreement between you and I'm Dead regarding the Services and supersede all prior agreements.
 
 ### 19.4 Severability
 
@@ -699,15 +699,15 @@ If any provision of these Terms is found to be unenforceable, the remaining prov
 
 ### 19.5 Waiver
 
-Expert Avatar's failure to enforce any right or provision of these Terms will not constitute a waiver of such right or provision.
+I'm Dead's failure to enforce any right or provision of these Terms will not constitute a waiver of such right or provision.
 
 ### 19.6 Assignment
 
-You may not assign these Terms without Expert Avatar's prior written consent. Expert Avatar may assign these Terms without restriction.
+You may not assign these Terms without I'm Dead's prior written consent. I'm Dead may assign these Terms without restriction.
 
 ### 19.7 Consent to Electronic Communications
 
-By creating an account or using the Services, you consent to receive electronic communications from Expert Avatar, including emails, in-app notifications, and other electronic messages. You agree that all agreements, notices, disclosures, and other communications we provide electronically satisfy any legal requirement that such communications be in writing. You may withdraw consent to receive electronic communications by deleting your account, but this may affect your ability to use the Services.
+By creating an account or using the Services, you consent to receive electronic communications from I'm Dead, including emails, in-app notifications, and other electronic messages. You agree that all agreements, notices, disclosures, and other communications we provide electronically satisfy any legal requirement that such communications be in writing. You may withdraw consent to receive electronic communications by deleting your account, but this may affect your ability to use the Services.
 
 ### 19.8 Notices
 
@@ -724,7 +724,7 @@ You agree to comply with all applicable export control laws and regulations.
 
 ### 19.10 Force Majeure
 
-Expert Avatar will not be liable for any failure or delay in performance due to causes beyond our reasonable control, including natural disasters, war, terrorism, labor disputes, or internet outages.
+I'm Dead will not be liable for any failure or delay in performance due to causes beyond our reasonable control, including natural disasters, war, terrorism, labor disputes, or internet outages.
 
 ### 19.11 Time Limitation on Claims
 
@@ -732,11 +732,11 @@ You agree that regardless of any statute or law to the contrary, any claim or ca
 
 ### 19.12 International Users; No GDPR Compliance
 
-**Expert Avatar operates exclusively from the United States and does not represent compliance with the General Data Protection Regulation (GDPR), UK GDPR, EU consumer protection directives, or any other non-U.S. data protection or consumer protection law.**
+**I'm Dead operates exclusively from the United States and does not represent compliance with the General Data Protection Regulation (GDPR), UK GDPR, EU consumer protection directives, or any other non-U.S. data protection or consumer protection law.**
 
 If you access the Services from the European Union, European Economic Area, United Kingdom, or any other jurisdiction outside the United States:
 
-- You acknowledge that Expert Avatar does not comply with GDPR, UK GDPR, or EU consumer protection laws
+- You acknowledge that I'm Dead does not comply with GDPR, UK GDPR, or EU consumer protection laws
 - Your data will be processed in the United States under U.S. legal standards
 - You use the Services at your own risk
 - To the maximum extent permitted by law, you waive claims based on EU or other foreign data protection or consumer laws
@@ -746,7 +746,7 @@ If you access the Services from the European Union, European Economic Area, Unit
 
 ### 19.13 Accessibility
 
-Expert Avatar is committed to making the Services accessible to all users, including individuals with disabilities. We strive to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards and to comply with applicable accessibility laws, including the Americans with Disabilities Act (ADA).
+I'm Dead is committed to making the Services accessible to all users, including individuals with disabilities. We strive to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards and to comply with applicable accessibility laws, including the Americans with Disabilities Act (ADA).
 
 **Our Efforts Include:**
 
@@ -762,7 +762,7 @@ Expert Avatar is committed to making the Services accessible to all users, inclu
 
 ### 19.14 Enterprise and Business Agreements
 
-These Terms apply to individual users of the Services. Enterprise customers, business entities, and organizations that wish to use the Services under different terms may enter into a separate written agreement with Expert Avatar. If you have entered into a separate enterprise or business agreement with us, that agreement governs your use of the Services to the extent it conflicts with these Terms. For inquiries about enterprise agreements, please contact us at support@melochora.com.
+These Terms apply to individual users of the Services. Enterprise customers, business entities, and organizations that wish to use the Services under different terms may enter into a separate written agreement with I'm Dead. If you have entered into a separate enterprise or business agreement with us, that agreement governs your use of the Services to the extent it conflicts with these Terms. For inquiries about enterprise agreements, please contact us at support@melochora.com.
 
 ---
 
